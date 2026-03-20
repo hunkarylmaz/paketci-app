@@ -1,0 +1,74 @@
+{
+  "name": {
+    "message": "Paketçi Kurye Eklentisi",
+    "description": "Extension name"
+  },
+  "description": {
+    "message": "Yemeksepeti, Getir, Trendyol ve Migros siparişlerini otomatik Paketçi'ye aktarın",
+    "description": "Extension description"
+  },
+  "loginTitle": {
+    "message": "API Key ile Giriş",
+    "description": "Login section title"
+  },
+  "apiKeyPlaceholder": {
+    "message": "pk_live_xxxxxxxxxxxx",
+    "description": "API key input placeholder"
+  },
+  "loginButton": {
+    "message": "Giriş Yap",
+    "description": "Login button text"
+  },
+  "apiKeyHelp": {
+    "message": "API Key'nizi Paketçi Paneli → Ayarlar bölümünden alabilirsiniz.",
+    "description": "API key help text"
+  },
+  "connectedPlatforms": {
+    "message": "Bağlı Platformlar",
+    "description": "Connected platforms section title"
+  },
+  "active": {
+    "message": "Aktif",
+    "description": "Status active"
+  },
+  "inactive": {
+    "message": "Pasif",
+    "description": "Status inactive"
+  },
+  "workMode": {
+    "message": "Çalışma Modu",
+    "description": "Work mode section title"
+  },
+  "manualMode": {
+    "message": "Manuel (Kurye Çağır)",
+    "description": "Manual mode label"
+  },
+  "autoMode": {
+    "message": "Otomatik (Yansıtma)",
+    "description": "Auto mode label"
+  },
+  "logout": {
+    "message": "Çıkış Yap",
+    "description": "Logout button"
+  },
+  "orderSent": {
+    "message": "Sipariş Paketçi'ye gönderildi",
+    "description": "Order sent notification"
+  },
+  "orderExists": {
+    "message": "Bu sipariş zaten gönderilmiş",
+    "description": "Order already exists notification"
+  },
+  "callCourier": {
+    "message": "Kurye Çağır",
+    "description": "Call courier button"
+  },
+  "courierOnTheWay": {
+    "message": "Kurye Yolda!",
+    "description": "Courier on the way status"
+  },
+  "inPaketci": {
+    "message": "Paketçi'de",
+    "description": "In Paketci status"
+  }
+}

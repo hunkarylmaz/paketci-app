@@ -1,0 +1,30 @@
+import { Delivery } from '../../deliveries/entities/delivery.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Courier } from '../../couriers/entities/courier.entity';
+import { Shift } from '../../shifts/entities/shift.entity';
+import { Credit } from '../../credits/entities/credit.entity';
+import { Receipt } from '../../receipts/entities/receipt.entity';
+import { User } from '../../users/entities/user.entity';
+import { CompanyStatus } from '../enums/company-status.enum';
+export declare class Company {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    logo: string;
+    address: string;
+    taxNumber: string;
+    creditBalance: number;
+    deliveryFeePerOrder: number;
+    restaurants: Restaurant[];
+    couriers: Courier[];
+    deliveries: Delivery[];
+    shifts: Shift[];
+    credits: Credit[];
+    users: User[];
+    receipts: Receipt[];
+    code: string;
+    status: CompanyStatus;
+    createdAt: Date;
+    updatedAt: Date;
+}

@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Paketçi Kurye Eklentisi",
+  "name_en": "Paketci Courier Extension",
+  "version": "1.0.0",
+  "description": "Yemeksepeti, Getir, Trendyol ve Migros siparişlerini otomatik Paketçi'ye aktarın",
+  "description_en": "Automatically transfer orders from Yemeksepeti, Getir, Trendyol and Migros to Paketci",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "notifications",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.yemeksepeti.com/*",
+    "*://*.getir.com/*",
+    "*://*.trendyol.com/*",
+    "*://*.migros.com.tr/*",
+    "*://api.paketci.app/*",
+    "*://localhost/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.yemeksepeti.com/*",
+        "*://*.getir.com/*",
+        "*://*.trendyol.com/*",
+        "*://*.migros.com.tr/*"
+      ],
+      "js": [
+        "shared/constants.js",
+        "shared/storage.js",
+        "shared/api.js",
+        "detectors/yemeksepeti.js",
+        "detectors/getir.js",
+        "detectors/trendyol.js",
+        "detectors/migros.js",
+        "shared/button-injector.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "default_locale": "tr"
+}

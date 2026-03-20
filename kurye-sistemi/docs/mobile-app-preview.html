@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paketçi - Kurye App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%); }
+        .card-shadow { box-shadow: 0 4px 15px -1px rgba(30, 64, 175, 0.15); }
+        .status-pill { 
+            background: rgba(255,255,255,0.2); 
+            backdrop-filter: blur(10px);
+        }
+        .nav-item.active { color: #3B82F6; }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: #3B82F6;
+            border-radius: 3px;
+        }
+        .order-card {
+            border-left: 4px solid #3B82F6;
+        }
+        .order-card.preparing { border-left-color: #F59E0B; }
+        .order-card.ready { border-left-color: #10B981; }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center min-h-screen p-4">
+    
+    <!-- Mobile Frame -->
+    <div class="w-full max-w-sm bg-gray-50 h-full min-h-[800px] rounded-[40px] overflow-hidden shadow-2xl relative">
+        
+        <!-- Status Bar -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-500 pt-12 pb-6 px-6 rounded-b-[30px]">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-white font-bold">
+                        MK
+                    </div>
+                    <div>
+                        <p class="text-white/70 text-xs">Hoş geldiniz,</p>
+                        <p class="text-white font-semibold">Mehmet Kaya</p>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <i class="fas fa-bell text-white text-xl"></i>
+                    <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">2</span>
+                </div>
+            </div>
+            
+            <!-- Stats Row -->
+            <div class="flex gap-3">
+                <div class="flex-1 bg-white/10 backdrop-blur rounded-2xl p-3">
+                    <p class="text-white/70 text-xs">Bakiye</p>
+                    <p class="text-white font-bold text-lg">₺1,247</p>
+                </div>
+                <div class="flex-1 bg-white/10 backdrop-blur rounded-2xl p-3">
+                    <p class="text-white/70 text-xs">Bugün</p>
+                    <p class="text-white font-bold text-lg">8 Teslimat</p>
+                </div>
+            </div>
+            
+            <!-- Online Toggle -->
+            <div class="mt-4 flex items-center justify-between bg-white/10 backdrop-blur rounded-full p-1">
+                <button class="flex-1 py-2 rounded-full bg-white text-blue-600 font-semibold text-sm shadow-lg">
+                    🟢 Çevrimiçi
+                </button>
+                <button class="flex-1 py-2 rounded-full text-white/70 font-medium text-sm">
+                    ⚪ Çevrimdışı
+                </button>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="p-4 pb-24">
+            
+            <!-- Section Title -->
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-bold text-gray-800">Aktif Siparişler</h2>
+                <a href="#" class="text-blue-600 text-sm">Tümü</a>
+            </div>
+            
+            <!-- Order Cards -->
+            <div class="space-y-4">
+                
+                <!-- Order 1 - On The Way -->
+                <div class="bg-white rounded-2xl p-4 card-shadow order-card">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="text-xs text-gray-400">#PKT-250318-1005</span>
+                            <p class="font-bold text-gray-800">Dönerci Hasan Usta</p>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                            Yolda
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>1.2 km • 5 dk</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-gray-800">₺85.00</p>
+                            <span class="text-xs text-orange-500">💵 Nakit</span>
+                        </div>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold">
+                            Detay
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 2 - Preparing -->
+                <div class="bg-white rounded-2xl p-4 card-shadow order-card preparing">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="text-xs text-gray-400">#PKT-250318-1006</span>
+                            <p class="font-bold text-gray-800">Pizza Palace</p>
+                        </div>
+                        <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-semibold">
+                            Hazırlanıyor
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                        <i class="fas fa-clock"></i>
+                        <span>Tahmini: 8 dk</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-gray-800">₺127.50</p>
+                            <span class="text-xs text-green-500">💳 Kart</span>
+                        </div>
+                        <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl text-sm font-semibold">
+                            Bekle
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order 3 - Ready -->
+                <div class="bg-white rounded-2xl p-4 card-shadow order-card ready">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <span class="text-xs text-gray-400">#PKT-250318-1007</span>
+                            <p class="font-bold text-gray-800">Burger King</p>
+                        </div>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                            Hazır
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>800 m • 3 dk</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-bold text-gray-800">₺94.00</p>
+                            <span class="text-xs text-blue-500">📱 Online</span>
+                        </div>
+                        <button class="px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold">
+                            Al
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Title -->
+            <div class="flex items-center justify-between mt-8 mb-4">
+                <h2 class="font-bold text-gray-800">Mevcut Siparişler</h2>
+                <span class="text-xs text-gray-400">3 yeni</span>
+            </div>
+            
+            <!-- Available Orders -->
+            <div class="bg-white rounded-2xl p-4 card-shadow border-2 border-dashed border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-store text-gray-400"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800">3 Yeni Sipariş</p>
+                            <p class="text-xs text-gray-400">1.5 km yakınınızda</p>
+                        </div>
+                    </div>
+                    
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold">
+                        Gör
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-3 flex justify-between items-center">
+            <a href="#" class="nav-item active relative flex flex-col items-center gap-1 text-blue-600">
+                <i class="fas fa-home text-xl"></i>
+                <span class="text-xs">Ana Sayfa</span>
+            </a>
+            
+            <a href="#" class="nav-item flex flex-col items-center gap-1 text-gray-400">
+                <i class="fas fa-list text-xl"></i>
+                <span class="text-xs">Siparişler</span>
+            </a>
+            
+            <a href="#" class="nav-item flex flex-col items-center gap-1 text-gray-400">
+                <i class="fas fa-wallet text-xl"></i>
+                <span class="text-xs">Kazanç</span>
+            </a>
+            
+            <a href="#" class="nav-item flex flex-col items-center gap-1 text-gray-400">
+                <i class="fas fa-user text-xl"></i>
+                <span class="text-xs">Profil</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

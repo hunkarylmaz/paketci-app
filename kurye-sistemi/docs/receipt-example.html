@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    body { 
+      font-family: 'Courier New', monospace; 
+      font-size: 14px;
+      width: 80mm;
+      margin: 0 auto;
+      padding: 10px;
+      background: white;
+    }
+    .receipt { border: 1px dashed #ccc; padding: 10px; }
+    .header { text-align: center; margin-bottom: 10px; }
+    .logo { width: 60px; height: 60px; background: #1E40AF; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-size: 32px; font-weight: bold; }
+    .dealer-name { font-size: 1.2em; font-weight: bold; color: #1E40AF; }
+    .divider { border-top: 1px dashed #000; margin: 8px 0; }
+    .channel-badge { display: inline-block; background: #1E40AF; color: white; padding: 3px 10px; border-radius: 4px; font-size: 0.85em; margin: 5px 0; }
+    .item-row { display: flex; justify-content: space-between; margin: 4px 0; }
+    .item-name { flex: 1; }
+    .item-qty { width: 30px; text-align: center; }
+    .item-price { width: 60px; text-align: right; }
+    .total-row { font-weight: bold; font-size: 1.1em; border-top: 2px solid #000; padding-top: 5px; margin-top: 5px; }
+    .label { color: #666; font-size: 0.9em; }
+    .payment-box { background: #f0f9ff; border: 1px solid #1E40AF; border-radius: 8px; padding: 8px; margin: 10px 0; text-align: center; }
+    .footer { text-align: center; margin-top: 15px; font-size: 0.9em; color: #666; }
+    .barcode { text-align: center; margin: 10px 0; font-family: monospace; letter-spacing: 2px; }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="logo">P</div>
+      <div class="dealer-name">Paketçi - Bodrum</div>
+      <div style="font-size: 0.85em; color: #666;">Atatürk Mah. 123. Sok. No:5</div>
+      <div style="font-size: 0.85em; color: #666;">Tel: 0532 123 45 67</div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- SİPARİŞ KANALI -->
+    <div style="text-align: center;">
+      <span class="channel-badge">📦 Yemeksepeti</span>
+    </div>
+    
+    <!-- FİŞ BİLGİLERİ -->
+    <div style="margin: 10px 0;">
+      <div><span class="label">Fiş No:</span> <b>PKT-250318-4281</b></div>
+      <div><span class="label">Tarih:</span> 18.03.2025 14:32</div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- MÜŞTERİ -->
+    <div style="margin: 10px 0;">
+      <div><b>MÜŞTERİ</b></div>
+      <div>Ahmet Yılmaz</div>
+      <div>Tel: 0533 444 55 66</div>
+      <div style="font-size: 0.85em;">📍 Kumbahçe Mah. Cumhuriyet Cad. No:12</div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- ÜRÜNLER -->
+    <div style="margin: 10px 0;">
+      <div><b>ÜRÜNLER</b></div>
+      
+      <div class="item-row">
+        <span class="item-name">Lahmacun (Acılı)</span>
+        <span class="item-qty">x2</span>
+        <span class="item-price">90.00</span>
+      </div>
+      
+      <div class="item-row">
+        <span class="item-name">Ayran (1L)</span>
+        <span class="item-qty">x2</span>
+        <span class="item-price">30.00</span>
+      </div>
+      
+      <div class="item-row">
+        <span class="item-name">Salata</span>
+        <span class="item-qty">x1</span>
+        <span class="item-price">25.00</span>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <!-- ÖDEME ÖZETİ -->
+    <div style="margin: 10px 0;">
+      <div class="item-row">
+        <span>Ara Toplam</span>
+        <span>145.00 TL</span>
+      </div>
+      <div class="item-row">
+        <span>Teslimat Ücreti</span>
+        <span>2.50 TL</span>
+      </div>
+      <div class="item-row">
+        <span>İndirim</span>
+        <span>-10.00 TL</span>
+      </div>
+    </div>
+    
+    <div class="total-row">
+      <div class="item-row">
+        <span>TOPLAM</span>
+        <span>137.50 TL</span>
+      </div>
+    </div>
+    
+    <!-- ÖDEME TİPİ -->
+    <div class="payment-box">
+      <div class="label">ÖDEME TİPİ</div>
+      <div style="font-size: 1.2em; font-weight: bold; color: #1E40AF;">💳 Kredi Kartı</div>
+      <div style="font-size: 0.8em; color: #666;">(Kapıda Ödeme)</div>
+    </div>
+    
+    <!-- BARKOD -->
+    <div class="barcode">
+      *PKT-250318-4281*
+    </div>
+    
+    <!-- FOOTER -->
+    <div class="footer">
+      <div style="font-size: 1.1em; margin-bottom: 5px;">Afiyet Olsun! 🍽️</div>
+      <div style="font-size: 0.75em;">Paketçi - powered by Paketçiniz</div>
+      <div style="font-size: 0.7em; color: #999; margin-top: 5px;">www.paketciniz.com</div>
+    </div>
+  </div>
+</body>
+</html>
