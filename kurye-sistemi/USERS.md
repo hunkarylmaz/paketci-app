@@ -6,31 +6,31 @@ Paketci App kurulumu sonrası bu hesaplar otomatik olarak oluşturulur.
 
 | Rol | E-posta | Şifre | Erişim Paneli |
 |-----|---------|-------|---------------|
-| **Super Admin** | `admin@paketci.app` | `Admin@2024!` | admin.paketci.app |
-| **Company Admin** | `yonetici@paketci.app` | `Yonetici@2024!` | paketci.app |
-| **Regional Manager** | `bolge@paketci.app` | `Bolge@2024!` | paketci.app |
-| **Manager** | `mudur@paketci.app` | `Mudur@2024!` | paketci.app |
-| **Accountant** | `muhasebe@paketci.app` | `Muhasebe@2024!` | muhasebe.paketci.app |
-| **Field Sales** | `satis@paketci.app` | `Satis@2024!` | saha.paketci.app |
-| **Operations** | `operasyon@paketci.app` | `Operasyon@2024!` | operasyon.paketci.app |
-| **Dealer** | `bayi@paketci.app` | `Bayi@2024!` | bayi.paketci.app |
-| **Restaurant** | `restoran@paketci.app` | `Restoran@2024!` | restoran.paketci.app |
-| **Courier 1** | `kurye@paketci.app` | `Kurye@2024!` | kurye.paketci.app |
-| **Courier 2** | `kurye2@paketci.app` | `Kurye@2024!` | kurye.paketci.app |
+| **Super Admin** | `admin@paketciniz.com` | `Admin@2024!` | portal.paketciniz.com |
+| **Company Admin** | `yonetici@paketciniz.com` | `Yonetici@2024!` | paketciniz.com |
+| **Regional Manager** | `bolge@paketciniz.com` | `Bolge@2024!` | paketciniz.com |
+| **Manager** | `mudur@paketciniz.com` | `Mudur@2024!` | paketciniz.com |
+| **Accountant** | `muhasebe@paketciniz.com` | `Muhasebe@2024!` | muhasebe.paketciniz.com |
+| **Field Sales** | `satis@paketciniz.com` | `Satis@2024!` | saha.paketciniz.com |
+| **Operations** | `operasyon@paketciniz.com` | `Operasyon@2024!` | operasyon.paketciniz.com |
+| **Dealer** | `bayi@paketciniz.com` | `Bayi@2024!` | paketci.paketciniz.com |
+| **Restaurant** | `partner@paketciniz.com` | `Partner@2024!` | partner.paketciniz.com |
+| **Courier 1** | `kurye@paketciniz.com` | `Kurye@2024!` | mobil.paketciniz.com |
+| **Courier 2** | `kurye2@paketciniz.com` | `Kurye@2024!` | mobil.paketciniz.com |
 
 ## 🌐 Subdomain Erişimleri
 
 | Subdomain | Rol | Açıklama |
 |-----------|-----|----------|
-| `https://paketci.app` | Super/Company Admin | Ana yönetim paneli |
-| `https://admin.paketci.app` | Super Admin | Detaylı admin paneli |
-| `https://api.paketci.app` | API | Backend API erişimi |
-| `https://bayi.paketci.app` | Dealer | Bayi yönetim paneli |
-| `https://kurye.paketci.app` | Courier | Kurye mobil uygulama |
-| `https://restoran.paketci.app` | Restaurant | Restoran sahibi paneli |
-| `https://saha.paketci.app` | Field Sales | Saha satış paneli |
-| `https://muhasebe.paketci.app` | Accountant | Muhasebe paneli |
-| `https://operasyon.ppaketci.app` | Operations | Operasyon merkezi |
+| `https://paketciniz.com` | Super/Company Admin | Ana yönetim paneli |
+| `https://portal.paketciniz.com` | Super Admin | Detaylı admin portalı |
+| `https://api.paketciniz.com` | API | Backend API erişimi |
+| `https://paketci.paketciniz.com` | Dealer | Paketçi/Bayi paneli |
+| `https://mobil.paketciniz.com` | Courier | Kurye mobil uygulama |
+| `https://partner.paketciniz.com` | Restaurant | Partner/Restoran paneli |
+| `https://saha.paketciniz.com` | Field Sales | Saha satış paneli |
+| `https://muhasebe.paketciniz.com` | Accountant | Muhasebe paneli |
+| `https://operasyon.paketciniz.com` | Operations | Operasyon merkezi |
 
 ## 🚀 Kullanıcıları Oluşturma
 
@@ -47,7 +47,7 @@ npm run seed:list
 
 ### 3. Şifre Sıfırlama
 ```bash
-npm run seed:reset-password -- -e kurye@paketci.app -p YeniSifre123!
+npm run seed:reset-password -- -e kurye@paketciniz.com -p YeniSifre123!
 ```
 
 ## ⚠️ Güvenlik Uyarısı
@@ -74,7 +74,7 @@ npm run seed:reset-password -- -e kurye@paketci.app -p YeniSifre123!
 - Finansal raporlar
 - Sistem konfigürasyonu
 
-### Dealer (Bayi)
+### Dealer (Paketçi)
 - Kurye yönetimi
 - Restoran ilişkileri
 - Komisyon takibi
@@ -86,7 +86,7 @@ npm run seed:reset-password -- -e kurye@paketci.app -p YeniSifre123!
 - Navigasyon
 - Bayi ile mesajlaşma
 
-### Restaurant
+### Partner (Restoran)
 - Sipariş oluşturma
 - Kurye takibi
 - Raporlar
@@ -96,11 +96,11 @@ npm run seed:reset-password -- -e kurye@paketci.app -p YeniSifre123!
 
 ```bash
 # Token alma
-curl -X POST https://api.paketci.app/auth/login \
+curl -X POST https://api.paketciniz.com/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@paketci.app","password":"Admin@2024!"}'
+  -d '{"email":"admin@paketciniz.com","password":"Admin@2024!"}'
 
 # API kullanımı
-curl https://api.paketci.app/users/me \
+curl https://api.paketciniz.com/users/me \
   -H "Authorization: Bearer TOKEN"
 ```

@@ -20,7 +20,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Domain
-DOMAIN="paketci.app"
+DOMAIN="paketciniz.com"
 
 echo -e "${BLUE}1. Sistem güncelleniyor...${NC}"
 sudo apt update && sudo apt upgrade -y
@@ -87,19 +87,19 @@ sudo systemctl enable nginx
 sudo systemctl start nginx
 
 # Nginx yapılandırma dosyası
-sudo tee /etc/nginx/sites-available/paketci.app > /dev/null <<EOF
+sudo tee /etc/nginx/sites-available/paketciniz.com > /dev/null <<EOF
 server {
     listen 80;
-    server_name paketci.app www.paketci.app;
+    server_name paketciniz.com www.paketciniz.com;
     return 301 https://\$server_name\$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name paketci.app www.paketci.app;
+    server_name paketciniz.com www.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -117,10 +117,10 @@ server {
 # API
 server {
     listen 443 ssl http2;
-    server_name api.paketci.app;
+    server_name api.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3001;
@@ -135,13 +135,13 @@ server {
     }
 }
 
-# Admin
+# Admin Portal
 server {
     listen 443 ssl http2;
-    server_name admin.paketci.app;
+    server_name portal.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -151,13 +151,13 @@ server {
     }
 }
 
-# Bayi
+# Paketci (Bayi)
 server {
     listen 443 ssl http2;
-    server_name bayi.paketci.app;
+    server_name paketci.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -166,13 +166,13 @@ server {
     }
 }
 
-# Kurye
+# Partner (Restoran)
 server {
     listen 443 ssl http2;
-    server_name kurye.paketci.app;
+    server_name partner.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -181,13 +181,13 @@ server {
     }
 }
 
-# Restoran
+# Mobil (Kurye)
 server {
     listen 443 ssl http2;
-    server_name restoran.paketci.app;
+    server_name mobil.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -199,10 +199,10 @@ server {
 # Saha Satış
 server {
     listen 443 ssl http2;
-    server_name saha.paketci.app;
+    server_name saha.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -214,10 +214,10 @@ server {
 # Muhasebe
 server {
     listen 443 ssl http2;
-    server_name muhasebe.paketci.app;
+    server_name muhasebe.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -229,10 +229,10 @@ server {
 # Operasyon
 server {
     listen 443 ssl http2;
-    server_name operasyon.paketci.app;
+    server_name operasyon.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -242,7 +242,7 @@ server {
 }
 EOF
 
-sudo ln -sf /etc/nginx/sites-available/paketci.app /etc/nginx/sites-enabled/
+sudo ln -sf /etc/nginx/sites-available/paketciniz.com /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 
 echo -e "${GREEN}✓ Nginx yapılandırıldı${NC}"
@@ -275,11 +275,11 @@ echo ""
 echo "📋 Sonraki Adımlar:"
 echo "─────────────────────────────────────────────────────────────"
 echo "1. SSL Sertifikası alın:"
-echo "   sudo certbot --nginx -d paketci.app -d api.paketci.app \\"
-echo "       -d admin.paketci.app -d bayi.paketci.app \\"
-echo "       -d kurye.paketci.app -d restoran.paketci.app \\"
-echo "       -d saha.paketci.app -d muhasebe.paketci.app \\"
-echo "       -d operasyon.paketci.app"
+echo "   sudo certbot --nginx -d paketciniz.com -d api.paketciniz.com \\"
+echo "       -d portal.paketciniz.com -d paketci.paketciniz.com \\"
+echo "       -d partner.paketciniz.com -d mobil.paketciniz.com \\"
+echo "       -d saha.paketciniz.com -d muhasebe.paketciniz.com \\"
+echo "       -d operasyon.paketciniz.com"
 echo ""
 echo "2. Kodu deploy kullanıcısı ile çekin:"
 echo "   sudo su - deploy"
@@ -295,9 +295,12 @@ echo "   npm run seed:users  # Varsayılan kullanıcıları oluştur"
 echo "   pm2 start ecosystem.config.js"
 echo ""
 echo "5. DNS Kayıtlarını ekleyin:"
-echo "   A paketci.app     → SUNUCU_IP"
-echo "   A api.paketci.app → SUNUCU_IP"
-echo "   A admin.paketci.app → SUNUCU_IP"
+echo "   A paketciniz.com     → SUNUCU_IP"
+echo "   A api.paketciniz.com → SUNUCU_IP"
+echo "   A portal.paketciniz.com → SUNUCU_IP"
+echo "   A paketci.paketciniz.com → SUNUCU_IP"
+echo "   A partner.paketciniz.com → SUNUCU_IP"
+echo "   A mobil.paketciniz.com → SUNUCU_IP"
 echo "   ..."
 echo "─────────────────────────────────────────────────────────────"
 echo ""

@@ -3,30 +3,30 @@
 ## 🌐 Subdomain Yapısı
 
 ### Ana Domain
-- **Domain**: `paketci.app`
-- **Ana Panel**: `https://paketci.app` (Super Admin / Company Admin)
+- **Domain**: `paketciniz.com`
+- **Ana Panel**: `https://paketciniz.com` (Super Admin / Company Admin)
 
 ### Rol Bazlı Subdomainler
 
 | Subdomain | Rol | Açıklama |
 |-----------|-----|----------|
-| `admin.paketci.app` | Super/Company Admin | Ana yönetim paneli |
-| `api.paketci.app` | Backend API | REST API ve WebSocket |
-| `bayi.paketci.app` | Dealer | Bayi yönetim paneli |
-| `kurye.paketci.app` | Courier | Kurye mobil uygulama |
-| `restoran.paketci.app` | Restaurant | Restoran sahibi paneli |
-| `saha.paketci.app` | Field Sales | Saha satış ekibi |
-| `muhasebe.paketci.app` | Accountant | Muhasebe paneli |
-| `operasyon.paketci.app` | Operations | Operasyon merkezi |
+| `portal.paketciniz.com` | Super/Company Admin | Admin portalı |
+| `api.paketciniz.com` | Backend API | REST API ve WebSocket |
+| `paketci.paketciniz.com` | Dealer | Bayi yönetim paneli |
+| `mobil.paketciniz.com` | Courier | Kurye mobil uygulama |
+| `partner.paketciniz.com` | Restaurant | Restoran/Partner paneli |
+| `saha.paketciniz.com` | Field Sales | Saha satış ekibi |
+| `muhasebe.paketciniz.com` | Accountant | Muhasebe paneli |
+| `operasyon.paketciniz.com` | Operations | Operasyon merkezi |
 
 ### Dinamik Bayi Subdomainleri (Opsiyonel - Çoklu Kiracı)
 ```
-{bayi-slug}.paketci.app
+{bayi-slug}.paketciniz.com
 
 Örnekler:
-- aydinlar.paketci.app → Aydınlar Dağıtım
-- hizlitasima.paketci.app → Hızlı Taşıma Ltd.
-- istanbulkurye.paketci.app → İstanbul Kurye
+- aydinlar.paketciniz.com → Aydınlar Dağıtım
+- hizlitasima.paketciniz.com → Hızlı Taşıma Ltd.
+- istanbulkurye.paketciniz.com → İstanbul Kurye
 ```
 
 ## 🖥️ Sunucu Gereksinimleri
@@ -81,24 +81,24 @@ sudo usermod -aG docker deploy
 
 # SSH key oluştur (deploy kullanıcısı için)
 sudo su - deploy
-ssh-keygen -t ed25519 -C "deploy@paketci.app"
+ssh-keygen -t ed25519 -C "deploy@paketciniz.com"
 ```
 
 ### 3. Nginx Yapılandırması
 ```nginx
-# /etc/nginx/sites-available/paketci.app
+# /etc/nginx/sites-available/paketciniz.com
 server {
     listen 80;
-    server_name paketci.app www.paketci.app;
+    server_name paketciniz.com www.paketciniz.com;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name paketci.app www.paketci.app;
+    server_name paketciniz.com www.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -113,10 +113,10 @@ server {
 # API Subdomain
 server {
     listen 443 ssl http2;
-    server_name api.paketci.app;
+    server_name api.paketciniz.com;
 
-    ssl_certificate /etc/letsencrypt/live/paketci.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/paketci.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
 
     location / {
         proxy_pass http://localhost:3001;
@@ -127,15 +127,120 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
+
+# Admin Portal
+server {
+    listen 443 ssl http2;
+    server_name portal.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Bayi (Paketci)
+server {
+    listen 443 ssl http2;
+    server_name paketci.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Partner (Restoran)
+server {
+    listen 443 ssl http2;
+    server_name partner.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Mobil (Kurye)
+server {
+    listen 443 ssl http2;
+    server_name mobil.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Saha Satış
+server {
+    listen 443 ssl http2;
+    server_name saha.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Muhasebe
+server {
+    listen 443 ssl http2;
+    server_name muhasebe.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
+
+# Operasyon
+server {
+    listen 443 ssl http2;
+    server_name operasyon.paketciniz.com;
+
+    ssl_certificate /etc/letsencrypt/live/paketciniz.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/paketciniz.com/privkey.pem;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+}
 ```
 
 ### 4. SSL Sertifikası
 ```bash
-sudo certbot --nginx -d paketci.app -d www.paketci.app \
-    -d api.paketci.app -d admin.paketci.app \
-    -d bayi.paketci.app -d kurye.paketci.app \
-    -d restoran.paketci.app -d saha.paketci.app \
-    -d muhasebe.paketci.app -d operasyon.paketci.app
+sudo certbot --nginx -d paketciniz.com -d www.paketciniz.com \
+    -d api.paketciniz.com -d portal.paketciniz.com \
+    -d paketci.paketciniz.com -d mobil.paketciniz.com \
+    -d partner.paketciniz.com -d saha.paketciniz.com \
+    -d muhasebe.paketciniz.com -d operasyon.paketciniz.com
 ```
 
 ### 5. PostgreSQL Yapılandırması
@@ -222,7 +327,7 @@ sudo ufw enable
 ### Super Admin
 ```json
 {
-  "email": "admin@paketci.app",
+  "email": "admin@paketciniz.com",
   "password": "Admin@2024!",
   "role": "super_admin",
   "name": "Sistem Yöneticisi"
@@ -232,17 +337,17 @@ sudo ufw enable
 ### Company Admin
 ```json
 {
-  "email": "yonetici@paketci.app",
+  "email": "yonetici@paketciniz.com",
   "password": "Yonetici@2024!",
   "role": "company_admin",
   "name": "Şirket Yöneticisi"
 }
 ```
 
-### Test Bayisi
+### Test Bayisi (Paketci)
 ```json
 {
-  "email": "bayi@paketci.app",
+  "email": "bayi@paketciniz.com",
   "password": "Bayi@2024!",
   "role": "dealer",
   "name": "Aydınlar Dağıtım",
@@ -253,7 +358,7 @@ sudo ufw enable
 ### Test Kuryesi
 ```json
 {
-  "email": "kurye@paketci.app",
+  "email": "kurye@paketciniz.com",
   "password": "Kurye@2024!",
   "role": "courier",
   "name": "Ahmet Yılmaz",
@@ -261,11 +366,11 @@ sudo ufw enable
 }
 ```
 
-### Test Restoranı
+### Test Partner (Restoran)
 ```json
 {
-  "email": "restoran@paketci.app",
-  "password": "Restoran@2024!",
+  "email": "partner@paketciniz.com",
+  "password": "Partner@2024!",
   "role": "restaurant",
   "name": "Burger King - Taksim",
   "address": "Taksim Meydanı No:1"

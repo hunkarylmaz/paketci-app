@@ -33,7 +33,7 @@ export class UserSeedService {
     const defaultUsers: CreateUserData[] = [
       // Super Admin
       {
-        email: 'admin@paketci.app',
+        email: 'admin@paketciniz.com',
         password: 'Admin@2024!',
         firstName: 'Sistem',
         lastName: 'Yöneticisi',
@@ -43,7 +43,7 @@ export class UserSeedService {
       },
       // Company Admin
       {
-        email: 'yonetici@paketci.app',
+        email: 'yonetici@paketciniz.com',
         password: 'Yonetici@2024!',
         firstName: 'Şirket',
         lastName: 'Yöneticisi',
@@ -53,7 +53,7 @@ export class UserSeedService {
       },
       // Regional Manager
       {
-        email: 'bolge@paketci.app',
+        email: 'bolge@paketciniz.com',
         password: 'Bolge@2024!',
         firstName: 'Bölge',
         lastName: 'Sorumlusu',
@@ -63,7 +63,7 @@ export class UserSeedService {
       },
       // Manager
       {
-        email: 'mudur@paketci.app',
+        email: 'mudur@paketciniz.com',
         password: 'Mudur@2024!',
         firstName: 'Restoran',
         lastName: 'Müdürü',
@@ -73,7 +73,7 @@ export class UserSeedService {
       },
       // Accountant
       {
-        email: 'muhasebe@paketci.app',
+        email: 'muhasebe@paketciniz.com',
         password: 'Muhasebe@2024!',
         firstName: 'Muhasebe',
         lastName: 'Yetkilisi',
@@ -83,7 +83,7 @@ export class UserSeedService {
       },
       // Field Sales
       {
-        email: 'satis@paketci.app',
+        email: 'satis@paketciniz.com',
         password: 'Satis@2024!',
         firstName: 'Saha',
         lastName: 'Satışçı',
@@ -93,7 +93,7 @@ export class UserSeedService {
       },
       // Operations Support
       {
-        email: 'operasyon@paketci.app',
+        email: 'operasyon@paketciniz.com',
         password: 'Operasyon@2024!',
         firstName: 'Operasyon',
         lastName: 'Destek',
@@ -101,9 +101,9 @@ export class UserSeedService {
         phone: '+90 532 000 0007',
         isActive: true,
       },
-      // Dealer
+      // Dealer (Paketci)
       {
-        email: 'bayi@paketci.app',
+        email: 'bayi@paketciniz.com',
         password: 'Bayi@2024!',
         firstName: 'Aydınlar',
         lastName: 'Dağıtım',
@@ -111,10 +111,10 @@ export class UserSeedService {
         phone: '+90 532 000 0008',
         isActive: true,
       },
-      // Restaurant
+      // Partner (Restoran)
       {
-        email: 'restoran@paketci.app',
-        password: 'Restoran@2024!',
+        email: 'partner@paketciniz.com',
+        password: 'Partner@2024!',
         firstName: 'Burger King',
         lastName: 'Taksim',
         role: UserRole.RESTAURANT,
@@ -123,7 +123,7 @@ export class UserSeedService {
       },
       // Courier
       {
-        email: 'kurye@paketci.app',
+        email: 'kurye@paketciniz.com',
         password: 'Kurye@2024!',
         firstName: 'Ahmet',
         lastName: 'Yılmaz',
@@ -133,7 +133,7 @@ export class UserSeedService {
       },
       // Courier 2
       {
-        email: 'kurye2@paketci.app',
+        email: 'kurye2@paketciniz.com',
         password: 'Kurye@2024!',
         firstName: 'Mehmet',
         lastName: 'Demir',
