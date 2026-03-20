@@ -53,4 +53,4 @@ public/uploads/
 # Cache
 .cache/
 temp/
-tmp/
+tmp/*.tar.gz
