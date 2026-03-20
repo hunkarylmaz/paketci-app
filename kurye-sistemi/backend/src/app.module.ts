@@ -21,6 +21,16 @@ import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { TrackingModule } from './modules/tracking/tracking.module';
 
+// New comprehensive modules
+import { RegionsModule } from './modules/regions/regions.module';
+import { DealersModule } from './modules/dealers/dealers.module';
+import { TerritoriesModule } from './modules/territories/territories.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { VisitsModule } from './modules/visits/visits.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -57,6 +67,15 @@ import { TrackingModule } from './modules/tracking/tracking.module';
     WebhooksModule,
     IntegrationsModule,
     TrackingModule,
+    // New modules
+    RegionsModule,
+    DealersModule,
+    TerritoriesModule,
+    InvoicesModule,
+    PaymentsModule,
+    LeadsModule,
+    VisitsModule,
+    ContractsModule,
     CommonModule,
   ],
 })
