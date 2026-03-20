@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5F5F5">
+
+    <!-- Başlık -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🚀 PAKETÇİ SERVİS"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#1976D2"
+        android:gravity="center"
+        android:padding="16dp" />
+
+    <!-- Servis Durumu Kartı -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:cardCornerRadius="8dp"
+        android:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Konum Takip Servisi"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333" />
+
+            <TextView
+                android:id="@+id/tvServiceStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Servis: Durdu 🔴"
+                android:textSize="16sp"
+                android:textColor="#666"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp" />
+
+            <Button
+                android:id="@+id/btnToggleService"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Servisi Başlat"
+                android:backgroundTint="#1976D2"
+                android:textColor="#FFF" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Caller ID Durumu -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:cardCornerRadius="8dp"
+        android:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📞 Caller ID"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333" />
+
+            <TextView
+                android:id="@+id/tvCallerIdStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Caller ID: Hazır"
+                android:textSize="14sp"
+                android:textColor="#666"
+                android:paddingTop="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Gelen aramalarda otomatik müşteri bilgisi gösterilir"
+                android:textSize="12sp"
+                android:textColor="#999"
+                android:paddingTop="4dp" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Bluetooth Yazıcı -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:cardCornerRadius="8dp"
+        android:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🖨️ Bluetooth Yazıcı"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333" />
+
+            <TextView
+                android:id="@+id/tvPrinterStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Yazıcı: Bağlı değil"
+                android:textSize="14sp"
+                android:textColor="#666"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp" />
+
+            <Button
+                android:id="@+id/btnScanPrinters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Yazıcı Tara"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFF"
+                android:layout_marginBottom="8dp" />
+
+            <ListView
+                android:id="@+id/lvDevices"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:background="#FFF"
+                android:divider="#DDD"
+                android:dividerHeight="1dp" />
+
+            <Button
+                android:id="@+id/btnPrintTest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Test Fişi Yazdır"
+                android:backgroundTint="#FF9800"
+                android:textColor="#FFF"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Bilgi -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Paketçi Kurye Servisi v1.0\npaketciniz.com"
+        android:textSize="12sp"
+        android:textColor="#999"
+        android:gravity="center"
+        android:padding="16dp" />
+
+</LinearLayout>

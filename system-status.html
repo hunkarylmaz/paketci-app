@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paketçi Sistem Durumu - paketciniz.com</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+            min-height: 100vh;
+            padding: 40px;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .subtitle {
+            text-align: center;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        .domain {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #FBBF24;
+        }
+        .status-badge {
+            display: inline-block;
+            background: #10B981;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .domains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .domain-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        .domain-card h3 {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .domain-card .url {
+            font-family: monospace;
+            font-size: 0.95em;
+            color: #FBBF24;
+            word-break: break-all;
+        }
+        .domain-card .desc {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card .icon {
+            font-size: 1.5em;
+        }
+        .card ul {
+            list-style: none;
+        }
+        .card li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card li:last-child {
+            border-bottom: none;
+        }
+        .check {
+            color: #10B981;
+            font-weight: bold;
+        }
+        .docker-status {
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .docker-status h3 {
+            margin-bottom: 15px;
+        }
+        .docker-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .running { color: #10B981; }
+        .stopped { color: #EF4444; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-box .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #FBBF24;
+        }
+        .stat-box .label {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PAKETÇİ SİSTEMİ</h1>
+        <p class="subtitle">B2B Kurye Yönetim Platformu</p>
+        <div class="domain">paketciniz.com</div>
+        
+        <div style="text-align: center;">
+            <span class="status-badge">✅ SİSTEM AYAĞA KALKTI</span>
+        </div>
+
+        <!-- Domain List -->
+        <div class="domains-grid">
+            <div class="domain-card">
+                <h3>🎛️ Admin Panel</h3>
+                <div class="url">paketci.paketciniz.com</div>
+                <div class="desc">Sistem yönetimi ve bayi kontrolü</div>
+            </div>
+            <div class="domain-card">
+                <h3>🤝 Partner Panel</h3>
+                <div class="url">partner.paketciniz.com</div>
+                <div class="desc">Bayi yönetimi ve kurye atama</div>
+            </div>
+            <div class="domain-card">
+                <h3>🍽️ İşletme Panel</h3>
+                <div class="url">isletme.paketciniz.com</div>
+                <div class="desc">Restoran sipariş ve rapor yönetimi</div>
+            </div>
+            <div class="domain-card">
+                <h3>⚙️ API Gateway</h3>
+                <div class="url">api.paketciniz.com</div>
+                <div class="desc">Backend API ve WebSocket</div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number">6</div>
+                <div class="label">Platform Entegrasyonu</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">15K+</div>
+                <div class="label">Kod Satırı</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">5</div>
+                <div class="label">Ana Modül</div>
+            </div>
+            <div class="stat-box">
+                <div class="number">5sn</div>
+                <div class="label">Konum Güncelleme</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3><span class="icon">💻</span> Backend API (NestJS)</h3>
+                <ul>
+                    <li><span class="check">✓</span> Platform Integration (6 platform)</li>
+                    <li><span class="check">✓</span> Notification Service (FCM/SMS)</li>
+                    <li><span class="check">✓</span> Location Tracking (Redis GEO)</li>
+                    <li><span class="check">✓</span> WebSocket Gateway</li>
+                    <li><span class="check">✓</span> Excel Reporting (XLSX)</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="icon">🪟</span> Admin & Partner Panel</h3>
+                <ul>
+                    <li><span class="check">✓</span> Next.js + TypeScript</li>
+                    <li><span class="check">✓</span> Real-time Dashboard</li>
+                    <li><span class="check">✓</span> Advanced Maps (OpenStreetMap)</li>
+                    <li><span class="check">✓</span> Multi-tenant Support</li>
+                    <li><span class="check">✓</span> Excel Export Reports</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="icon">🤖</span> Android Service</h3>
+                <ul>
+                    <li><span class="check">✓</span> Foreground Service</li>
+                    <li><span class="check">✓</span> Location (5sn interval)</li>
+                    <li><span class="check">✓</span> FCM Push Notifications</li>
+                    <li><span class="check">✓</span> Call Receiver (Caller ID)</li>
+                    <li><span class="check">✓</span> Bluetooth Printer</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="icon">🌐</span> İşletme Portalı</h3>
+                <ul>
+                    <li><span class="check">✓</span> React + Vite</li>
+                    <li><span class="check">✓</span> Live Tracking (Leaflet)</li>
+                    <li><span class="check">✓</span> Orders & Excel Export</li>
+                    <li><span class="check">✓</span> Platform Integration UI</li>
+                    <li><span class="check">✓</span> Financial Reports</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="icon">📱</span> Mobile App (Flutter)</h3>
+                <ul>
+                    <li><span class="check">✓</span> Location Tracking Service</li>
+                    <li><span class="check">✓</span> WebSocket Client</li>
+                    <li><span class="check">✓</span> FCM Integration</li>
+                    <li><span class="check">✓</span> Emergency Button</li>
+                    <li><span class="check">✓</span> Break Request System</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3><span class="icon">🔌</span> Platform Entegrasyonları</h3>
+                <ul>
+                    <li><span class="check">✓</span> Yemeksepeti</li>
+                    <li><span class="check">✓</span> Getir Yemek</li>
+                    <li><span class="check">✓</span> Trendyol</li>
+                    <li><span class="check">✓</span> Migros</li>
+                    <li><span class="check">✓</span> Getir Çarşı & Fuudy</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="docker-status">
+            <h3>🐳 Servis Durumu</h3>
+            <div class="docker-item">
+                <span>🐘 PostgreSQL</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+            <div class="docker-item">
+                <span>🔴 Redis</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+            <div class="docker-item">
+                <span>⚙️ Backend API</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+            <div class="docker-item">
+                <span>🎛️ Frontend (Admin/Partner)</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+            <div class="docker-item">
+                <span>🍽️ Restoran Portal</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+            <div class="docker-item">
+                <span>🌐 Nginx</span>
+                <span class="running">🟢 Çalışıyor</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Paketçi Sistem v5.0.0 | paketciniz.com</p>
+            <p>"Don't worry. Even if the world forgets, I'll remember for you." ❤️‍🔥</p>
+        </div>
+    </div>
+</body>
+</html>

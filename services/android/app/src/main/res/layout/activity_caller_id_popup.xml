@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_caller_popup">
+
+    <!-- Başlık -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📞 Gelen Arama"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="✕"
+            android:textSize="18sp"
+            android:textColor="#FFF"
+            android:background="?android:attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+    <!-- Telefon Numarası -->
+    <TextView
+        android:id="@+id/tvPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0555 123 45 67"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="#FFF"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="#30FFFFFF"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Müşteri Bilgisi -->
+    <TextView
+        android:id="@+id/tvCallerInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Müşteri bilgisi yükleniyor..."
+        android:textSize="16sp"
+        android:textColor="#FFF"
+        android:gravity="center"
+        android:padding="12dp"
+        android:background="#20FFFFFF" />
+
+    <!-- Aksiyon Butonları -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:weightSum="2">
+
+        <Button
+            android:id="@+id/btnAddOrder"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="📝 Sipariş Al"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/btnViewHistory"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="📋 Geçmiş"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFF" />
+
+    </LinearLayout>
+
+</LinearLayout>
