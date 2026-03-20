@@ -30,6 +30,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { LeadsModule } from './modules/leads/leads.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
+import { SupportModule } from './modules/support/support.module';
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { ContractsModule } from './modules/contracts/contracts.module';
     LeadsModule,
     VisitsModule,
     ContractsModule,
+    SupportModule,
     CommonModule,
   ],
 })
