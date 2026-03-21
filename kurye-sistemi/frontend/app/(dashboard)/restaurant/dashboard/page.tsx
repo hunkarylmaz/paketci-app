@@ -102,16 +102,76 @@ export default function RestaurantDashboard() {
   const [activeTab, setActiveTab] = useState('pending');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [user, setUser] = useState({ name: 'ASMA DÖNER', dealerName: 'Paketçiniz Bodrum' });
+  const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [newOrder, setNewOrder] = useState({
+    customerName: '',
+    customerPhone: '',
+    deliveryAddress: '',
+    totalAmount: '',
+    paymentMethod: 'Nakit',
+    notes: ''
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem('restaurant_user');
     if (stored) setUser(JSON.parse(stored));
+    
+    // Load orders from localStorage
+    const storedOrders = localStorage.getItem('restaurant_orders');
+    if (storedOrders) setOrders(JSON.parse(storedOrders));
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('restaurant_user');
     router.push('/');
   };
+
+  const handleNewOrder = () => {
+    setShowNewOrderModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowNewOrderModal(false);
+    setNewOrder({
+      customerName: '',
+      customerPhone: '',
+      deliveryAddress: '',
+      totalAmount: '',
+      paymentMethod: 'Nakit',
+      notes: ''
+    });
+  };
+
+  const handleSubmitOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const order = {
+      id: 'ORD-' + Date.now(),
+      ...newOrder,
+      totalAmount: parseFloat(newOrder.totalAmount) || 0,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      distance: '1.2 km',
+      time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      courier: 'Atanmadı'
+    };
+    
+    const updatedOrders = [order, ...orders];
+    setOrders(updatedOrders);
+    localStorage.setItem('restaurant_orders', JSON.stringify(updatedOrders));
+    
+    handleCloseModal();
+  };
+
+  const filteredOrders = orders.filter(order => {
+    if (activeTab === 'pending') return order.status === 'pending';
+    if (activeTab === 'onway') return order.status === 'onway';
+    return true;
+  });
+
+  const pendingCount = orders.filter(o => o.status === 'pending').length;
+  const onwayCount = orders.filter(o => o.status === 'onway').length;
 
   return (
     <div style={{ minHeight: '100vh', background: '#f8f9fa', position: 'relative' }}>
@@ -260,7 +320,9 @@ export default function RestaurantDashboard() {
             </button>
 
             {/* New Order Button */}
-            <button style={{
+            <button 
+              onClick={handleNewOrder}
+              style={{
               display: 'flex',
               alignItems: 'center',
               gap: 8,
@@ -480,7 +542,7 @@ export default function RestaurantDashboard() {
                 fontWeight: 600,
                 color: activeTab === 'pending' ? 'white' : '#374151'
               }}>
-                0
+                {pendingCount}
               </span>
             </button>
 
@@ -510,7 +572,7 @@ export default function RestaurantDashboard() {
                 fontWeight: 600,
                 color: activeTab === 'onway' ? 'white' : '#374151'
               }}>
-                0
+                {onwayCount}
               </span>
             </button>
 
@@ -604,19 +666,62 @@ export default function RestaurantDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td 
-                      colSpan={8} 
-                      style={{
-                        padding: '60px 20px',
-                        textAlign: 'center',
-                        color: '#9ca3af',
-                        fontSize: 14
-                      }}
-                    >
-                      Bu kategoride sipariş bulunmamaktadır
-                    </td>
-                  </tr>
+                  {filteredOrders.length === 0 ? (
+                    <tr>
+                      <td 
+                        colSpan={8} 
+                        style={{
+                          padding: '60px 20px',
+                          textAlign: 'center',
+                          color: '#9ca3af',
+                          fontSize: 14
+                        }}
+                      >
+                        Bu kategoride sipariş bulunmamaktadır
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order) => (
+                      <tr key={order.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <td style={{ padding: '16px', fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                          {order.id}
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, color: '#374151' }}>
+                          <div style={{ fontWeight: 500 }}>{order.customerName}</div>
+                          <div style={{ fontSize: 12, color: '#6b7280' }}>{order.customerPhone}</div>
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, color: '#374151', maxWidth: 200 }}>
+                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {order.deliveryAddress}
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, color: '#374151' }}>
+                          {order.distance}
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, color: '#374151' }}>
+                          {order.time}
+                        </td>
+                        <td style={{ padding: '16px' }}>
+                          <span style={{
+                            padding: '4px 12px',
+                            borderRadius: 20,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            background: order.status === 'pending' ? '#fef3c7' : '#dbeafe',
+                            color: order.status === 'pending' ? '#92400e' : '#1e40af'
+                          }}>
+                            {order.status === 'pending' ? 'Bekliyor' : 'Yolda'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                          {order.totalAmount.toFixed(2)} TL
+                        </td>
+                        <td style={{ padding: '16px', fontSize: 14, color: '#374151' }}>
+                          {order.courier}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -636,6 +741,294 @@ export default function RestaurantDashboard() {
           }
         }
       `}</style>
+
+      {/* New Order Modal */}
+      {showNewOrderModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            backdropFilter: 'blur(4px)'
+          }}
+          onClick={handleCloseModal}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            style={{
+              background: 'white',
+              borderRadius: 16,
+              width: '100%',
+              maxWidth: 500,
+              maxHeight: '90vh',
+              overflow: 'auto',
+              boxShadow: '0 20px 60px rgba(0,0,0,.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSubmitOrder}>
+              {/* Modal Header */}
+              <div style={{
+                padding: '20px 24px',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <h2 style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: '#111827',
+                  margin: 0
+                }}>
+                  Yeni Sipariş
+                </h2>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 8,
+                    borderRadius: 8,
+                    color: '#6b7280',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <Icons.x />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div style={{ padding: '24px' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#374151',
+                    marginBottom: 6
+                  }}>
+                    Müşteri Adı *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newOrder.customerName}
+                    onChange={(e) => setNewOrder({...newOrder, customerName: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      outline: 'none',
+                      transition: 'all .2s'
+                    }}
+                    placeholder="Müşteri adını girin"
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#374151',
+                    marginBottom: 6
+                  }}>
+                    Telefon *
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={newOrder.customerPhone}
+                    onChange={(e) => setNewOrder({...newOrder, customerPhone: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      outline: 'none',
+                      transition: 'all .2s'
+                    }}
+                    placeholder="05XX XXX XX XX"
+                  />
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#374151',
+                    marginBottom: 6
+                  }}>
+                    Teslimat Adresi *
+                  </label>
+                  <textarea
+                    required
+                    value={newOrder.deliveryAddress}
+                    onChange={(e) => setNewOrder({...newOrder, deliveryAddress: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      outline: 'none',
+                      transition: 'all .2s',
+                      minHeight: 80,
+                      resize: 'vertical'
+                    }}
+                    placeholder="Teslimat adresini girin"
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#374151',
+                      marginBottom: 6
+                    }}>
+                      Tutar (TL) *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={newOrder.totalAmount}
+                      onChange={(e) => setNewOrder({...newOrder, totalAmount: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        outline: 'none'
+                      }}
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#374151',
+                      marginBottom: 6
+                    }}>
+                      Ödeme Şekli
+                    </label>
+                    <select
+                      value={newOrder.paymentMethod}
+                      onChange={(e) => setNewOrder({...newOrder, paymentMethod: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '10px 14px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        outline: 'none',
+                        background: 'white'
+                      }}
+                    >
+                      <option value="Nakit">Nakit</option>
+                      <option value="Kredi Kartı">Kredi Kartı</option>
+                      <option value="Online">Online Ödeme</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#374151',
+                    marginBottom: 6
+                  }}>
+                    Notlar
+                  </label>
+                  <textarea
+                    value={newOrder.notes}
+                    onChange={(e) => setNewOrder({...newOrder, notes: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      outline: 'none',
+                      minHeight: 60,
+                      resize: 'vertical'
+                    }}
+                    placeholder="Sipariş notları (isteğe bağlı)"
+                  />
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div style={{
+                padding: '16px 24px',
+                borderTop: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: 12
+              }}>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#f3f4f6',
+                    border: '1px solid #d1d5db',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: '#374151',
+                    cursor: 'pointer',
+                    transition: 'all .2s'
+                  }}
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '10px 24px',
+                    background: '#5c3cbb',
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: 'white',
+                    cursor: 'pointer',
+                    transition: 'all .2s',
+                    boxShadow: '0 4px 12px rgba(92,60,187,.3)'
+                  }}
+                >
+                  Siparişi Kaydet
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
