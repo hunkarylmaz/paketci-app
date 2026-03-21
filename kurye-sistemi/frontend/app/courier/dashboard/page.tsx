@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-// Dynamic import for Leaflet (client-side only)
-const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(m => m.Popup), { ssr: false });
+// Dynamic import for the entire map component (client-side only)
+const LiveMap = dynamic(() => import('./LiveMap'), { 
+  ssr: false,
+  loading: () => <div style={{ height: '100%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>Harita yükleniyor...</div>
+});
 
-// Import Leaflet CSS
-import 'leaflet/dist/leaflet.css';
+// Bodrum center coordinates
+const BODRUM_CENTER: [number, number] = [37.0344, 27.4305];
 
 // ==================== COLORS ====================
 const colors = {
@@ -57,9 +57,6 @@ const initialRestaurants: Restaurant[] = [
   { id: 4, name: 'Limon Cafe', phone: '0252 318 90 12', address: 'Yalıkavak Mah. No:8 Bodrum', status: 'active', orders: 31, rating: 4.6, commission: 10, location: { lat: 37.1050, lng: 27.2600 } },
   { id: 5, name: 'Gümbet Burger', phone: '0252 319 34 56', address: 'Gümbet Mah. No:25 Bodrum', status: 'active', orders: 52, rating: 4.4, commission: 14, location: { lat: 37.0250, lng: 27.4200 } }
 ];
-
-// Bodrum center coordinates
-const BODRUM_CENTER: [number, number] = [37.0344, 27.4305];
 
 // ==================== MAIN COMPONENT ====================
 export default function CourierDashboard() {
@@ -392,41 +389,6 @@ function MapView({ couriers, restaurants }: { couriers: Courier[], restaurants: 
         <LiveMap couriers={couriers} restaurants={restaurants} />
       </div>
     </div>
-  );
-}
-
-function LiveMap({ couriers, restaurants }: { couriers: Courier[], restaurants: Restaurant[] }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
-  if (!mounted) return <div style={{ height: '100%', background: colors.gray100, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.gray500 }}>Harita yükleniyor...</div>;
-
-  return (
-    <MapContainer center={BODRUM_CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={true}>
-      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {restaurants.map((r) => (
-        <Marker key={`r-${r.id}`} position={[r.location.lat, r.location.lng]}>
-          <Popup>
-            <div style={{ minWidth: 180 }}>
-              <div style={{ fontWeight: 700, fontSize: 15 }}>🏪 {r.name}</div>
-              <div style={{ fontSize: 12, color: colors.gray600, marginTop: 4 }}>{r.address}</div>
-              <div style={{ marginTop: 8, fontSize: 12 }}>⭐ {r.rating} • 📦 {r.orders} • %{r.commission}</div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-      {couriers.filter(c => c.location).map((c) => (
-        <Marker key={`c-${c.id}`} position={[c.location!.lat, c.location!.lng]}>
-          <Popup>
-            <div style={{ minWidth: 150 }}>
-              <div style={{ fontWeight: 700 }}>🚴 {c.name}</div>
-              <div style={{ fontSize: 12, color: colors.gray600 }}>{c.phone}</div>
-              <div style={{ marginTop: 4, fontSize: 12 }}>⭐ {c.rating} • {c.deliveries} teslimat</div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
   );
 }
 
