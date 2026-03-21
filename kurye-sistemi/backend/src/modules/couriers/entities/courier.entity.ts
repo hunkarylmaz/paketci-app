@@ -47,6 +47,9 @@ export class Courier {
   @Column({ type: 'decimal', precision: 3, scale: 2, nullable: true })
   performanceRating: number;
 
+  @Column({ default: true })
+  isActive: boolean; // Kurye aktif/pasif durumu
+
   @Column()
   companyId: string;
 

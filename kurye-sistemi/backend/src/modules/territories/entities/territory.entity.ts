@@ -1,27 +1,7 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
-import { Region } from '../../regions/entities/region.entity';
+// Territory Entity - Bölge Yönetimi için
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Restaurant } from '../../restaurants/entities/restaurant.entity';
-import { Lead } from '../../leads/entities/lead.entity';
-
-export enum TerritoryStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-}
-
-export enum TerritoryPriority {
-  HIGH = 'high',
-  MEDIUM = 'medium',
-  LOW = 'low',
-}
+import { Region } from '../../regions/entities/region.entity';
 
 @Entity('territories')
 export class Territory {
@@ -31,49 +11,32 @@ export class Territory {
   @Column()
   name: string;
 
-  @Column({ unique: true })
-  code: string;
+  @Column({ nullable: true })
+  description: string;
 
   @Column({ nullable: true })
   regionId: string;
 
-  @ManyToOne(() => Region, region => region.territories)
+  @ManyToOne(() => Region, region => region.territories, { nullable: true })
   @JoinColumn({ name: 'regionId' })
   region: Region;
 
+  @OneToMany(() => User, user => user.assignedTerritories)
+  fieldSales: User[];
+
   @Column({ nullable: true })
-  fieldSalesId: string;
+  assignedToId: string;
 
   @ManyToOne(() => User, user => user.assignedTerritories, { nullable: true })
-  @JoinColumn({ name: 'fieldSalesId' })
-  fieldSales: User;
+  @JoinColumn({ name: 'assignedToId' })
+  assignedTo: User;
 
-  @Column('simple-json', { nullable: true })
-  boundaries: {
-    type: 'polygon';
-    coordinates: number[][][];
-  };
-
-  @Column({
-    type: 'enum',
-    enum: TerritoryPriority,
-    default: TerritoryPriority.MEDIUM,
-  })
-  priority: TerritoryPriority;
-
-  @Column({
-    type: 'enum',
-    enum: TerritoryStatus,
-    default: TerritoryStatus.ACTIVE,
-  })
-  status: TerritoryStatus;
-
-  @OneToMany(() => Restaurant, restaurant => restaurant.territory)
-  restaurants: Restaurant[];
-
-  @OneToMany(() => Lead, lead => lead.territory)
-  leads: Lead[];
+  @Column({ default: true })
+  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

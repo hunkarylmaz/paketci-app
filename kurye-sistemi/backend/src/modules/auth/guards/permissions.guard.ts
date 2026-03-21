@@ -45,7 +45,7 @@ export class PermissionsGuard implements CanActivate {
 
     // Seviye kontrolü
     if (minLevel) {
-      const userLevel = RoleLevel[user.role] || 0;
+      const userLevel = RoleLevel[user.role] as unknown as number || 0;
       if (userLevel < minLevel) {
         throw new ForbiddenException(
           `Bu işlem için yeterli yetki seviyeniz yok. Gereken seviye: ${minLevel}`

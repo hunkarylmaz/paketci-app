@@ -1,25 +1,28 @@
 import { Response } from 'express';
 import { ReportsService } from './reports.service';
-import { ExcelExportService } from '../../common/services/excel-export.service';
-import { Repository } from 'typeorm';
-import { Delivery } from '../deliveries/entities/delivery.entity';
 export declare class ReportsController {
     private readonly reportsService;
-    private readonly excelService;
-    private deliveryRepository;
-    constructor(reportsService: ReportsService, excelService: ExcelExportService, deliveryRepository: Repository<Delivery>);
+    constructor(reportsService: ReportsService);
     getDashboardStats(companyId: string): Promise<{
-        message: string;
+        todayDeliveries: number;
+        totalCouriers: number;
+        activeCouriers: number;
+        totalRestaurants: number;
     }>;
-    getDeliveryReport(companyId: string, startDate: string, endDate: string): Promise<Delivery[]>;
-    exportDeliveries(companyId: string, startDate: string, endDate: string, res: Response): Promise<void>;
-    getCourierPerformance(companyId: string, startDate: string, endDate: string): Promise<{
-        message: string;
+    getDealerSummary(companyId: string, startDate: string, endDate: string): Promise<{
+        todayDeliveries: number;
+        totalCouriers: number;
+        activeCouriers: number;
+        totalRestaurants: number;
     }>;
-    getRestaurantPerformance(companyId: string, startDate: string, endDate: string): Promise<{
-        message: string;
-    }>;
+    exportDealerSummary(companyId: string, startDate: string, endDate: string, res: Response): Promise<void>;
+    getRestaurantDetailed(restaurantId: string, startDate: string, endDate: string): Promise<import("../restaurants/entities/restaurant.entity").Restaurant[]>;
+    exportRestaurantDetailed(restaurantId: string, startDate: string, endDate: string, res: Response): Promise<void>;
+    getCourierPerformance(companyId: string, startDate: string, endDate: string): Promise<import("../couriers/entities/courier.entity").Courier[]>;
     getFinancialReport(companyId: string, startDate: string, endDate: string): Promise<{
-        message: string;
+        totalDeliveries: number;
+        totalRevenue: number;
+        totalTips: number;
+        totalIncome: number;
     }>;
 }

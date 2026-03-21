@@ -38,6 +38,37 @@ let NotificationsService = class NotificationsService {
     async getUnreadCount(userId) {
         return this.notifications.filter(n => n.userId === userId && !n.read).length;
     }
+    async sendNewOrderNotification(deliveryId, restaurantId) {
+        const notification = {
+            id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            userId: restaurantId,
+            type: 'NEW_ORDER',
+            title: 'Yeni Sipariş',
+            message: `Yeni bir sipariş alındı: ${deliveryId}`,
+            deliveryId,
+            read: false,
+            createdAt: new Date(),
+        };
+        this.notifications.push(notification);
+        console.log(`📢 Yeni Sipariş Bildirimi: ${deliveryId}`);
+        return notification;
+    }
+    async sendOrderCancelledNotification(deliveryId, restaurantId, reason) {
+        const notification = {
+            id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            userId: restaurantId,
+            type: 'ORDER_CANCELLED',
+            title: 'Sipariş İptal Edildi',
+            message: `Sipariş iptal edildi. Sebep: ${reason}`,
+            deliveryId,
+            reason,
+            read: false,
+            createdAt: new Date(),
+        };
+        this.notifications.push(notification);
+        console.log(`📢 Sipariş İptal Bildirimi: ${deliveryId} - Sebep: ${reason}`);
+        return notification;
+    }
 };
 exports.NotificationsService = NotificationsService;
 exports.NotificationsService = NotificationsService = __decorate([

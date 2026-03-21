@@ -18,6 +18,7 @@ const receipt_entity_1 = require("../../receipts/entities/receipt.entity");
 var DeliveryStatus;
 (function (DeliveryStatus) {
     DeliveryStatus["PENDING"] = "pending";
+    DeliveryStatus["PENDING_ASSIGNMENT"] = "pending_assignment";
     DeliveryStatus["ASSIGNED"] = "assigned";
     DeliveryStatus["ACCEPTED"] = "accepted";
     DeliveryStatus["PICKED_UP"] = "picked_up";
@@ -121,6 +122,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Delivery.prototype, "orderAmount", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "totalAmount", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: PaymentType, default: PaymentType.CASH }),
     __metadata("design:type", String)
 ], Delivery.prototype, "paymentType", void 0);
@@ -212,6 +217,70 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'simple-json', nullable: true }),
     __metadata("design:type", Object)
 ], Delivery.prototype, "customerSignatureMetadata", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "platformOrderId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "orderNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "platform", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, nullable: true }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "deliveryFee", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "tip", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Delivery.prototype, "pickupTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Delivery.prototype, "deliveryTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "rating", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "ratingComment", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "customerNote", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'jsonb', nullable: true }),
+    __metadata("design:type", Array)
+], Delivery.prototype, "items", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "discountAmount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
+    __metadata("design:type", Date)
+], Delivery.prototype, "platformOrderTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Delivery.prototype, "estimatedPrepTime", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Delivery.prototype, "sourceUrl", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 8, scale: 2, nullable: true }),
     __metadata("design:type", Number)

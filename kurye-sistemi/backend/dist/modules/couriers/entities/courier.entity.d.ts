@@ -19,6 +19,7 @@ export declare class Courier {
     currentLongitude: number;
     lastLocationAt: Date;
     performanceRating: number;
+    isActive: boolean;
     companyId: string;
     company: Company;
     deliveries: Delivery[];

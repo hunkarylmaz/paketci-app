@@ -3,6 +3,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Redis } from 'ioredis';
 import { WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { Cron } from '@nestjs/schedule';
 
 export interface GeoPosition {
   latitude: number;

@@ -157,6 +157,51 @@ let DeliveriesService = class DeliveriesService {
         });
         await this.creditRepository.save(creditTransaction);
     }
+    async createFromPlatform(companyId, platformData) {
+        const company = await this.companyRepository.findOne({ where: { id: companyId } });
+        if (!company) {
+            throw new common_1.NotFoundException('Şirket bulunamadı');
+        }
+        const delivery = this.deliveryRepository.create({
+            ...platformData,
+            companyId,
+            trackingNumber: (0, tracking_number_util_1.generateTrackingNumber)(),
+            creditDeducted: company.deliveryFeePerOrder,
+            status: delivery_entity_1.DeliveryStatus.PENDING,
+            paymentType: platformData.paymentType,
+            orderSource: platformData.platform.toLowerCase(),
+        });
+        return this.deliveryRepository.save(delivery);
+    }
+    async autoAssignCourier(deliveryId) {
+        const delivery = await this.deliveryRepository.findOne({
+            where: { id: deliveryId },
+            relations: ['restaurant'],
+        });
+        if (!delivery) {
+            throw new common_1.NotFoundException('Teslimat bulunamadı');
+        }
+        delivery.status = delivery_entity_1.DeliveryStatus.ASSIGNED;
+        delivery.assignedAt = new Date();
+        return this.deliveryRepository.save(delivery);
+    }
+    async cancelOrder(companyId, deliveryId, reason) {
+        const delivery = await this.findOne(companyId, deliveryId);
+        if (delivery.status === delivery_entity_1.DeliveryStatus.DELIVERED) {
+            throw new common_1.BadRequestException('Teslim edilmiş sipariş iptal edilemez');
+        }
+        if (delivery.status === delivery_entity_1.DeliveryStatus.CANCELLED) {
+            throw new common_1.BadRequestException('Sipariş zaten iptal edilmiş');
+        }
+        delivery.status = delivery_entity_1.DeliveryStatus.CANCELLED;
+        delivery.cancelledAt = new Date();
+        delivery.cancellationReason = reason;
+        await this.deliveryRepository.save(delivery);
+        if ([delivery_entity_1.DeliveryStatus.PENDING, delivery_entity_1.DeliveryStatus.ASSIGNED].includes(delivery.status)) {
+            await this.refundCredit(companyId, delivery);
+        }
+        return delivery;
+    }
     async getStats(companyId, period) {
         const query = this.deliveryRepository.createQueryBuilder('delivery')
             .where('delivery.companyId = :companyId', { companyId });

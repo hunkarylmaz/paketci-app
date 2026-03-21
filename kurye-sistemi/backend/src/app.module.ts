@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
@@ -31,10 +32,12 @@ import { LeadsModule } from './modules/leads/leads.module';
 import { VisitsModule } from './modules/visits/visits.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { SupportModule } from './modules/support/support.module';
+import { PosIntegrationModule } from './modules/pos-integration/pos-integration.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
     
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -78,6 +81,7 @@ import { SupportModule } from './modules/support/support.module';
     VisitsModule,
     ContractsModule,
     SupportModule,
+    PosIntegrationModule,
     CommonModule,
   ],
 })

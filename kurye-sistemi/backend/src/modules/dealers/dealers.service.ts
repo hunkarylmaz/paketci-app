@@ -132,8 +132,8 @@ export class DealersService {
         .getRawOne(),
     ]);
 
-    const monthlyRevenue = parseFloat(monthlyStats?.monthlyrevenue || 0);
-    const monthlyTarget = parseFloat(dealer.monthlyTarget?.toString() || 0);
+    const monthlyRevenue = parseFloat(monthlyStats?.monthlyrevenue || '0');
+    const monthlyTarget = parseFloat(dealer.monthlyTarget?.toString() || '0');
 
     return {
       dealerId,

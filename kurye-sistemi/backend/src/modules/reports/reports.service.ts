@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
-import { Delivery } from '../deliveries/entities/delivery.entity';
+import { Delivery, DeliveryStatus } from '../deliveries/entities/delivery.entity';
 import { Courier } from '../couriers/entities/courier.entity';
 import { Restaurant } from '../restaurants/entities/restaurant.entity';
 import { User } from '../users/entities/user.entity';
@@ -351,11 +351,11 @@ export class ReportsService {
       hours[hour]++;
     }
 
-    const data = [['Saat Aralığı', 'Sipariş Sayısı', 'Yoğunluk']];
+    const data: any[][] = [['Saat Aralığı', 'Sipariş Sayısı', 'Yoğunluk']];
     for (let i = 0; i < 24; i++) {
       const count = hours[i];
       const intensity = count > 10 ? '🔴 Yoğun' : count > 5 ? '🟡 Orta' : '🟢 Düşük';
-      data.push([`${i.toString().padStart(2, '0')}:00 - ${i.toString().padStart(2, '0')}:59`, count, intensity]);
+      data.push([`${i.toString().padStart(2, '0')}:00 - ${i.toString().padStart(2, '0')}:59`, count.toString(), intensity]);
     }
 
     return data;
@@ -363,7 +363,7 @@ export class ReportsService {
 
   private generateCourierBreakdownData(deliveries: Delivery[]): any[][] {
     const grouped = this.groupByCourier(deliveries);
-    const data = [['Kurye Adı', 'Toplam Teslimat', 'Ortalama Süre (dk)', 'Müşteri Puanı']];
+    const data: any[][] = [['Kurye Adı', 'Toplam Teslimat', 'Ortalama Süre (dk)', 'Müşteri Puanı']];
 
     for (const [courierName, courierDeliveries] of Object.entries(grouped)) {
       const avgTime = this.calculateAvgDeliveryTime(courierDeliveries);
@@ -371,7 +371,7 @@ export class ReportsService {
         .filter(d => d.rating)
         .reduce((sum, d) => sum + (d.rating || 0), 0) / courierDeliveries.filter(d => d.rating).length || 0;
 
-      data.push([courierName, courierDeliveries.length, avgTime, avgRating.toFixed(1)]);
+      data.push([courierName, courierDeliveries.length.toString(), avgTime.toString(), avgRating.toFixed(1)]);
     }
 
     return data;
@@ -488,7 +488,7 @@ export class ReportsService {
       where: {
         companyId,
         createdAt: Between(startDate, endDate),
-        status: 'delivered',
+        status: DeliveryStatus.DELIVERED,
       },
     });
 

@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
-import { CommandModule, CommandService } from 'nest-commander';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { SeedUsersCommand, ResetPasswordCommand, ListUsersCommand } from './seed-commands';
 import { UsersModule } from '../modules/users/users.module';
 
 @Module({
@@ -21,24 +18,7 @@ import { UsersModule } from '../modules/users/users.module';
         synchronize: process.env.NODE_ENV !== 'production',
       }),
     }),
-    CommandModule,
     UsersModule,
   ],
-  providers: [SeedUsersCommand, ResetPasswordCommand, ListUsersCommand],
 })
 export class CliModule {}
-
-// CLI entry point
-async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(CliModule, {
-    logger: ['error', 'warn', 'log'],
-  });
-  
-  try {
-    await app.get(CommandService).exec();
-  } finally {
-    await app.close();
-  }
-}
-
-bootstrap();

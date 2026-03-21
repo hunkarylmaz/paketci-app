@@ -24,7 +24,7 @@ export class IntegrationsController {
   async getRestaurantIntegrations(
     @Param('restaurantId') restaurantId: string,
     @Request() req,
-  ) {
+  ): Promise<any> {
     // TODO: Check if user has access to this restaurant
     return this.integrationsService.getRestaurantIntegrations(restaurantId);
   }

@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { Lead } from './lead.entity';
+import { Lead } from '../../leads/entities/lead.entity';
 import { User } from '../../users/entities/user.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 

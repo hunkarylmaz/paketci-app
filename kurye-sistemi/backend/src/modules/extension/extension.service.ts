@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Restaurant } from '../restaurants/entities/restaurant.entity';
-import { Delivery } from '../deliveries/entities/delivery.entity';
+import { Delivery, DeliveryStatus } from '../deliveries/entities/delivery.entity';
 import { generateTrackingNumber } from '../../utils/tracking-number.util';
 
 @Injectable()
@@ -93,8 +93,8 @@ export class ExtensionService {
       deliveryLatitude: orderData.address?.latitude,
       deliveryLongitude: orderData.address?.longitude,
       
-      // Items (stored as JSON)
-      items: JSON.stringify(orderData.items || []),
+      // Items (stored as JSON array)
+      items: orderData.items || [],
       
       // Payment
       totalAmount: orderData.payment?.total || 0,
@@ -103,7 +103,7 @@ export class ExtensionService {
       paymentMethod: orderData.payment?.method || 'online',
       
       // Status
-      status: 'pending_assignment',
+      status: DeliveryStatus.PENDING_ASSIGNMENT,
       
       // Timing
       platformOrderTime: orderData.timing?.orderTime ? new Date(orderData.timing.orderTime) : new Date(),
@@ -117,7 +117,8 @@ export class ExtensionService {
       updatedAt: new Date(),
     });
 
-    const savedDelivery = await this.deliveryRepository.save(delivery);
+    const savedDeliveries = await this.deliveryRepository.save(delivery);
+    const savedDelivery = Array.isArray(savedDeliveries) ? savedDeliveries[0] : savedDeliveries;
 
     return {
       success: true,
@@ -163,9 +164,9 @@ export class ExtensionService {
       data: {
         paketciOrderId: delivery.trackingNumber,
         status: delivery.status,
-        courier: delivery.courierId ? {
-          name: delivery.courierName,
-          phone: delivery.courierPhone,
+        courier: delivery.courier ? {
+          name: `${delivery.courier.firstName} ${delivery.courier.lastName}`,
+          phone: delivery.courier.phone,
         } : null,
         estimatedDelivery: delivery.estimatedDeliveryTime,
       },

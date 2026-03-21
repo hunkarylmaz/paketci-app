@@ -143,7 +143,7 @@ export class WebhooksController {
     const order = await this.deliveriesService.createFromPlatform(platform, data);
 
     // Bildirim gönder
-    await this.notificationsService.sendNewOrderNotification(order);
+    await this.notificationsService.sendNewOrderNotification(order.id, order.restaurantId);
 
     // Otomatik kurye ata (eğer ayarlanmışsa)
     await this.deliveriesService.autoAssignCourier(order.id);
@@ -153,10 +153,10 @@ export class WebhooksController {
     this.logger.log(`Cancelled order from ${platform}`, data);
 
     const orderId = data.orderId || data.id;
-    await this.deliveriesService.cancelOrder(orderId, 'Platform tarafından iptal edildi');
+    await this.deliveriesService.cancelOrder(orderId, 'Platform tarafından iptal edildi', 'SYSTEM');
 
     // Kuryeye bildirim gönder
-    await this.notificationsService.sendOrderCancelledNotification(orderId);
+    await this.notificationsService.sendOrderCancelledNotification(orderId, data.restaurantId || '', 'Platform tarafından iptal edildi');
   }
 
   private async handleStatusChange(platform: string, data: any) {

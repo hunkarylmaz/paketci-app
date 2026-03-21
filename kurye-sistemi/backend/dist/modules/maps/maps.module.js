@@ -8,13 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapsModule = void 0;
 const common_1 = require("@nestjs/common");
+const axios_1 = require("@nestjs/axios");
+const maps_service_1 = require("./maps.service");
 const maps_controller_1 = require("./maps.controller");
+const ioredis_1 = require("@nestjs-modules/ioredis");
 let MapsModule = class MapsModule {
 };
 exports.MapsModule = MapsModule;
 exports.MapsModule = MapsModule = __decorate([
     (0, common_1.Module)({
+        imports: [
+            axios_1.HttpModule,
+            ioredis_1.RedisModule,
+        ],
+        providers: [maps_service_1.MapsService],
         controllers: [maps_controller_1.MapsController],
+        exports: [maps_service_1.MapsService],
     })
 ], MapsModule);
 //# sourceMappingURL=maps.module.js.map

@@ -1,6 +1,13 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Company } from '../../companies/entities/company.entity';
 import { UserRole, RoleLevel } from '../enums/user-role.enum';
+import { Dealer } from '../../dealers/entities/dealer.entity';
+import { Region } from '../../regions/entities/region.entity';
+import { SupportTicket } from '../../support/entities/support-ticket.entity';
+import { SupportMessage } from '../../support/entities/support-message.entity';
+import { Lead } from '../../leads/entities/lead.entity';
+import { Territory } from '../../territories/entities/territory.entity';
+import { Visit } from '../../visits/entities/visit.entity';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -30,6 +37,9 @@ export class User {
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
+
+  @Column({ default: true })
+  isActive: boolean; // Kullanıcı aktif/pasif durumu
 
   @Column({ nullable: true })
   phone: string;
@@ -79,6 +89,33 @@ export class User {
   @OneToMany(() => User, user => user.reportsTo)
   subordinates: User[];
 
+  // Bayi sahipliği (bir kullanıcı birden fazla bayiye sahip olabilir)
+  @OneToMany(() => Dealer, dealer => dealer.owner)
+  ownedDealers: Dealer[];
+
+  // Yönetilen bölgeler (Bölge Sorumlusu için)
+  @OneToMany(() => Region, region => region.manager)
+  managedRegions: Region[];
+
+  // Destek ticket ilişkileri
+  @OneToMany(() => SupportTicket, ticket => ticket.creator)
+  createdTickets: SupportTicket[];
+
+  @OneToMany(() => SupportTicket, ticket => ticket.assignee)
+  assignedTickets: SupportTicket[];
+
+  @OneToMany(() => SupportMessage, message => message.sender)
+  sentMessages: SupportMessage[];
+
+  @OneToMany(() => Lead, lead => lead.assignedTo)
+  assignedLeads: Lead[];
+
+  @OneToMany(() => Territory, territory => territory.fieldSales)
+  assignedTerritories: Territory[];
+
+  @OneToMany(() => Visit, visit => visit.visitor)
+  visits: Visit[];
+
   // Atanan restoranlar (saha satış, bölge sorumlusu için)
   @Column('simple-array', { nullable: true })
   assignedRestaurantIds: string[];
@@ -116,3 +153,6 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 }
+
+// Re-export for backward compatibility
+export { UserRole, RoleLevel } from '../enums/user-role.enum';

@@ -1,21 +1,22 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
+// Lead Entity - Potansiyel Müşteri
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Territory } from '../../territories/entities/territory.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Visit } from '../../visits/entities/visit.entity';
 
 export enum LeadStatus {
-  NEW = 'new',
-  CONTACTED = 'contacted',
-  VISITED = 'visited',
-  NEGOTIATING = 'negotiating',
-  CONVERTED = 'converted',
-  LOST = 'lost',
+  NEW = 'NEW',
+  CONTACTED = 'CONTACTED',
+  VISITED = 'VISITED',
+  NEGOTIATING = 'NEGOTIATING',
+  CONVERTED = 'CONVERTED',
+  LOST = 'LOST'
 }
 
 export enum LeadPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  HOT = 'hot',
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
 }
 
 @Entity('leads')
@@ -23,69 +24,57 @@ export class Lead {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column()
   restaurantName: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  ownerName: string;
+  @Column({ nullable: true })
+  contactName: string;
 
-  @Column({ type: 'varchar', length: 20 })
+  @Column({ nullable: true })
   phone: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ nullable: true })
   email: string;
 
-  @Column({ type: 'text' })
+  @Column({ nullable: true })
   address: string;
-
-  @Index()
-  @Column({ type: 'uuid', nullable: true })
-  territoryId: string;
-
-  @ManyToOne(() => Territory, territory => territory.leads, { nullable: true })
-  @JoinColumn({ name: 'territoryId' })
-  territory: Territory;
-
-  @Index()
-  @Column({ type: 'uuid', nullable: true })
-  assignedTo: string;
-
-  @ManyToOne(() => User, user => user.assignedLeads, { nullable: true })
-  @JoinColumn({ name: 'assignedTo' })
-  assignedUser: User;
 
   @Column({
     type: 'enum',
     enum: LeadStatus,
-    default: LeadStatus.NEW,
+    default: LeadStatus.NEW
   })
   status: LeadStatus;
 
   @Column({
     type: 'enum',
     enum: LeadPriority,
-    default: LeadPriority.MEDIUM,
+    default: LeadPriority.MEDIUM
   })
   priority: LeadPriority;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ nullable: true })
   notes: string;
 
-  @Column({ type: 'int', default: 0 })
-  visitCount: number;
+  @Column({ nullable: true })
+  assignedToId: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  lastVisitAt: Date;
+  @ManyToOne(() => User, user => user.assignedLeads, { nullable: true })
+  @JoinColumn({ name: 'assignedToId' })
+  assignedTo: User;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  expectedRevenue: number;
+  @Column({ nullable: true })
+  restaurantId: string;
 
-  @Column({ type: 'timestamp', nullable: true })
-  convertedAt: Date;
+  @ManyToOne(() => Restaurant, restaurant => restaurant.leads, { nullable: true })
+  @JoinColumn({ name: 'restaurantId' })
+  restaurant: Restaurant;
 
-  @Index()
-  @Column({ type: 'uuid', nullable: true })
-  convertedToRestaurantId: string;
+  @OneToMany(() => Visit, visit => visit.lead)
+  visits: Visit[];
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

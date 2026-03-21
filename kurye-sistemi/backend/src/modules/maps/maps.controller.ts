@@ -19,7 +19,7 @@ export class MapsController {
       destination: Coordinates;
       waypoints?: Coordinates[];
     },
-  ) {
+  ): Promise<any> {
     return this.mapsService.calculateRoute(
       body.origin,
       body.destination,
@@ -30,14 +30,14 @@ export class MapsController {
   @Post('route/optimized')
   async calculateOptimizedRoute(
     @Body() body: { waypoints: Coordinates[] },
-  ) {
+  ): Promise<any> {
     return this.mapsService.calculateOptimizedRoute(body.waypoints);
   }
 
   // ==================== GEOCODING ====================
 
   @Get('geocode')
-  async geocodeAddress(@Query('address') address: string) {
+  async geocodeAddress(@Query('address') address: string): Promise<any> {
     return this.mapsService.geocodeAddress(address);
   }
 
@@ -45,7 +45,7 @@ export class MapsController {
   async reverseGeocode(
     @Query('lat') lat: string,
     @Query('lng') lng: string,
-  ) {
+  ): Promise<any> {
     return this.mapsService.reverseGeocode(parseFloat(lat), parseFloat(lng));
   }
 
@@ -70,7 +70,7 @@ export class MapsController {
   }
 
   @Post('polyline/decode')
-  decodePolyline(@Body() body: { encoded: string }) {
+  decodePolyline(@Body() body: { encoded: string }): any {
     return {
       coordinates: this.mapsService.decodePolyline(body.encoded),
     };

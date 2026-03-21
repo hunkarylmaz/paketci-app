@@ -15,7 +15,20 @@ export declare class DeliveriesService {
     findOne(companyId: string, id: string): Promise<Delivery>;
     findByTrackingNumber(trackingNumber: string): Promise<Delivery>;
     updateStatus(companyId: string, id: string, updateDto: UpdateDeliveryStatusDto, userId: string): Promise<Delivery>;
-    private refundCredit;
+    refundCredit(companyId: string, delivery: Delivery): Promise<void>;
+    createFromPlatform(companyId: string, platformData: {
+        platform: string;
+        platformOrderId: string;
+        restaurantId: string;
+        customerName: string;
+        customerPhone: string;
+        deliveryAddress: string;
+        orderAmount: number;
+        paymentType: string;
+        deliveryFee?: number;
+    }): Promise<Delivery>;
+    autoAssignCourier(deliveryId: string): Promise<Delivery>;
+    cancelOrder(companyId: string, deliveryId: string, reason: string): Promise<Delivery>;
     getStats(companyId: string, period?: {
         start: Date;
         end: Date;

@@ -3,6 +3,15 @@
 // ============================================
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Delivery } from '../../deliveries/entities/delivery.entity';
+import { Contract } from '../../contracts/entities/contract.entity';
+import { Company } from '../../companies/entities/company.entity';
+import { Dealer } from '../../dealers/entities/dealer.entity';
+import { Region } from '../../regions/entities/region.entity';
+import { Invoice } from '../../invoices/entities/invoice.entity';
+import { Territory } from '../../territories/entities/territory.entity';
+import { Visit } from '../../visits/entities/visit.entity';
+import { Lead } from '../../leads/entities/lead.entity';
 
 // 📊 9 ÇALIŞMA ŞEKLİ
 export enum PricingType {
@@ -147,6 +156,12 @@ export class Restaurant {
   // ============================================
   // KONUM
   // ============================================
+  @Column({ type: 'decimal', precision: 10, scale: 8, nullable: true })
+  latitude: number;
+
+  @Column({ type: 'decimal', precision: 11, scale: 8, nullable: true })
+  longitude: number;
+
   @Column({ type: 'jsonb' })
   address: {
     full: string;
@@ -161,6 +176,16 @@ export class Restaurant {
     latitude: number;
     longitude: number;
   };
+
+  // Hazırlık süreleri
+  @Column({ type: 'int', default: 15 })
+  averagePreparationTime: number; // Ortalama hazırlık süresi (dakika)
+
+  @Column({ type: 'int', default: 30 })
+  maxPreparationTime: number; // Maksimum hazırlık süresi (dakika)
+
+  @Column({ type: 'jsonb', nullable: true })
+  preparationTimeByHour: Record<string, number>; // Saat bazlı hazırlık süreleri {"10": 12, "11": 15, ...}
 
   // ============================================
   // HİYERARŞİ İLİŞKİLERİ (Yeni Roller İçin)
@@ -234,6 +259,40 @@ export class Restaurant {
 
   @Column({ type: 'timestamp', nullable: true })
   activatedAt: Date;
+
+  // ============================================
+  // İLİŞKİLER
+  // ============================================
+  @ManyToOne(() => Company, company => company.restaurants, { nullable: true })
+  @JoinColumn({ name: 'companyId' })
+  company: Company;
+
+  @ManyToOne(() => Dealer, dealer => dealer.restaurants, { nullable: true })
+  @JoinColumn({ name: 'dealerId' })
+  dealer: Dealer;
+
+  @ManyToOne(() => Region, region => region.restaurants, { nullable: true })
+  @JoinColumn({ name: 'regionId' })
+  region: Region;
+
+  @ManyToOne(() => Territory, territory => territory.restaurants, { nullable: true })
+  @JoinColumn({ name: 'territoryId' })
+  territory: Territory;
+
+  @OneToMany(() => Delivery, delivery => delivery.restaurant)
+  deliveries: Delivery[];
+
+  @OneToMany(() => Contract, contract => contract.restaurant)
+  contracts: Contract[];
+
+  @OneToMany(() => Invoice, invoice => invoice.restaurant)
+  invoices: Invoice[];
+
+  @OneToMany(() => Visit, visit => visit.restaurant)
+  visits: Visit[];
+
+  @OneToMany(() => Lead, lead => lead.restaurant)
+  leads: Lead[];
 
   @CreateDateColumn()
   createdAt: Date;

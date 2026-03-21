@@ -6,6 +6,7 @@ import { Receipt } from '../../receipts/entities/receipt.entity';
 
 export enum DeliveryStatus {
   PENDING = 'pending',           // Bekliyor
+  PENDING_ASSIGNMENT = 'pending_assignment', // Atama bekliyor
   ASSIGNED = 'assigned',         // Kuryeye atandı
   ACCEPTED = 'accepted',         // Kurye kabul etti
   PICKED_UP = 'picked_up',       // Paket alındı
@@ -90,6 +91,9 @@ export class Delivery {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   orderAmount: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 })
+  totalAmount: number; // Toplam tutar (sipariş + teslimat ücreti + bahşiş)
+
   @Column({ type: 'enum', enum: PaymentType, default: PaymentType.CASH })
   paymentType: PaymentType;
 
@@ -171,6 +175,59 @@ export class Delivery {
     ipAddress?: string;
     deviceInfo?: string;
   };
+
+  // Platform entegrasyonu için yeni alanlar
+  @Column({ nullable: true })
+  platformOrderId: string; // Getir, Yemeksepeti sipariş ID
+
+  @Column({ nullable: true })
+  orderNumber: string; // Sipariş numarası
+
+  @Column({ nullable: true })
+  platform: string; // Getir, Yemeksepeti, Trendyol, vb.
+
+  // Ücretlendirme alanları
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  deliveryFee: number; // Teslimat ücreti
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 })
+  tip: number; // Bahşiş
+
+  // Zaman alanları
+  @Column({ type: 'timestamp', nullable: true })
+  pickupTime: Date; // Paket alınma zamanı
+
+  @Column({ type: 'timestamp', nullable: true })
+  deliveryTime: Date; // Teslimat zamanı
+
+  // Değerlendirme
+  @Column({ type: 'int', nullable: true })
+  rating: number; // Müşteri değerlendirmesi (1-5)
+
+  @Column({ type: 'text', nullable: true })
+  ratingComment: string; // Değerlendirme yorumu
+
+  // Extension/Platform entegrasyonu için ek alanlar
+  @Column({ type: 'text', nullable: true })
+  customerNote: string; // Müşteri notu
+
+  @Column({ type: 'jsonb', nullable: true })
+  items: any[]; // Sipariş ürünleri
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, default: 0 })
+  discountAmount: number; // İndirim tutarı
+
+  @Column({ nullable: true })
+  paymentMethod: string; // Ödeme yöntemi
+
+  @Column({ type: 'timestamp', nullable: true })
+  platformOrderTime: Date; // Platform sipariş zamanı
+
+  @Column({ type: 'int', nullable: true })
+  estimatedPrepTime: number; // Tahmini hazırlık süresi
+
+  @Column({ nullable: true })
+  sourceUrl: string; // Kaynak URL
 
   // Süre hesaplamaları (dakika cinsinden)
   @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })

@@ -175,7 +175,7 @@ export class DeliveriesService {
     return this.findOne(companyId, id);
   }
 
-  private async refundCredit(companyId: string, delivery: Delivery) {
+  async refundCredit(companyId: string, delivery: Delivery) {
     const company = await this.companyRepository.findOne({ where: { id: companyId } });
     const newBalance = parseFloat(company.creditBalance.toString()) + parseFloat(delivery.creditDeducted.toString());
 
@@ -194,6 +194,89 @@ export class DeliveriesService {
     });
 
     await this.creditRepository.save(creditTransaction);
+  }
+
+  // Platform entegrasyonu için yeni sipariş oluşturma
+  async createFromPlatform(
+    companyId: string,
+    platformData: {
+      platform: string;
+      platformOrderId: string;
+      restaurantId: string;
+      customerName: string;
+      customerPhone: string;
+      deliveryAddress: string;
+      orderAmount: number;
+      paymentType: string;
+      deliveryFee?: number;
+    },
+  ): Promise<Delivery> {
+    const company = await this.companyRepository.findOne({ where: { id: companyId } });
+    
+    if (!company) {
+      throw new NotFoundException('Şirket bulunamadı');
+    }
+
+    const delivery = this.deliveryRepository.create({
+      ...platformData,
+      companyId,
+      trackingNumber: generateTrackingNumber(),
+      creditDeducted: company.deliveryFeePerOrder,
+      status: DeliveryStatus.PENDING,
+      paymentType: platformData.paymentType as PaymentType,
+      orderSource: platformData.platform.toLowerCase(),
+    });
+
+    return this.deliveryRepository.save(delivery);
+  }
+
+  // Otomatik kurye atama
+  async autoAssignCourier(deliveryId: string): Promise<Delivery> {
+    const delivery = await this.deliveryRepository.findOne({
+      where: { id: deliveryId },
+      relations: ['restaurant'],
+    });
+
+    if (!delivery) {
+      throw new NotFoundException('Teslimat bulunamadı');
+    }
+
+    // TODO: Implement smart assignment logic
+    // For now, just mark as pending_assignment
+    delivery.status = DeliveryStatus.ASSIGNED;
+    delivery.assignedAt = new Date();
+    
+    return this.deliveryRepository.save(delivery);
+  }
+
+  // Sipariş iptali
+  async cancelOrder(
+    companyId: string,
+    deliveryId: string,
+    reason: string,
+  ): Promise<Delivery> {
+    const delivery = await this.findOne(companyId, deliveryId);
+
+    if (delivery.status === DeliveryStatus.DELIVERED) {
+      throw new BadRequestException('Teslim edilmiş sipariş iptal edilemez');
+    }
+
+    if (delivery.status === DeliveryStatus.CANCELLED) {
+      throw new BadRequestException('Sipariş zaten iptal edilmiş');
+    }
+
+    delivery.status = DeliveryStatus.CANCELLED;
+    delivery.cancelledAt = new Date();
+    delivery.cancellationReason = reason;
+
+    await this.deliveryRepository.save(delivery);
+
+    // Kontör iadesi yap (eğer teslimat başlamadıysa)
+    if ([DeliveryStatus.PENDING, DeliveryStatus.ASSIGNED].includes(delivery.status)) {
+      await this.refundCredit(companyId, delivery);
+    }
+
+    return delivery;
   }
 
   async getStats(companyId: string, period?: { start: Date; end: Date }) {

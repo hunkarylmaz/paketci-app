@@ -4,6 +4,7 @@ import { Courier } from '../../couriers/entities/courier.entity';
 import { Receipt } from '../../receipts/entities/receipt.entity';
 export declare enum DeliveryStatus {
     PENDING = "pending",
+    PENDING_ASSIGNMENT = "pending_assignment",
     ASSIGNED = "assigned",
     ACCEPTED = "accepted",
     PICKED_UP = "picked_up",
@@ -40,6 +41,7 @@ export declare class Delivery {
     deliveryLongitude: number;
     deliveryNotes: string;
     orderAmount: number;
+    totalAmount: number;
     paymentType: PaymentType;
     cashAmount: number;
     status: DeliveryStatus;
@@ -72,6 +74,22 @@ export declare class Delivery {
         ipAddress?: string;
         deviceInfo?: string;
     };
+    platformOrderId: string;
+    orderNumber: string;
+    platform: string;
+    deliveryFee: number;
+    tip: number;
+    pickupTime: Date;
+    deliveryTime: Date;
+    rating: number;
+    ratingComment: string;
+    customerNote: string;
+    items: any[];
+    discountAmount: number;
+    paymentMethod: string;
+    platformOrderTime: Date;
+    estimatedPrepTime: number;
+    sourceUrl: string;
     preparationDuration: number;
     assignmentDuration: number;
     acceptanceDuration: number;
