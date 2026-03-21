@@ -233,9 +233,29 @@ export default function RestaurantDashboard() {
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [selectedTime, setSelectedTime] = useState('15');
 
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+
+  const cancellationReasons = [
+    'Müşteri isteği',
+    'Ürün tükendi',
+    'Adres yanlış/ulaşılamaz',
+    'Ödeme sorunu',
+    'Restoran kapalı',
+    'Diğer'
+  ];
+
   useEffect(() => {
     const stored = localStorage.getItem('restaurant_user');
-    if (stored) setUser(JSON.parse(stored));
+    if (stored) {
+      setUser(JSON.parse(stored));
+    } else {
+      // Auto-login with default user if no user exists
+      const defaultUser = { name: 'ASMA DÖNER BODRUM', dealerName: 'Paketçiniz Bodrum', id: '1', role: 'restaurant' };
+      setUser(defaultUser);
+      localStorage.setItem('restaurant_user', JSON.stringify(defaultUser));
+    }
     const storedOrders = localStorage.getItem('restaurant_orders');
     if (storedOrders) setOrders(JSON.parse(storedOrders));
   }, []);
@@ -293,7 +313,11 @@ export default function RestaurantDashboard() {
       createdAt: new Date().toLocaleString('tr-TR'),
       time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
       distance: (Math.random() * 3 + 0.5).toFixed(1) + ' km',
-      courier: 'Atanmadı'
+      courier: 'Atanmadı',
+      deliveredAt: null,
+      cancelledAt: null,
+      cancellationReason: null,
+      platform: 'Web'
     };
 
     const updated = [order, ...orders];
@@ -322,13 +346,43 @@ export default function RestaurantDashboard() {
     return true;
   });
 
-  const updateOrderStatus = (orderId: string, newStatus: string) => {
-    const updated = orders.map((o: any) => o.id === orderId ? { ...o, status: newStatus, statusChangedAt: new Date().toLocaleString('tr-TR') } : o);
+  const updateOrderStatus = (orderId: string, newStatus: string, reason?: string) => {
+    const now = new Date().toLocaleString('tr-TR');
+    const updated = orders.map((o: any) => {
+      if (o.id === orderId) {
+        const update: any = { 
+          ...o, 
+          status: newStatus, 
+          statusChangedAt: now
+        };
+        if (newStatus === 'delivered') {
+          update.deliveredAt = now;
+        }
+        if (newStatus === 'cancelled') {
+          update.cancelledAt = now;
+          update.cancellationReason = reason || 'Belirtilmedi';
+        }
+        return update;
+      }
+      return o;
+    });
     setOrders(updated);
     localStorage.setItem('restaurant_orders', JSON.stringify(updated));
     if (selectedOrder?.id === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus, statusChangedAt: new Date().toLocaleString('tr-TR') });
+      const updatedOrder = updated.find((o: any) => o.id === orderId);
+      setSelectedOrder(updatedOrder);
     }
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    if (!cancellationReason) {
+      alert('Lütfen bir iptal nedeni seçin');
+      return;
+    }
+    updateOrderStatus(orderId, 'cancelled', cancellationReason);
+    setShowCancelModal(false);
+    setCancellationReason('');
+    setOrderToCancel(null);
   };
 
   const deleteOrder = (orderId: string) => {
@@ -641,6 +695,55 @@ export default function RestaurantDashboard() {
             <div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.gray800, marginBottom: 24 }}>İstatistikler</h2>
               
+              {/* Order Status Chart */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20, marginBottom: 24 }}>
+                {/* Status Distribution */}
+                <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 24 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, marginBottom: 16 }}>Sipariş Durumları</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {[
+                      { label: 'Bekleyen', count: pendingCount, color: colors.yellow, bg: '#FEF3C7' },
+                      { label: 'Yolda', count: onwayCount, color: colors.primary, bg: '#DBEAFE' },
+                      { label: 'Teslim Edildi', count: orders.filter((o: any) => o.status === 'delivered').length, color: colors.green, bg: '#D1FAE5' },
+                      { label: 'İptal Edildi', count: orders.filter((o: any) => o.status === 'cancelled').length, color: colors.red, bg: '#FEE2E2' },
+                    ].map((item) => (
+                      <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 8, background: item.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 18, fontWeight: 700, color: item.color }}>{item.count}</span>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                            <span style={{ fontSize: 13, color: colors.gray600 }}>{item.label}</span>
+                            <span style={{ fontSize: 13, fontWeight: 600 }}>{orders.length > 0 ? Math.round((item.count / orders.length) * 100) : 0}%</span>
+                          </div>
+                          <div style={{ height: 6, background: colors.gray100, borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ width: `${orders.length > 0 ? (item.count / orders.length) * 100 : 0}%`, height: '100%', background: item.color, borderRadius: 3 }} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Daily Sales Chart */}
+                <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 24 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, marginBottom: 16 }}>Günlük Satışlar</h3>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 160 }}>
+                    {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((day, idx) => {
+                      const height = [65, 45, 80, 95, 85, 100, 70][idx];
+                      const isToday = idx === new Date().getDay() - 1;
+                      return (
+                        <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: colors.gray600 }}>{height * 12}₺</div>
+                          <div style={{ width: '100%', height: height * 1.2, background: isToday ? colors.primary : colors.gray300, borderRadius: 4 }} />
+                          <div style={{ fontSize: 11, color: isToday ? colors.primary : colors.gray500, fontWeight: isToday ? 700 : 400 }}>{day}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                 {/* Top Products */}
                 <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 24 }}>
@@ -959,7 +1062,7 @@ export default function RestaurantDashboard() {
                     <>
                       <button onClick={() => updateOrderStatus(selectedOrder.id, 'onway')} style={{ flex: 1, padding: '10px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Yola Çıkar</button>
                       <button onClick={() => updateOrderStatus(selectedOrder.id, 'waiting')} style={{ flex: 1, padding: '10px', background: '#4F46E5', color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Beklemeye Al</button>
-                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')} style={{ flex: 1, padding: '10px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>İptal Et</button>
+                      <button onClick={() => { setOrderToCancel(selectedOrder.id); setShowCancelModal(true); }} style={{ flex: 1, padding: '10px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>İptal Et</button>
                     </>
                   )}
                   {selectedOrder.status === 'onway' && (
@@ -979,6 +1082,33 @@ export default function RestaurantDashboard() {
                   )}
                 </div>
               </div>
+
+              {/* Delivered Info */}
+              {selectedOrder.status === 'delivered' && selectedOrder.deliveredAt && (
+                <div style={{ padding: 16, background: '#D1FAE5', borderRadius: 12, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <Icons.check />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#065F46' }}>Teslim Edildi</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#065F46' }}>Teslim zamanı: {selectedOrder.deliveredAt}</p>
+                </div>
+              )}
+
+              {/* Cancellation Info */}
+              {selectedOrder.status === 'cancelled' && (
+                <div style={{ padding: 16, background: '#FEE2E2', borderRadius: 12, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <Icons.warning />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#991B1B' }}>Sipariş İptal Edildi</span>
+                  </div>
+                  {selectedOrder.cancellationReason && (
+                    <p style={{ fontSize: 12, color: '#991B1B' }}>Neden: {selectedOrder.cancellationReason}</p>
+                  )}
+                  {selectedOrder.cancelledAt && (
+                    <p style={{ fontSize: 12, color: '#991B1B', marginTop: 4 }}>İptal zamanı: {selectedOrder.cancelledAt}</p>
+                  )}
+                </div>
+              )}
 
               {/* Wait Time Selector */}
               {selectedOrder.status === 'waiting' && (
@@ -1068,6 +1198,28 @@ export default function RestaurantDashboard() {
                 <button style={{ flex: 1, padding: '12px', background: colors.white, color: colors.gray700, border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icons.print /> Yazdır</button>
                 <button onClick={() => deleteOrder(selectedOrder.id)} style={{ flex: 1, padding: '12px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Siparişi Sil</button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CANCELLATION MODAL */}
+      {showCancelModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={() => setShowCancelModal(false)}>
+          <div style={{ width: '100%', maxWidth: 400, background: colors.white, borderRadius: 12, padding: 24 }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.gray800, marginBottom: 8 }}>Siparişi İptal Et</h3>
+            <p style={{ fontSize: 14, color: colors.gray500, marginBottom: 16 }}>İptal nedenini seçin:</p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+              {cancellationReasons.map((reason) => (
+                <button key={reason} onClick={() => setCancellationReason(reason)} style={{ padding: '12px 16px', borderRadius: 8, border: 'none', background: cancellationReason === reason ? colors.red : colors.gray100, color: cancellationReason === reason ? colors.white : colors.gray700, fontSize: 14, fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                  {reason}
+                </button>
+              ))}
+            </div>
+            
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowCancelModal(false)} style={{ flex: 1, padding: '12px', borderRadius: 8, border: `1px solid ${colors.gray300}`, background: colors.white, color: colors.gray700, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>Vazgeç</button>
+              <button onClick={() => orderToCancel && handleCancelOrder(orderToCancel)} style={{ flex: 1, padding: '12px', borderRadius: 8, border: 'none', background: colors.red, color: colors.white, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>İptal Et</button>
             </div>
           </div>
         </div>
