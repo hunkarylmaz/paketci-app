@@ -230,6 +230,8 @@ export default function RestaurantDashboard() {
   const [user, setUser] = useState({ name: 'ASMA DÖNER BODRUM', dealerName: 'Paketçiniz Bodrum' });
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showOrderDetail, setShowOrderDetail] = useState(false);
+  const [selectedTime, setSelectedTime] = useState('15');
 
   useEffect(() => {
     const stored = localStorage.getItem('restaurant_user');
@@ -316,11 +318,31 @@ export default function RestaurantDashboard() {
   const filteredOrders = orders.filter((order: any) => {
     if (activeOrderTab === 'pending') return order.status === 'pending';
     if (activeOrderTab === 'onway') return order.status === 'onway';
+    if (activeOrderTab === 'history') return ['delivered', 'cancelled'].includes(order.status);
     return true;
   });
 
+  const updateOrderStatus = (orderId: string, newStatus: string) => {
+    const updated = orders.map((o: any) => o.id === orderId ? { ...o, status: newStatus, statusChangedAt: new Date().toLocaleString('tr-TR') } : o);
+    setOrders(updated);
+    localStorage.setItem('restaurant_orders', JSON.stringify(updated));
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: newStatus, statusChangedAt: new Date().toLocaleString('tr-TR') });
+    }
+  };
+
+  const deleteOrder = (orderId: string) => {
+    if (confirm('Siparişi silmek istediğinize emin misiniz?')) {
+      const updated = orders.filter((o: any) => o.id !== orderId);
+      setOrders(updated);
+      localStorage.setItem('restaurant_orders', JSON.stringify(updated));
+      setShowOrderDetail(false);
+    }
+  };
+
   const pendingCount = orders.filter((o: any) => o.status === 'pending').length;
   const onwayCount = orders.filter((o: any) => o.status === 'onway').length;
+  const historyCount = orders.filter((o: any) => ['delivered', 'cancelled'].includes(o.status)).length;
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
   const todayOrders = orders.filter((o: any) => o.createdAt?.includes(new Date().toLocaleDateString('tr-TR')));
 
@@ -386,19 +408,22 @@ export default function RestaurantDashboard() {
           {activeTab === 'orders' && (
             <div>
               {/* Tabs */}
-              <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
-                <button onClick={() => setActiveOrderTab('pending')} style={{ padding: '10px 20px', borderRadius: 8, border: 'none', background: activeOrderTab === 'pending' ? colors.primary : colors.white, color: activeOrderTab === 'pending' ? colors.white : colors.gray600, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, boxShadow: activeOrderTab === 'pending' ? '0 2px 4px rgba(37,99,235,0.3)' : `0 1px 3px ${colors.gray200}` }}>
-                  Bekleyen Siparişler
-                  <span style={{ background: activeOrderTab === 'pending' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'pending' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>{pendingCount}</span>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => setActiveOrderTab('pending')} style={{ padding: '10px 16px', borderRadius: 8, border: 'none', background: activeOrderTab === 'pending' ? colors.primary : colors.white, color: activeOrderTab === 'pending' ? colors.white : colors.gray600, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: activeOrderTab === 'pending' ? '0 2px 4px rgba(37,99,235,0.3)' : `0 1px 3px ${colors.gray200}` }}>
+                  Bekleyen
+                  <span style={{ background: activeOrderTab === 'pending' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'pending' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>{pendingCount}</span>
                 </button>
-                <button onClick={() => setActiveOrderTab('onway')} style={{ padding: '10px 20px', borderRadius: 8, border: `1px solid ${colors.gray200}`, background: activeOrderTab === 'onway' ? colors.primary : colors.white, color: activeOrderTab === 'onway' ? colors.white : colors.gray600, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-                  Yoldaki Siparişler
-                  <span style={{ background: activeOrderTab === 'onway' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'onway' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>{onwayCount}</span>
+                <button onClick={() => setActiveOrderTab('onway')} style={{ padding: '10px 16px', borderRadius: 8, border: `1px solid ${colors.gray200}`, background: activeOrderTab === 'onway' ? colors.primary : colors.white, color: activeOrderTab === 'onway' ? colors.white : colors.gray600, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Yolda
+                  <span style={{ background: activeOrderTab === 'onway' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'onway' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>{onwayCount}</span>
+                </button>
+                <button onClick={() => setActiveOrderTab('history')} style={{ padding: '10px 16px', borderRadius: 8, border: `1px solid ${colors.gray200}`, background: activeOrderTab === 'history' ? colors.primary : colors.white, color: activeOrderTab === 'history' ? colors.white : colors.gray600, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Geçmiş
+                  <span style={{ background: activeOrderTab === 'history' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'history' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>{historyCount}</span>
                 </button>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                  <button style={{ width: 40, height: 40, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.search /></button>
-                  <button style={{ width: 40, height: 40, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.list /></button>
-                  <button style={{ width: 40, height: 40, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.cancel /></button>
+                  <button style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.search /></button>
+                  <button style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.list /></button>
                 </div>
               </div>
 
@@ -407,8 +432,8 @@ export default function RestaurantDashboard() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: colors.gray50 }}>
-                      {['SİPARİŞ', 'MÜŞTERİ', 'ADRES', 'MESAFE', 'SAAT', 'DURUM', 'ÖDEME', 'KURYE'].map((header) => (
-                        <th key={header} style={{ padding: '14px 16px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: colors.gray500, textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: `1px solid ${colors.gray200}` }}>{header}</th>
+                      {['SİPARİŞ', 'MÜŞTERİ', 'ADRES', 'MESAFE', 'SAAT', 'DURUM', 'ÖDEME', 'İŞLEM'].map((header) => (
+                        <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: colors.gray500, textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: `1px solid ${colors.gray200}` }}>{header}</th>
                       ))}
                     </tr>
                   </thead>
@@ -416,25 +441,35 @@ export default function RestaurantDashboard() {
                     {filteredOrders.length === 0 ? (
                       <tr><td colSpan={8} style={{ padding: '60px 20px', textAlign: 'center', color: colors.gray500, fontSize: 14 }}>Bu kategoride sipariş bulunmamaktadır</td></tr>
                     ) : (
-                      filteredOrders.map((order: any) => (
-                        <tr key={order.id} style={{ borderTop: `1px solid ${colors.gray200}` }}>
-                          <td style={{ padding: '14px 16px' }}><span style={{ fontWeight: 700, color: colors.primary }}>#{order.id}</span></td>
-                          <td style={{ padding: '14px 16px' }}>
-                            <div style={{ fontWeight: 600, color: colors.gray800 }}>{order.customerName}</div>
-                            <div style={{ fontSize: 12, color: colors.gray500 }}>{order.customerPhone}</div>
-                          </td>
-                          <td style={{ padding: '14px 16px', fontSize: 13, color: colors.gray600, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.address}</td>
-                          <td style={{ padding: '14px 16px', fontSize: 13, color: colors.gray600 }}>{order.distance}</td>
-                          <td style={{ padding: '14px 16px', fontSize: 13, color: colors.gray600 }}>{order.time}</td>
-                          <td style={{ padding: '14px 16px' }}>
-                            <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: order.status === 'pending' ? '#FEF3C7' : '#DBEAFE', color: order.status === 'pending' ? colors.yellow : colors.primary }}>
-                              {order.status === 'pending' ? 'Bekliyor' : 'Yolda'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '14px 16px', fontWeight: 700, color: colors.gray800 }}>{order.total.toFixed(2)} TL</td>
-                          <td style={{ padding: '14px 16px', fontSize: 13, color: colors.gray600 }}>{order.courier}</td>
-                        </tr>
-                      ))
+                      filteredOrders.map((order: any) => {
+                        const statusColors: any = {
+                          pending: { bg: '#FEF3C7', color: colors.yellow, text: 'Bekliyor' },
+                          onway: { bg: '#DBEAFE', color: colors.primary, text: 'Yolda' },
+                          delivered: { bg: '#D1FAE5', color: colors.green, text: 'Teslim' },
+                          cancelled: { bg: '#FEE2E2', color: colors.red, text: 'İptal' },
+                          waiting: { bg: '#E0E7FF', color: '#4F46E5', text: 'Beklemede' }
+                        };
+                        const status = statusColors[order.status] || statusColors.pending;
+                        return (
+                          <tr key={order.id} style={{ borderTop: `1px solid ${colors.gray200}`, cursor: 'pointer' }} onClick={() => { setSelectedOrder(order); setShowOrderDetail(true); }}>
+                            <td style={{ padding: '12px 16px' }}><span style={{ fontWeight: 700, color: colors.primary, fontSize: 13 }}>#{order.id}</span></td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ fontWeight: 600, color: colors.gray800, fontSize: 13 }}>{order.customerName}</div>
+                              <div style={{ fontSize: 11, color: colors.gray500 }}>{order.customerPhone}</div>
+                            </td>
+                            <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.address}</td>
+                            <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600 }}>{order.distance}</td>
+                            <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600 }}>{order.time}</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: status.bg, color: status.color }}>{status.text}</span>
+                            </td>
+                            <td style={{ padding: '12px 16px', fontWeight: 700, color: colors.gray800, fontSize: 13 }}>{order.total.toFixed(2)} TL</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setShowOrderDetail(true); }} style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: colors.primary, color: colors.white, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Detay</button>
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -887,6 +922,151 @@ export default function RestaurantDashboard() {
                   <div style={{ padding: '12px 16px', borderRadius: 6, background: colors.primary, color: colors.white, fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>Toplam: {cartTotal.toFixed(2)} ₺</div>
                   <button onClick={handleCreateOrder} style={{ flex: 1, padding: '12px', borderRadius: 6, border: 'none', background: cart.length > 0 ? colors.green : colors.gray400, color: colors.white, fontSize: 14, fontWeight: 600, cursor: cart.length > 0 ? 'pointer' : 'not-allowed' }}>Sipariş Oluştur</button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ORDER DETAIL MODAL */}
+      {showOrderDetail && selectedOrder && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', justifyContent: 'flex-end' }} onClick={() => setShowOrderDetail(false)}>
+          <div style={{ width: '100%', maxWidth: 480, height: '100%', background: colors.white, display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${colors.gray200}`, flexShrink: 0 }}>
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.gray800, margin: 0 }}>Sipariş #{selectedOrder.id}</h2>
+                <p style={{ fontSize: 12, color: colors.gray500, margin: '4px 0 0' }}>{selectedOrder.createdAt}</p>
+              </div>
+              <button onClick={() => setShowOrderDetail(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.gray400, padding: 4 }}><Icons.close /></button>
+            </div>
+
+            {/* Body */}
+            <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
+              {/* Status Card */}
+              <div style={{ padding: 16, background: colors.gray50, borderRadius: 12, marginBottom: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: colors.gray500, textTransform: 'uppercase' }}>Durum</span>
+                  {selectedOrder.status === 'pending' && <span style={{ padding: '4px 12px', background: '#FEF3C7', color: colors.yellow, borderRadius: 12, fontSize: 12, fontWeight: 700 }}>Bekliyor</span>}
+                  {selectedOrder.status === 'onway' && <span style={{ padding: '4px 12px', background: '#DBEAFE', color: colors.primary, borderRadius: 12, fontSize: 12, fontWeight: 700 }}>Yolda</span>}
+                  {selectedOrder.status === 'delivered' && <span style={{ padding: '4px 12px', background: '#D1FAE5', color: colors.green, borderRadius: 12, fontSize: 12, fontWeight: 700 }}>Teslim Edildi</span>}
+                  {selectedOrder.status === 'cancelled' && <span style={{ padding: '4px 12px', background: '#FEE2E2', color: colors.red, borderRadius: 12, fontSize: 12, fontWeight: 700 }}>İptal</span>}
+                  {selectedOrder.status === 'waiting' && <span style={{ padding: '4px 12px', background: '#E0E7FF', color: '#4F46E5', borderRadius: 12, fontSize: 12, fontWeight: 700 }}>Beklemede</span>}
+                </div>
+                
+                {/* Quick Actions */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {selectedOrder.status === 'pending' && (
+                    <>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'onway')} style={{ flex: 1, padding: '10px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Yola Çıkar</button>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'waiting')} style={{ flex: 1, padding: '10px', background: '#4F46E5', color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Beklemeye Al</button>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')} style={{ flex: 1, padding: '10px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>İptal Et</button>
+                    </>
+                  )}
+                  {selectedOrder.status === 'onway' && (
+                    <>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'delivered')} style={{ flex: 1, padding: '10px', background: colors.green, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Teslim Edildi</button>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'pending')} style={{ flex: 1, padding: '10px', background: colors.gray400, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Geri Al</button>
+                    </>
+                  )}
+                  {selectedOrder.status === 'waiting' && (
+                    <>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'pending')} style={{ flex: 1, padding: '10px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Aktif Et</button>
+                      <button onClick={() => updateOrderStatus(selectedOrder.id, 'cancelled')} style={{ flex: 1, padding: '10px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>İptal Et</button>
+                    </>
+                  )}
+                  {(selectedOrder.status === 'delivered' || selectedOrder.status === 'cancelled') && (
+                    <button onClick={() => updateOrderStatus(selectedOrder.id, 'pending')} style={{ flex: 1, padding: '10px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Tekrar Aç</button>
+                  )}
+                </div>
+              </div>
+
+              {/* Wait Time Selector */}
+              {selectedOrder.status === 'waiting' && (
+                <div style={{ padding: 16, background: '#E0E7FF', borderRadius: 12, marginBottom: 16 }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#4F46E5', marginBottom: 10 }}>Bekleme Süresi Seç</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {['5', '10', '15', '20', '30', '45'].map((min) => (
+                      <button key={min} onClick={() => setSelectedTime(min)} style={{ flex: 1, padding: '10px', borderRadius: 8, border: 'none', background: selectedTime === min ? '#4F46E5' : colors.white, color: selectedTime === min ? colors.white : '#4F46E5', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{min} dk</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Customer Info Card */}
+              <div style={{ padding: 16, background: colors.white, border: `1px solid ${colors.gray200}`, borderRadius: 12, marginBottom: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: colors.gray800, marginBottom: 12 }}>Müşteri Bilgileri</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icons.users />
+                    <span style={{ fontSize: 14 }}>{selectedOrder.customerName}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Icons.phone />
+                    <span style={{ fontSize: 14 }}>{selectedOrder.customerPhone}</span>
+                    <button style={{ marginLeft: 'auto', padding: '6px 12px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 6, fontSize: 11, cursor: 'pointer' }}>Ara</button>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <span style={{ marginTop: 2 }}>📍</span>
+                    <span style={{ fontSize: 14, color: colors.gray600 }}>{selectedOrder.address}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Items Card */}
+              <div style={{ padding: 16, background: colors.white, border: `1px solid ${colors.gray200}`, borderRadius: 12, marginBottom: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: colors.gray800, marginBottom: 12 }}>Sipariş İçeriği</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {selectedOrder.items?.map((item: any, idx: number) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: idx < (selectedOrder.items?.length - 1) ? `1px solid ${colors.gray100}` : 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ width: 24, height: 24, background: colors.gray100, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{item.quantity}</span>
+                        <span style={{ fontSize: 14 }}>{item.name}</span>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{(item.price * item.quantity).toFixed(2)} TL</span>
+                    </div>
+                  ))}
+                  {!selectedOrder.items?.length && <p style={{ color: colors.gray400, fontSize: 13 }}>Ürün bilgisi yok</p>}
+                </div>
+                
+                <hr style={{ margin: '16px 0', border: 'none', borderTop: `1px solid ${colors.gray200}` }} />
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 14, color: colors.gray600 }}>Ödeme Yöntemi</span>
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>{selectedOrder.paymentMethod}</span>
+                </div>
+                {selectedOrder.orderNote && (
+                  <div style={{ marginTop: 10, padding: 10, background: colors.gray50, borderRadius: 8 }}>
+                    <span style={{ fontSize: 12, color: colors.gray500 }}>Not: {selectedOrder.orderNote}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Courier Assignment */}
+              {['pending', 'onway'].includes(selectedOrder.status) && (
+                <div style={{ padding: 16, background: colors.gray50, borderRadius: 12 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: colors.gray800, marginBottom: 12 }}>Kurye Atama</h3>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <select style={{ flex: 1, padding: '10px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 13 }}>
+                      <option>Kurye Seç...</option>
+                      <option>Ahmet K.</option>
+                      <option>Mehmet Y.</option>
+                      <option>Ali R.</option>
+                    </select>
+                    <button style={{ padding: '10px 16px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Ata</button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: 16, borderTop: `1px solid ${colors.gray200}`, background: colors.gray50, display: 'flex', flexDirection: 'column', gap: 12, flexShrink: 0 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: 16, fontWeight: 700 }}>Toplam</span>
+                <span style={{ fontSize: 20, fontWeight: 700, color: colors.primary }}>{selectedOrder.total.toFixed(2)} TL</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button style={{ flex: 1, padding: '12px', background: colors.white, color: colors.gray700, border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icons.print /> Yazdır</button>
+                <button onClick={() => deleteOrder(selectedOrder.id)} style={{ flex: 1, padding: '12px', background: colors.red, color: colors.white, border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Siparişi Sil</button>
               </div>
             </div>
           </div>
