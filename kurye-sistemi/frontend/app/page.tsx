@@ -3,12 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  User, Lock, Eye, EyeOff, ShoppingBag
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -33,93 +27,267 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4"
-      style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-      }}
-    >
-      <div className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}
-      />
-
+    <div style={{
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      width: '100%',
+      overflow: 'hidden',
+      background: '#f3f4f6'
+    }}>
+      {/* Background */}
+      <div style={{
+        position: 'absolute',
+        top: -20,
+        left: -20,
+        right: -20,
+        bottom: -20,
+        zIndex: 1,
+        filter: 'blur(20px)',
+        WebkitFilter: 'blur(20px)',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #5c3cbb 100%)'
+      }} />
+      
+      {/* Login Card */}
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }} 
-        animate={{ opacity: 1, scale: 1 }} 
-        transition={{ duration: 0.3 }}
-        className="w-full max-w-md relative z-10"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        style={{
+          position: 'relative',
+          zIndex: 10,
+          width: '90%',
+          maxWidth: 460,
+          padding: '48px 44px',
+          background: '#ffffff',
+          borderRadius: 24,
+          boxShadow: '0 20px 60px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.05)'
+        }}
       >
-        <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <motion.div
-                initial={{ y: -20 }}
-                animate={{ y: 0 }}
-                className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl shadow-lg mb-4"
-              >
-                <ShoppingBag className="w-8 h-8 text-white" />
-              </motion.div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-1">İşletme paneline hoşgeldin</h1>
-              <p className="text-gray-500">Hesabınıza giriş yapın</p>
+        <div style={{ width: '100%' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <h1 style={{
+              fontSize: 28,
+              fontWeight: 700,
+              color: '#5c3cbb',
+              margin: '0 0 8px',
+              letterSpacing: -0.3,
+              lineHeight: 1.3
+            }}>
+              İşletme paneline hoşgeldin
+            </h1>
+            <p style={{
+              fontSize: 16,
+              color: '#6b7280',
+              margin: 0,
+              fontWeight: 400
+            }}>
+              Hesabınıza giriş yapın
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 24
+          }}>
+            {/* Username */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: '#374151',
+                letterSpacing: 0.2
+              }}>
+                Kullanıcı Adı
+              </label>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute',
+                  left: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af',
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                  transition: 'color .3s ease'
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <input 
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Kullanıcı adınızı giriniz"
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: 12,
+                    fontSize: 15,
+                    background: '#ffffff',
+                    transition: 'all .3s ease',
+                    boxSizing: 'border-box',
+                    fontWeight: 400,
+                    color: '#374151',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#5c3cbb';
+                    e.target.style.boxShadow = '0 0 0 4px rgba(92,60,187,.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  required
+                />
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Kullanıcı Adı</label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
-                    <User className="w-5 h-5" />
-                  </div>
-                  <Input 
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Kullanıcı adınızı giriniz"
-                    className="pl-10 h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-                    required
-                  />
+            {/* Password */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: '#374151',
+                letterSpacing: 0.2
+              }}>
+                Şifre
+              </label>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute',
+                  left: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#9ca3af',
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                  transition: 'color .3s ease'
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="16" r="1" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
+                <input 
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Şifrenizi giriniz"
+                  style={{
+                    width: '100%',
+                    padding: '14px 48px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: 12,
+                    fontSize: 15,
+                    background: '#ffffff',
+                    transition: 'all .3s ease',
+                    boxSizing: 'border-box',
+                    fontWeight: 400,
+                    color: '#374151',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#5c3cbb';
+                    e.target.style.boxShadow = '0 0 0 4px rgba(92,60,187,.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  required
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  style={{
+                    position: 'absolute',
+                    right: 16,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#9ca3af',
+                    zIndex: 2,
+                    transition: 'color .3s ease',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#5c3cbb'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Şifre</label>
-                <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
-                    <Lock className="w-5 h-5" />
-                  </div>
-                  <Input 
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Şifrenizi giriniz"
-                    className="pl-10 pr-10 h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
-                    required
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
-                  >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/30"
-                disabled={loading}
-              >
-                {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-              </Button>
-            </form>
-
-            <div className="text-center mt-6">
-              <p className="text-sm text-gray-400">© 2026 Tüm hakları saklıdır.</p>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              disabled={loading}
+              style={{
+                background: 'linear-gradient(135deg,#5c3cbb,#4a2d99)',
+                color: 'white',
+                border: 'none',
+                padding: '16px 32px',
+                borderRadius: 12,
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                transition: 'all .3s ease',
+                marginTop: 8,
+                boxShadow: '0 4px 12px rgba(92,60,187,.3)',
+                opacity: loading ? 0.7 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(92,60,187,.4)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(92,60,187,.3)';
+              }}
+            >
+              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div style={{
+            textAlign: 'center',
+            marginTop: 32,
+            paddingTop: 24,
+            borderTop: '1px solid #e5e7eb'
+          }}>
+            <p style={{
+              color: '#9ca3af',
+              fontSize: 13,
+              margin: 0,
+              fontWeight: 400
+            }}>
+              © 2026 Tüm hakları saklıdır.
+            </p>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
