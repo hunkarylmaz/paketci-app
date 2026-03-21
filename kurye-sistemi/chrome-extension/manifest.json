@@ -1,49 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "Paketçiniz - Sipariş Entegrasyonu",
+  "name": "Paketçiniz - Sipariş Aktarıcı",
   "version": "1.0.0",
-  "description": "Yemeksepeti, Migros Yemek, Trendyol Yemek ve Getir Yemek siparişlerini otomatik veya manuel olarak Paketçiniz sisteme senkronize eder.",
+  "description": "Yemeksepeti, Migros Yemek, Trendyol Yemek ve Getir Yemek siparişlerini otomatik aktarın",
   "permissions": [
-    "storage",
     "activeTab",
-    "tabs",
-    "notifications",
-    "background"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
-    "https://*.yemeksepeti.com/*",
-    "https://*.migrosyemek.com/*",
-    "https://*.trendyolyemek.com/*",
-    "https://*.getiryemek.com/*",
-    "https://partner.yemeksepeti.com/*",
-    "https://restoran.migrosyemek.com/*",
-    "https://restaurant.trendyolyemek.com/*",
-    "https://restaurant.getiryemek.com/*"
-  ],
-  "background": {
-    "service_worker": "background.js"
-  },
-  "content_scripts": [
-    {
-      "matches": ["https://partner.yemeksepeti.com/*"],
-      "js": ["content_scripts/yemeksepeti.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://restoran.migrosyemek.com/*"],
-      "js": ["content_scripts/migrosyemek.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://restaurant.trendyolyemek.com/*"],
-      "js": ["content_scripts/trendyolyemek.js"],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": ["https://restaurant.getiryemek.com/*"],
-      "js": ["content_scripts/getiryemek.js"],
-      "run_at": "document_idle"
-    }
+    "*://*.yemeksepeti.com/*",
+    "*://*.migrosyemek.com/*",
+    "*://*.trendyolyemek.com/*",
+    "*://*.getiryemek.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -58,10 +27,18 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "web_accessible_resources": [
+  "content_scripts": [
     {
-      "resources": ["injected.js"],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "*://*.yemeksepeti.com/*",
+        "*://*.migrosyemek.com/*",
+        "*://*.trendyolyemek.com/*",
+        "*://*.getiryemek.com/*"
+      ],
+      "js": ["content.js"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }

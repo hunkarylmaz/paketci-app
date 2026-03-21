@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import * as XLSX from 'xlsx';
 
 // ==================== ICONS ====================
 const Icons = {
@@ -237,6 +238,10 @@ export default function RestaurantDashboard() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
 
+  // Date filter states for reports
+  const [reportStartDate, setReportStartDate] = useState('');
+  const [reportEndDate, setReportEndDate] = useState('');
+
   const cancellationReasons = [
     'Müşteri isteği',
     'Ürün tükendi',
@@ -394,6 +399,88 @@ export default function RestaurantDashboard() {
     }
   };
 
+  // Excel Export Functions
+  const exportOrdersToExcel = (filteredData?: any[]) => {
+    const dataToExport = filteredData || orders;
+    
+    const exportData = dataToExport.map((order: any) => ({
+      'Sipariş No': order.id,
+      'Tarih': order.createdAt,
+      'Müşteri': order.customerName,
+      'Telefon': order.customerPhone,
+      'Adres': order.address,
+      'Durum': order.status === 'pending' ? 'Bekliyor' : 
+               order.status === 'onway' ? 'Yolda' : 
+               order.status === 'delivered' ? 'Teslim Edildi' : 
+               order.status === 'cancelled' ? 'İptal' : 'Beklemede',
+      'Ödeme Yöntemi': order.paymentMethod,
+      'Toplam Tutar': order.total,
+      'Kurye': order.courier,
+      'İptal Nedeni': order.cancellationReason || '-',
+      'Teslim Zamanı': order.deliveredAt || '-'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Siparişler');
+    
+    const dateStr = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(wb, `siparisler_${dateStr}.xlsx`);
+  };
+
+  const exportReportsToExcel = () => {
+    let filteredOrders = orders;
+    
+    // Apply date filter if set
+    if (reportStartDate && reportEndDate) {
+      const start = new Date(reportStartDate);
+      const end = new Date(reportEndDate);
+      end.setHours(23, 59, 59);
+      
+      filteredOrders = orders.filter((order: any) => {
+        const orderDate = new Date(order.createdAt);
+        return orderDate >= start && orderDate <= end;
+      });
+    }
+
+    // Create summary sheet
+    const summaryData = [
+      { 'Metrik': 'Toplam Sipariş', 'Değer': filteredOrders.length },
+      { 'Metrik': 'Toplam Ciro', 'Değer': filteredOrders.reduce((sum, o) => sum + o.total, 0) + ' TL' },
+      { 'Metrik': 'Ortalama Tutar', 'Değer': filteredOrders.length > 0 ? Math.round(filteredOrders.reduce((sum, o) => sum + o.total, 0) / filteredOrders.length) + ' TL' : '0 TL' },
+      { 'Metrik': 'Bekleyen', 'Değer': filteredOrders.filter((o: any) => o.status === 'pending').length },
+      { 'Metrik': 'Yolda', 'Değer': filteredOrders.filter((o: any) => o.status === 'onway').length },
+      { 'Metrik': 'Teslim Edildi', 'Değer': filteredOrders.filter((o: any) => o.status === 'delivered').length },
+      { 'Metrik': 'İptal Edildi', 'Değer': filteredOrders.filter((o: any) => o.status === 'cancelled').length },
+    ];
+
+    const detailData = filteredOrders.map((order: any) => ({
+      'Sipariş No': order.id,
+      'Tarih': order.createdAt,
+      'Müşteri': order.customerName,
+      'Telefon': order.customerPhone,
+      'Adres': order.address,
+      'Durum': order.status === 'pending' ? 'Bekliyor' : 
+               order.status === 'onway' ? 'Yolda' : 
+               order.status === 'delivered' ? 'Teslim Edildi' : 
+               order.status === 'cancelled' ? 'İptal' : 'Beklemede',
+      'Ödeme': order.paymentMethod,
+      'Tutar': order.total
+    }));
+
+    const wb = XLSX.utils.book_new();
+    
+    const wsSummary = XLSX.utils.json_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Özet');
+    
+    const wsDetail = XLSX.utils.json_to_sheet(detailData);
+    XLSX.utils.book_append_sheet(wb, wsDetail, 'Detay');
+    
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filterStr = reportStartDate && reportEndDate ? `_${reportStartDate}_${reportEndDate}` : '';
+    XLSX.writeFile(wb, `rapor${filterStr}_${dateStr}.xlsx`);
+  };
+
   const pendingCount = orders.filter((o: any) => o.status === 'pending').length;
   const onwayCount = orders.filter((o: any) => o.status === 'onway').length;
   const historyCount = orders.filter((o: any) => ['delivered', 'cancelled'].includes(o.status)).length;
@@ -476,6 +563,7 @@ export default function RestaurantDashboard() {
                   <span style={{ background: activeOrderTab === 'history' ? 'rgba(255,255,255,0.3)' : colors.gray200, color: activeOrderTab === 'history' ? colors.white : colors.gray600, padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>{historyCount}</span>
                 </button>
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                  <button onClick={() => exportOrdersToExcel(filteredOrders)} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: colors.green, color: colors.white, display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>📊 Excel</button>
                   <button style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.search /></button>
                   <button style={{ width: 36, height: 36, borderRadius: 8, border: `1px solid ${colors.gray200}`, background: colors.white, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: colors.gray600 }}><Icons.list /></button>
                 </div>
@@ -638,7 +726,7 @@ export default function RestaurantDashboard() {
                   <h3 style={{ fontSize: 18, fontWeight: 700 }}>Chrome Eklentisi</h3>
                   <p style={{ marginTop: 4, opacity: 0.9 }}>Platform panelinden siparişleri tek tıkla içe aktarın</p>
                 </div>
-                <button style={{ padding: '12px 24px', background: colors.white, color: colors.primary, border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Eklentiyi İndir</button>
+                <a href="/chrome-extension.zip" download style={{ padding: '12px 24px', background: colors.white, color: colors.primary, border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer', textDecoration: 'none' }}>Eklentiyi İndir</a>
               </div>
             </div>
           )}
@@ -646,7 +734,30 @@ export default function RestaurantDashboard() {
           {/* ===== REPORTS TAB ===== */}
           {activeTab === 'reports' && (
             <div>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.gray800, marginBottom: 24 }}>Raporlar</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.gray800, margin: 0 }}>Raporlar</h2>
+                <button onClick={exportReportsToExcel} style={{ padding: '10px 20px', background: colors.green, color: colors.white, border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  📊 Excel'e Aktar
+                </button>
+              </div>
+
+              {/* Date Filter */}
+              <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 20, marginBottom: 24 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: colors.gray800, marginBottom: 16 }}>📅 Tarih Aralığı</h3>
+                <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                  <div style={{ flex: 1, minWidth: 150 }}>
+                    <label style={{ display: 'block', fontSize: 12, color: colors.gray600, marginBottom: 6 }}>Başlangıç Tarihi</label>
+                    <input type="date" value={reportStartDate} onChange={(e) => setReportStartDate(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 14 }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 150 }}>
+                    <label style={{ display: 'block', fontSize: 12, color: colors.gray600, marginBottom: 6 }}>Bitiş Tarihi</label>
+                    <input type="date" value={reportEndDate} onChange={(e) => setReportEndDate(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 14 }} />
+                  </div>
+                  <button onClick={() => { setReportStartDate(''); setReportEndDate(''); }} style={{ padding: '10px 20px', background: colors.gray100, color: colors.gray700, border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                    Sıfırla
+                  </button>
+                </div>
+              </div>
               
               {/* Stats Cards */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>

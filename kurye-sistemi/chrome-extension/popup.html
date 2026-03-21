@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paketçiniz</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 360px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
+    .header { background: linear-gradient(135deg, #2563EB, #1D4ED8); color: white; padding: 20px; text-align: center; }
+    .header h1 { font-size: 20px; margin-bottom: 4px; }
+    .header p { font-size: 12px; opacity: 0.9; }
+    .content { padding: 16px; }
+    .platform-card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
+    .platform-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .platform-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .platform-info h3 { font-size: 14px; color: #1f2937; }
+    .platform-info span { font-size: 12px; color: #6b7280; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 4px; }
+    .status-connected { background: #d1fae5; color: #065f46; }
+    .status-disconnected { background: #fee2e2; color: #991b1b; }
+    .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .btn-primary { background: #2563EB; color: white; }
+    .btn-secondary { background: #f3f4f6; color: #374151; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f3f4f6; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 18px; font-weight: 700; color: #1f2937; }
+    .stat-label { font-size: 11px; color: #6b7280; }
+    .settings { margin-top: 16px; padding: 16px; background: white; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .settings h3 { font-size: 14px; margin-bottom: 12px; color: #1f2937; }
+    .input-group { margin-bottom: 12px; }
+    .input-group label { display: block; font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+    .input-group input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; }
+    .footer { padding: 12px; text-align: center; font-size: 11px; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📦 Paketçiniz</h1>
+    <p>Siparişleri otomatik aktar</p>
+  </div>
+
+  <div class="content">
+    <div class="platform-card">
+      <div class="platform-header">
+        <div class="platform-icon" style="background: #fee2e2;">🍽️</div>
+        <div class="platform-info">
+          <h3>Yemeksepeti</h3>
+          <span class="status-badge status-connected">Bağlı</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Sipariş</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">1,240₺</div>
+          <div class="stat-label">Ciro</div>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="sync-yemeksepeti">Siparişleri Aktar</button>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-header">
+        <div class="platform-icon" style="background: #ffedd5;">🥘</div>
+        <div class="platform-info">
+          <h3>Migros Yemek</h3>
+          <span class="status-badge status-disconnected">Bağlı Değil</span>
+        </div>
+      </div>
+      <button class="btn btn-secondary">Bağlan</button>
+    </div>
+
+    <div class="settings">
+      <h3>⚙️ Ayarlar</h3>
+      <div class="input-group">
+        <label>Restoran ID</label>
+        <input type="text" placeholder="Restoran ID girin..." id="restaurant-id">
+      </div>
+      <div class="input-group">
+        <label>API Key</label>
+        <input type="password" placeholder="API Key girin..." id="api-key">
+      </div>
+      <button class="btn btn-primary" id="save-settings">Kaydet</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    Paketçiniz © 2026 - Tüm hakları saklıdır
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
