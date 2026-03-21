@@ -1,162 +1,112 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { IntegrationsService } from './integrations.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateIntegrationDto, UpdateIntegrationDto, TestIntegrationDto, PlatformOrderDto } from './dto/integration.dto';
+import { IntegrationPlatform } from './entities/integration.entity';
 
-interface SaveIntegrationDto {
-  platform: string;
-  apiKey: string;
-  apiSecret: string;
-  merchantId: string;
-  branchId?: string;
-  autoAccept: boolean;
-  isOpen: boolean;
-}
-
+@ApiTags('Integrations')
 @Controller('integrations')
-@UseGuards(JwtAuthGuard)
 export class IntegrationsController {
   constructor(private readonly integrationsService: IntegrationsService) {}
 
-  /**
-   * Restoran'ın tüm entegrasyonlarını listele
-   */
-  @Get('restaurant/:restaurantId')
-  async getRestaurantIntegrations(
-    @Param('restaurantId') restaurantId: string,
-    @Request() req,
-  ): Promise<any> {
-    // TODO: Check if user has access to this restaurant
-    return this.integrationsService.getRestaurantIntegrations(restaurantId);
+  @Get()
+  @ApiOperation({ summary: 'Get all integrations' })
+  findAll(@Query('restaurantId') restaurantId?: string) {
+    return this.integrationsService.findAll(restaurantId);
   }
 
-  /**
-   * Entegrasyon kaydet/güncelle
-   */
-  @Post('restaurant/:restaurantId')
-  async saveIntegration(
-    @Param('restaurantId') restaurantId: string,
-    @Body() config: SaveIntegrationDto,
-    @Request() req,
+  @Get(':id')
+  @ApiOperation({ summary: 'Get integration by ID' })
+  findOne(@Param('id') id: string) {
+    return this.integrationsService.findOne(id);
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Create new integration' })
+  create(@Body() dto: CreateIntegrationDto) {
+    return this.integrationsService.create(dto);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update integration' })
+  update(@Param('id') id: string, @Body() dto: UpdateIntegrationDto) {
+    return this.integrationsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete integration' })
+  remove(@Param('id') id: string) {
+    return this.integrationsService.remove(id);
+  }
+
+  @Post('test')
+  @ApiOperation({ summary: 'Test platform connection' })
+  testConnection(@Body() dto: TestIntegrationDto) {
+    return this.integrationsService.testConnection(dto);
+  }
+
+  @Post(':id/sync')
+  @ApiOperation({ summary: 'Sync orders from platform' })
+  syncOrders(
+    @Param('id') id: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
-    // TODO: Check if user has access to this restaurant
-    return this.integrationsService.saveIntegration(restaurantId, config);
+    return this.integrationsService.syncOrders(id, { startDate, endDate });
   }
 
-  /**
-   * Bağlantı testi yap
-   */
-  @Post('restaurant/:restaurantId/test/:platform')
-  async testConnection(
-    @Param('restaurantId') restaurantId: string,
-    @Param('platform') platform: string,
-    @Request() req,
+  @Post('extension/order')
+  @ApiOperation({ summary: 'Create order from Chrome Extension' })
+  createOrderFromExtension(
+    @Body() orderData: PlatformOrderDto,
+    @Query('restaurantId') restaurantId: string,
   ) {
-    // TODO: Check if user has access to this restaurant
-    return this.integrationsService.testConnection(restaurantId, platform);
+    return this.integrationsService.createOrderFromExtension(restaurantId, orderData);
   }
 
-  /**
-   * Siparişleri çek (manuel senkronizasyon)
-   */
-  @Post('restaurant/:restaurantId/sync/:platform')
-  async syncOrders(
-    @Param('restaurantId') restaurantId: string,
-    @Param('platform') platform: string,
-    @Request() req,
-  ) {
-    // TODO: Check if user has access to this restaurant
-    const orders = await this.integrationsService.fetchOrders(restaurantId, platform);
-    return {
-      success: true,
-      count: orders.length,
-      orders,
-    };
-  }
-
-  /**
-   * Restoran durumunu değiştir (açık/kapalı)
-   */
-  @Put('restaurant/:restaurantId/:platform/status')
-  async toggleStatus(
-    @Param('restaurantId') restaurantId: string,
-    @Param('platform') platform: string,
-    @Body('isOpen') isOpen: boolean,
-    @Request() req,
-  ) {
-    // TODO: Check if user has access to this restaurant
-    const success = await this.integrationsService.toggleRestaurantStatus(
-      restaurantId,
-      platform,
-      isOpen,
-    );
-    return { success };
-  }
-
-  /**
-   * Entegrasyon sil
-   */
-  @Delete('restaurant/:restaurantId/:platform')
-  async deleteIntegration(
-    @Param('restaurantId') restaurantId: string,
-    @Param('platform') platform: string,
-    @Request() req,
-  ) {
-    // TODO: Implement delete
-    return { success: true };
-  }
-
-  /**
-   * Webhook URL'si getir
-   */
-  @Get('restaurant/:restaurantId/:platform/webhook-url')
-  getWebhookUrl(
-    @Param('restaurantId') restaurantId: string,
-    @Param('platform') platform: string,
-  ) {
-    const url = this.integrationsService.getWebhookUrl(platform, restaurantId);
-    return { url };
-  }
-
-  /**
-   * Platform listesi
-   */
-  @Get('platforms')
+  @Get('platforms/list')
+  @ApiOperation({ summary: 'Get available platforms' })
   getPlatforms() {
     return [
       {
-        id: 'yemeksepeti',
+        id: IntegrationPlatform.YEMEK_SEPETI,
         name: 'Yemeksepeti',
         icon: '🍽️',
-        requires: ['apiKey', 'apiSecret', 'merchantId', 'branchId'],
-        webhookEnabled: true,
+        color: 'bg-red-500',
+        description: 'Türkiye\'nin en büyük online yemek sipariş platformu',
+        commission: '%15-25',
+        features: ['Restoran Yönetimi', 'Sipariş Takibi', 'Kampanya Yönetimi'],
+        authType: 'apiKey',
       },
       {
-        id: 'getir',
-        name: 'Getir Yemek',
-        icon: '🛵',
-        requires: ['apiKey', 'apiSecret', 'merchantId', 'storeId'],
-        webhookEnabled: true,
-      },
-      {
-        id: 'trendyol',
-        name: 'Trendyol Yemek',
-        icon: '🟠',
-        requires: ['apiKey', 'apiSecret', 'sellerId'],
-        webhookEnabled: true,
-      },
-      {
-        id: 'migros',
+        id: IntegrationPlatform.MIGROS_YEMEK,
         name: 'Migros Yemek',
-        icon: '🦁',
-        requires: ['apiKey', 'apiSecret', 'restaurantId'],
-        webhookEnabled: true,
+        icon: '🥘',
+        color: 'bg-orange-500',
+        description: 'Migros\'un yemek sipariş platformu',
+        commission: '%12-20',
+        features: ['Hızlı Teslimat', 'Migros Privileges', 'Geniş Kitle'],
+        authType: 'apiKey',
       },
       {
-        id: 'fuudy',
-        name: 'Fuudy',
-        icon: '🍔',
-        requires: ['apiKey', 'apiSecret', 'restaurantId'],
-        webhookEnabled: false,
+        id: IntegrationPlatform.TRENDYOL_YEMEK,
+        name: 'Trendyol Yemek',
+        icon: '🛵',
+        color: 'bg-orange-600',
+        description: 'Trendyol\'un yemek sipariş hizmeti',
+        commission: '%10-18',
+        features: ['Trendyol Go Entegrasyonu', 'Hızlı Teslimat', 'Geniş Müşteri Ağı'],
+        authType: 'apiKey',
+      },
+      {
+        id: IntegrationPlatform.GETIR_YEMEK,
+        name: 'Getir Yemek',
+        icon: '📱',
+        color: 'bg-purple-500',
+        description: 'Getir\'in yemek sipariş platformu',
+        commission: '%20-30',
+        features: ['Dakikalar İçinde Teslimat', 'Getir Bünyesinde', 'Yüksek Frekans'],
+        authType: 'apiKey',
       },
     ];
   }

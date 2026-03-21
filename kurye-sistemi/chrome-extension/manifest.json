@@ -1,0 +1,67 @@
+{
+  "manifest_version": 3,
+  "name": "Paketçiniz - Sipariş Entegrasyonu",
+  "version": "1.0.0",
+  "description": "Yemeksepeti, Migros Yemek, Trendyol Yemek ve Getir Yemek siparişlerini otomatik veya manuel olarak Paketçiniz sisteme senkronize eder.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "notifications",
+    "background"
+  ],
+  "host_permissions": [
+    "https://*.yemeksepeti.com/*",
+    "https://*.migrosyemek.com/*",
+    "https://*.trendyolyemek.com/*",
+    "https://*.getiryemek.com/*",
+    "https://partner.yemeksepeti.com/*",
+    "https://restoran.migrosyemek.com/*",
+    "https://restaurant.trendyolyemek.com/*",
+    "https://restaurant.getiryemek.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://partner.yemeksepeti.com/*"],
+      "js": ["content_scripts/yemeksepeti.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://restoran.migrosyemek.com/*"],
+      "js": ["content_scripts/migrosyemek.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://restaurant.trendyolyemek.com/*"],
+      "js": ["content_scripts/trendyolyemek.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://restaurant.getiryemek.com/*"],
+      "js": ["content_scripts/getiryemek.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

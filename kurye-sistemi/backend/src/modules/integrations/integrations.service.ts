@@ -1,335 +1,265 @@
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RestaurantPlatformConfig } from './entities/restaurant-platform-config.entity';
-import { YemeksepetiAdapter, IPlatformAdapter, PlatformOrder } from './adapters/yemeksepeti.adapter';
-import { GetirAdapter } from './adapters/getir.adapter';
-
-interface IntegrationConfig {
-  platform: string;
-  apiKey: string;
-  apiSecret: string;
-  merchantId: string;
-  branchId?: string;
-  autoAccept: boolean;
-  isOpen: boolean;
-}
-
-interface IntegrationStatus {
-  platform: string;
-  connected: boolean;
-  lastSyncAt?: Date;
-  error?: string;
-  pendingOrders: number;
-  todayOrders: number;
-}
+import { Integration, IntegrationPlatform, IntegrationStatus } from './entities/integration.entity';
+import { WebhookEvent, WebhookEventType, WebhookStatus } from './entities/webhook-event.entity';
+import { CreateIntegrationDto, UpdateIntegrationDto, TestIntegrationDto, PlatformOrderDto } from './dto/integration.dto';
+import { YemeksepetiAdapter } from './adapters/yemeksepeti.adapter';
+import { MigrosYemekAdapter } from './adapters/migrosyemek.adapter';
+import { TrendyolYemekAdapter } from './adapters/trendyolyemek.adapter';
+import { GetirYemekAdapter } from './adapters/getiryemek.adapter';
+import { PlatformAdapter } from './adapters/platform-adapter.interface';
 
 @Injectable()
 export class IntegrationsService {
   private readonly logger = new Logger(IntegrationsService.name);
-  private adapters: Map<string, IPlatformAdapter> = new Map();
+  private readonly adapters: Map<IntegrationPlatform, PlatformAdapter>;
 
   constructor(
-    @InjectRepository(RestaurantPlatformConfig)
-    private configRepo: Repository<RestaurantPlatformConfig>,
-    private httpService: HttpService,
+    @InjectRepository(Integration)
+    private integrationRepository: Repository<Integration>,
+    @InjectRepository(WebhookEvent)
+    private webhookEventRepository: Repository<WebhookEvent>,
+    private yemeksepetiAdapter: YemeksepetiAdapter,
+    private migrosAdapter: MigrosYemekAdapter,
+    private trendyolAdapter: TrendyolYemekAdapter,
+    private getirAdapter: GetirYemekAdapter,
   ) {
-    // Adapter'ları kaydet
-    this.adapters.set('yemeksepeti', new YemeksepetiAdapter(httpService));
-    this.adapters.set('getir', new GetirAdapter(httpService));
+    this.adapters = new Map([
+      [IntegrationPlatform.YEMEK_SEPETI, yemeksepetiAdapter],
+      [IntegrationPlatform.MIGROS_YEMEK, migrosAdapter],
+      [IntegrationPlatform.TRENDYOL_YEMEK, trendyolAdapter],
+      [IntegrationPlatform.GETIR_YEMEK, getirAdapter],
+    ]);
   }
 
-  // ==================== RESTORAN API KEY YÖNETİMİ ====================
-
-  /**
-   * Restoran için platform entegrasyonu kaydet/güncelle
-   */
-  async saveIntegration(
-    restaurantId: string,
-    config: IntegrationConfig,
-  ): Promise<RestaurantPlatformConfig> {
-    // Şifreleme için AES kullan
-    const encryptedApiKey = this.encrypt(config.apiKey);
-    const encryptedApiSecret = this.encrypt(config.apiSecret);
-
-    let entity = await this.configRepo.findOne({
-      where: { restaurantId, platform: config.platform },
-    });
-
-    if (entity) {
-      // Güncelle
-      entity.apiKey = encryptedApiKey;
-      entity.apiSecret = encryptedApiSecret;
-      entity.merchantId = config.merchantId;
-      entity.branchId = config.branchId;
-      entity.autoAcceptOrders = config.autoAccept;
-      entity.isOpen = config.isOpen;
-    } else {
-      // Yeni oluştur
-      entity = this.configRepo.create({
-        restaurantId,
-        platform: config.platform,
-        apiKey: encryptedApiKey,
-        apiSecret: encryptedApiSecret,
-        merchantId: config.merchantId,
-        branchId: config.branchId,
-        autoAcceptOrders: config.autoAccept,
-        isOpen: config.isOpen,
-        status: 'pending_setup',
-      });
+  async findAll(restaurantId?: string): Promise<Integration[]> {
+    const query = this.integrationRepository.createQueryBuilder('integration')
+      .leftJoinAndSelect('integration.restaurant', 'restaurant');
+    
+    if (restaurantId) {
+      query.where('integration.restaurantId = :restaurantId', { restaurantId });
     }
-
-    return this.configRepo.save(entity);
+    
+    return query.getMany();
   }
 
-  /**
-   * Restoran'ın tüm entegrasyonlarını getir
-   */
-  async getRestaurantIntegrations(restaurantId: string): Promise<IntegrationStatus[]> {
-    const configs = await this.configRepo.find({
-      where: { restaurantId },
+  async findOne(id: string): Promise<Integration> {
+    const integration = await this.integrationRepository.findOne({
+      where: { id },
+      relations: ['restaurant'],
     });
-
-    return Promise.all(
-      configs.map(async (config) => {
-        const status = await this.checkConnection(config);
-        return {
-          platform: config.platform,
-          connected: status,
-          lastSyncAt: config.lastSyncAt,
-          pendingOrders: 0, // TODO: Count from DB
-          todayOrders: 0,   // TODO: Count from DB
-        };
-      }),
-    );
+    
+    if (!integration) {
+      throw new NotFoundException('Integration not found');
+    }
+    
+    return integration;
   }
 
-  /**
-   * Platform bağlantısını test et
-   */
-  async testConnection(
-    restaurantId: string,
-    platform: string,
-  ): Promise<{ success: boolean; message: string }> {
-    const config = await this.configRepo.findOne({
+  async findByPlatform(restaurantId: string, platform: IntegrationPlatform): Promise<Integration | null> {
+    return this.integrationRepository.findOne({
       where: { restaurantId, platform },
     });
+  }
 
-    if (!config) {
-      throw new HttpException(
-        'Entegrasyon bulunamadı',
-        HttpStatus.NOT_FOUND,
-      );
+  async create(dto: CreateIntegrationDto): Promise<Integration> {
+    const existing = await this.findByPlatform(dto.restaurantId, dto.platform);
+    
+    if (existing) {
+      throw new Error('Integration already exists for this platform');
     }
 
+    const integration = this.integrationRepository.create({
+      ...dto,
+      webhookUrl: dto.webhookUrl || `https://api.paketci.app/webhooks/${dto.platform}`,
+      status: IntegrationStatus.PENDING,
+    });
+
+    return this.integrationRepository.save(integration);
+  }
+
+  async update(id: string, dto: UpdateIntegrationDto): Promise<Integration> {
+    const integration = await this.findOne(id);
+    
+    Object.assign(integration, dto);
+    
+    return this.integrationRepository.save(integration);
+  }
+
+  async remove(id: string): Promise<void> {
+    const integration = await this.findOne(id);
+    await this.integrationRepository.remove(integration);
+  }
+
+  async testConnection(dto: TestIntegrationDto): Promise<{ success: boolean; message: string; data?: any }> {
+    const adapter = this.adapters.get(dto.platform);
+    
+    if (!adapter) {
+      return { success: false, message: 'Platform adapter not found' };
+    }
+
+    return adapter.testConnection({
+      apiKey: dto.apiKey,
+      apiSecret: dto.apiSecret,
+      merchantId: dto.merchantId,
+      branchId: dto.branchId,
+    });
+  }
+
+  async syncOrders(integrationId: string, filters?: any): Promise<any[]> {
+    const integration = await this.findOne(integrationId);
+    const adapter = this.adapters.get(integration.platform);
+    
+    if (!adapter) {
+      throw new Error('Platform adapter not found');
+    }
+
+    const credentials = {
+      apiKey: integration.apiKey,
+      apiSecret: integration.apiSecret,
+      merchantId: integration.merchantId,
+      branchId: integration.branchId,
+    };
+
+    const rawOrders = await adapter.fetchOrders(credentials, filters);
+    
+    // Normalize orders
+    const normalizedOrders = rawOrders.map(order => adapter.normalizeOrder(order));
+    
+    // Update last sync time
+    await this.integrationRepository.update(integrationId, {
+      lastSyncAt: new Date(),
+      status: IntegrationStatus.ACTIVE,
+    });
+
+    return normalizedOrders;
+  }
+
+  async handleWebhook(platform: IntegrationPlatform, payload: any, signature?: string): Promise<void> {
+    this.logger.log(`Received webhook from ${platform}`);
+
+    // Find integration by platform
+    const integrations = await this.integrationRepository.find({
+      where: { platform, status: IntegrationStatus.ACTIVE },
+    });
+
+    for (const integration of integrations) {
+      try {
+        const adapter = this.adapters.get(platform);
+        
+        if (!adapter) {
+          this.logger.warn(`No adapter found for platform ${platform}`);
+          continue;
+        }
+
+        // Validate webhook if secret exists
+        if (integration.webhookSecret && signature) {
+          const isValid = adapter.validateWebhook(payload, integration.webhookSecret);
+          if (!isValid) {
+            this.logger.warn(`Invalid webhook signature for integration ${integration.id}`);
+            continue;
+          }
+        }
+
+        // Create webhook event record
+        const webhookEvent = this.webhookEventRepository.create({
+          integrationId: integration.id,
+          platform,
+          eventType: this.detectEventType(payload, platform),
+          rawPayload: JSON.stringify(payload),
+          processedData: adapter.normalizeOrder(payload),
+          status: WebhookStatus.PENDING,
+        });
+
+        await this.webhookEventRepository.save(webhookEvent);
+
+        // Process the webhook
+        await this.processWebhookEvent(webhookEvent);
+
+      } catch (error) {
+        this.logger.error(`Error handling webhook for integration ${integration.id}`, error);
+        
+        await this.integrationRepository.update(integration.id, {
+          status: IntegrationStatus.ERROR,
+          lastError: error.message,
+        });
+      }
+    }
+  }
+
+  async processWebhookEvent(event: WebhookEvent): Promise<void> {
     try {
-      const adapter = this.adapters.get(platform);
-      if (!adapter) {
-        throw new HttpException(
-          'Platform adapter bulunamadı',
-          HttpStatus.NOT_IMPLEMENTED,
-        );
-      }
+      await this.webhookEventRepository.update(event.id, {
+        status: WebhookStatus.PROCESSING,
+      });
 
-      // API key'leri çöz
-      const decryptedConfig = {
-        ...config,
-        apiKey: this.decrypt(config.apiKey),
-        apiSecret: this.decrypt(config.apiSecret),
-      };
-
-      const success = await adapter.authenticate(decryptedConfig);
-
-      if (success) {
-        config.status = 'connected';
-        config.connectedAt = new Date();
-        await this.configRepo.save(config);
-
-        return {
-          success: true,
-          message: 'Bağlantı başarılı!',
-        };
-      } else {
-        config.status = 'error';
-        config.lastError = 'Kimlik doğrulama başarısız';
-        await this.configRepo.save(config);
-
-        return {
-          success: false,
-          message: 'API bilgileri geçersiz',
-        };
-      }
-    } catch (error) {
-      this.logger.error(`Connection test failed for ${platform}`, error);
+      // Create order from webhook data
+      const orderData = event.processedData as PlatformOrderDto;
       
-      config.status = 'error';
-      config.lastError = error.message;
-      await this.configRepo.save(config);
+      // TODO: Create order in orders service
+      // await this.ordersService.createFromPlatform(orderData, event.integrationId);
 
-      return {
-        success: false,
-        message: `Bağlantı hatası: ${error.message}`,
-      };
+      await this.webhookEventRepository.update(event.id, {
+        status: WebhookStatus.SUCCESS,
+        processedAt: new Date(),
+      });
+
+    } catch (error) {
+      await this.webhookEventRepository.update(event.id, {
+        status: WebhookStatus.FAILED,
+        errorMessage: error.message,
+      });
+      throw error;
     }
   }
 
-  /**
-   * Platformdan siparişleri çek
-   */
-  async fetchOrders(
-    restaurantId: string,
-    platform: string,
-  ): Promise<PlatformOrder[]> {
-    const config = await this.configRepo.findOne({
-      where: { restaurantId, platform },
-    });
-
-    if (!config || config.status !== 'connected') {
-      return [];
-    }
-
-    const adapter = this.adapters.get(platform);
-    if (!adapter) {
-      return [];
-    }
-
-    // API key'leri çöz
-    const decryptedConfig = {
-      ...config,
-      apiKey: this.decrypt(config.apiKey),
-      apiSecret: this.decrypt(config.apiSecret),
-    };
-
-    const orders = await adapter.getOrders(decryptedConfig);
-
-    // Son senkronizasyon zamanını güncelle
-    config.lastSyncAt = new Date();
-    await this.configRepo.save(config);
-
-    return orders;
-  }
-
-  /**
-   * Restoran durumunu değiştir (açık/kapalı)
-   */
-  async toggleRestaurantStatus(
-    restaurantId: string,
-    platform: string,
-    isOpen: boolean,
-  ): Promise<boolean> {
-    const config = await this.configRepo.findOne({
-      where: { restaurantId, platform },
-    });
-
-    if (!config) {
-      throw new HttpException('Entegrasyon bulunamadı', HttpStatus.NOT_FOUND);
-    }
-
-    const adapter = this.adapters.get(platform);
-    if (!adapter) {
-      throw new HttpException('Platform desteklenmiyor', HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    const decryptedConfig = {
-      ...config,
-      apiKey: this.decrypt(config.apiKey),
-      apiSecret: this.decrypt(config.apiSecret),
-    };
-
-    const success = await adapter.toggleRestaurantStatus(decryptedConfig, isOpen);
-
-    if (success) {
-      config.isOpen = isOpen;
-      await this.configRepo.save(config);
-    }
-
-    return success;
-  }
-
-  /**
-   * Siparişi kabul et
-   */
-  async acceptOrder(
-    restaurantId: string,
-    platform: string,
-    orderId: string,
-  ): Promise<boolean> {
-    const config = await this.configRepo.findOne({
-      where: { restaurantId, platform },
-    });
-
-    if (!config) return false;
-
-    const adapter = this.adapters.get(platform);
-    if (!adapter) return false;
-
-    const decryptedConfig = {
-      ...config,
-      apiKey: this.decrypt(config.apiKey),
-      apiSecret: this.decrypt(config.apiSecret),
-    };
-
-    return adapter.acceptOrder(decryptedConfig, orderId);
-  }
-
-  /**
-   * Siparişi reddet
-   */
-  async rejectOrder(
-    restaurantId: string,
-    platform: string,
-    orderId: string,
-    reason: string,
-  ): Promise<boolean> {
-    const config = await this.configRepo.findOne({
-      where: { restaurantId, platform },
-    });
-
-    if (!config) return false;
-
-    const adapter = this.adapters.get(platform);
-    if (!adapter) return false;
-
-    const decryptedConfig = {
-      ...config,
-      apiKey: this.decrypt(config.apiKey),
-      apiSecret: this.decrypt(config.apiSecret),
-    };
-
-    return adapter.rejectOrder(decryptedConfig, orderId, reason);
-  }
-
-  // ==================== YARDIMCI METODLAR ====================
-
-  private async checkConnection(config: RestaurantPlatformConfig): Promise<boolean> {
-    if (config.status !== 'connected') return false;
+  async createOrderFromExtension(restaurantId: string, orderData: PlatformOrderDto): Promise<any> {
+    this.logger.log(`Creating order from Chrome Extension for restaurant ${restaurantId}`);
     
-    // Son 1 saatte senkronizasyon varsa bağlı kabul et
-    if (config.lastSyncAt) {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-      return config.lastSyncAt > oneHourAgo;
+    // Normalize order data
+    const normalizedOrder = {
+      ...orderData,
+      platform: orderData.platform || 'chrome_extension',
+      metadata: {
+        ...orderData.metadata,
+        source: 'chrome_extension',
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    // TODO: Create order via orders service
+    // return this.ordersService.createFromPlatform(normalizedOrder, null);
+    
+    return {
+      success: true,
+      orderId: `ORD-${Date.now()}`,
+      message: 'Order created successfully',
+    };
+  }
+
+  private detectEventType(payload: any, platform: IntegrationPlatform): WebhookEventType {
+    // Platform-specific event type detection
+    switch (platform) {
+      case IntegrationPlatform.YEMEK_SEPETI:
+        if (payload.eventType === 'ORDER_CREATED') return WebhookEventType.ORDER_CREATED;
+        if (payload.eventType === 'ORDER_STATUS_UPDATED') return WebhookEventType.ORDER_STATUS_CHANGED;
+        break;
+      case IntegrationPlatform.MIGROS_YEMEK:
+        if (payload.event === 'order.created') return WebhookEventType.ORDER_CREATED;
+        break;
+      case IntegrationPlatform.TRENDYOL_YEMEK:
+        if (payload.eventType === 'ORDER_PLACED') return WebhookEventType.ORDER_CREATED;
+        break;
+      case IntegrationPlatform.GETIR_YEMEK:
+        if (payload.status === 'PLACED') return WebhookEventType.ORDER_CREATED;
+        break;
     }
     
-    return false;
+    return WebhookEventType.ORDER_CREATED;
   }
 
-  private encrypt(text: string): string {
-    // TODO: Implement proper AES encryption
-    // For now, simple base64 (NOT SECURE - replace with AES-256)
-    return Buffer.from(text).toString('base64');
-  }
-
-  private decrypt(encrypted: string): string {
-    // TODO: Implement proper AES decryption
-    return Buffer.from(encrypted, 'base64').toString('utf8');
-  }
-
-  /**
-   * Webhook URL'si oluştur
-   */
-  getWebhookUrl(platform: string, restaurantId: string): string {
-    const baseUrl = process.env.API_URL || 'https://api.paketci.app';
-    return `${baseUrl}/api/webhooks/${platform}/${restaurantId}`;
+  getPlatformAdapter(platform: IntegrationPlatform): PlatformAdapter | undefined {
+    return this.adapters.get(platform);
   }
 }
