@@ -4,18 +4,16 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  LayoutDashboard, ShoppingBag, History, TrendingUp, 
+  ShoppingBag, History, TrendingUp, 
   DollarSign, CreditCard, Utensils, Users, LogOut,
-  Plus, Search, Filter, ChevronRight, Phone, MapPin,
-  Clock, CheckCircle, X, Bike, Wallet, BarChart3,
-  Calendar, Bell, User, Settings, FileText
+  Plus, Search, Filter, ChevronRight, Phone,
+  Clock, CheckCircle, X, Bike, BarChart3,
+  Calendar, Settings, FileText, Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 
-// Mock Data
 const mockOrders = [
   { id: 'SIP-001', customer: 'Ahmet Yılmaz', phone: '0555 123 45 67', address: 'Atatürk Cad. No:15', distance: '2.10 km', time: '13:30', status: 'delivered', payment: 'Online', amount: 185, courier: 'YUSUF GÖK' },
   { id: 'SIP-002', customer: 'Ayşe Kaya', phone: '0555 234 56 78', address: 'Cumhuriyet Mah. 23', distance: '0.54 km', time: '13:18', status: 'delivered', payment: 'Nakit', amount: 220, courier: 'DENİZ ENMEK' },
@@ -36,13 +34,7 @@ const menuItems = [
 export default function RestaurantDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('current');
-  const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('restaurant_user');
-    if (stored) setUser(JSON.parse(stored));
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('restaurant_user');
@@ -61,8 +53,7 @@ export default function RestaurantDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className={`${isMobileMenuOpen ? 'fixed inset-0 z-50' : 'hidden'} lg:flex lg:static lg:inset-auto flex-col w-72 bg-[#6B4EE6] text-white`}>
+      <aside className={`${isMobileMenuOpen ? 'fixed inset-0 z-50' : 'hidden'} lg:flex lg:static flex-col w-72 bg-[#6B4EE6] text-white`}>
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between lg:justify-start gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -98,17 +89,14 @@ export default function RestaurantDashboard() {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/90 hover:bg-white/10 transition-all"
-          >
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/90 hover:bg-white/10 transition-all">
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><LogOut className="w-4 h-4" /></div>
             Çıkış Yap
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
@@ -119,38 +107,28 @@ export default function RestaurantDashboard() {
                   <span className="w-4 h-0.5 bg-gray-700"></span>
                 </div>
               </button>
-              
-              <div className="hidden md:block">
-                <h2 className="text-xl font-bold text-gray-900">Osmaniye Paketçiniz</h2>
-              </div>
+              <h2 className="hidden md:block text-xl font-bold text-gray-900">Osmaniye Paketçiniz</h2>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg"
-003e
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm text-gray-600">TATLI KÖŞE</span>
                 <span className="text-xs text-gray-400">Osmaniye Paketçiniz</span>
               </div>
               
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  <span>Aramalar</span>
-                  <div className="w-8 h-4 bg-gray-200 rounded-full relative">
-                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow"></div>
-                  </div>
-                </Button>
-                
-                <Button size="sm" className="bg-[#6B4EE6] hover:bg-[#5a41d1]">
-                  <Plus className="w-4 h-4 mr-1" /> Yeni Sipariş
-                </Button>
-                
-                <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50"
-003e
-                  <LogOut className="w-4 h-4 mr-1" /> Çıkış
-                </Button>
-              </div>
+              <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
+                <Phone className="w-4 h-4" />
+                <span>Aramalar</span>
+              </Button>
+              
+              <Button size="sm" className="bg-[#6B4EE6] hover:bg-[#5a41d1]">
+                <Plus className="w-4 h-4 mr-1" /> Yeni Sipariş
+              </Button>
+              
+              <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">
+                <LogOut className="w-4 h-4 mr-1" /> Çıkış
+              </Button>
             </div>
           </div>
         </header>
@@ -163,7 +141,6 @@ export default function RestaurantDashboard() {
   );
 }
 
-// Current Orders View
 function CurrentOrdersView() {
   const [activeFilter, setActiveFilter] = useState('pending');
   
@@ -174,7 +151,6 @@ function CurrentOrdersView() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      {/* Filters */}
       <div className="flex flex-wrap gap-2">
         {filters.map((filter) => (
           <button
@@ -187,9 +163,9 @@ function CurrentOrdersView() {
             }`}
           >
             {filter.label}
-            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-              activeFilter === filter.id ? 'bg-white/20' : 'bg-gray-100'
-            }`}>{filter.count}</span>
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${activeFilter === filter.id ? 'bg-white/20' : 'bg-gray-100'}`}>
+              {filter.count}
+            </span>
           </button>
         ))}
         
@@ -202,7 +178,6 @@ function CurrentOrdersView() {
         </div>
       </div>
 
-      {/* Empty State */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-12 text-center">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -215,13 +190,9 @@ function CurrentOrdersView() {
   );
 }
 
-// History Orders View
 function HistoryOrdersView() {
-  const [dateRange, setDateRange] = useState({ start: '21.03.2026', end: '22.03.2026' });
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      {/* Filters */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
@@ -230,18 +201,13 @@ function HistoryOrdersView() {
               <span className="font-medium">Tamamlanan</span>
               <Badge className="bg-white/20 text-white">4</Badge>
             </div>
-            
             <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg">
               <X className="w-4 h-4 text-gray-400" />
               <span className="text-gray-600">İptal Edilen</span>
               <Badge className="bg-gray-100">0</Badge>
             </div>
-
             <div className="flex-1" />
-
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-1" /> Filtrele</Button>
-            </div>
+            <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-1" /> Filtrele</Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-100">
@@ -259,7 +225,6 @@ function HistoryOrdersView() {
         </CardContent>
       </Card>
 
-      {/* Table */}
       <Card className="border-0 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -314,7 +279,6 @@ function HistoryOrdersView() {
   );
 }
 
-// Performance View
 function PerformanceView() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -438,7 +402,6 @@ function PerformanceView() {
   );
 }
 
-// Company Earnings View
 function CompanyEarningsView() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
@@ -488,6 +451,3 @@ function CompanyEarningsView() {
     </motion.div>
   );
 }
-
-// Import Eye icon
-import { Eye } from 'lucide-react';
