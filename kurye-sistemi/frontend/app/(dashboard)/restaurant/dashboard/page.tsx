@@ -446,9 +446,9 @@ export default function RestaurantDashboard() {
           {activeTab === 'integrations' && (
             <div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: colors.gray800, marginBottom: 8 }}>Platform Entegrasyonları</h2>
-              <p style={{ color: colors.gray500, marginBottom: 24 }}>Yemeksepeti, Migros Yemek, Trendyol Yemek ve Getir Yemek siparişlerini otomatik senkronize edin.</p>
+              <p style={{ color: colors.gray500, marginBottom: 24 }}>Yemeksepeti, Migros Yemek, Trendyol Yemek ve Getir Yemek siparişlerini otomatik senkronize edin. API bilgilerinizi girerek bağlantı kurun.</p>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 20 }}>
                 {platformIntegrations.map(platform => (
                   <div key={platform.id} style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -462,14 +462,35 @@ export default function RestaurantDashboard() {
                           </div>
                         </div>
                       </div>
-                      <button style={{ padding: '6px 12px', borderRadius: 6, border: 'none', background: platform.status === 'connected' ? colors.red : colors.primary, color: colors.white, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-                        {platform.status === 'connected' ? 'Kes' : 'Bağlan'}
-                      </button>
                     </div>
+
+                    {/* API Settings Form */}
+                    <div style={{ marginBottom: 16, padding: 16, background: colors.gray50, borderRadius: 8 }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: colors.gray700, marginBottom: 12, textTransform: 'uppercase', letterSpacing: 0.5 }}>API Bağlantı Ayarları</p>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div>
+                          <label style={{ fontSize: 12, color: colors.gray600, marginBottom: 4, display: 'block' }}>API Key / Restaurant ID</label>
+                          <input type="text" placeholder="API Key girin..." style={{ width: '100%', padding: '8px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 13, boxSizing: 'border-box' }} />
+                        </div>
+                        <div>
+                          <label style={{ fontSize: 12, color: colors.gray600, marginBottom: 4, display: 'block' }}>API Secret / Şifre</label>
+                          <input type="password" placeholder="Secret key girin..." style={{ width: '100%', padding: '8px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 13, boxSizing: 'border-box' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                          <button style={{ flex: 1, padding: '10px', borderRadius: 6, border: 'none', background: platform.status === 'connected' ? colors.red : colors.primary, color: colors.white, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+                            {platform.status === 'connected' ? 'Bağlantıyı Kes' : 'Bağlan'}
+                          </button>
+                          <button style={{ padding: '10px 16px', borderRadius: 6, border: `1px solid ${colors.gray300}`, background: colors.white, color: colors.gray600, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Test Et</button>
+                        </div>
+                      </div>
+                    </div>
+
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, paddingTop: 16, borderTop: `1px solid ${colors.gray100}` }}>
                       <div><p style={{ fontSize: 12, color: colors.gray500 }}>Sipariş</p><p style={{ fontSize: 18, fontWeight: 700 }}>{platform.orders}</p></div>
                       <div><p style={{ fontSize: 12, color: colors.gray500 }}>Ciro</p><p style={{ fontSize: 18, fontWeight: 700 }}>{platform.revenue.toLocaleString()} TL</p></div>
                     </div>
+                    
                     {platform.status === 'connected' && (
                       <div style={{ marginTop: 12, padding: 10, background: '#D1FAE5', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#065F46' }}>
                         <Icons.check /> Otomatik senkronizasyon aktif
@@ -477,6 +498,49 @@ export default function RestaurantDashboard() {
                     )}
                   </div>
                 ))}
+              </div>
+
+              {/* Integration Settings */}
+              <div style={{ marginTop: 24, padding: 24, background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}` }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, marginBottom: 16 }}>Senkronizasyon Ayarları</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: colors.gray50, borderRadius: 8, cursor: 'pointer' }}>
+                    <span style={{ fontSize: 14 }}>Otomatik sipariş çekme</span>
+                    <div style={{ width: 44, height: 24, background: colors.primary, borderRadius: 12, position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, background: colors.white, borderRadius: '50%' }} />
+                    </div>
+                  </label>
+                  
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: colors.gray50, borderRadius: 8, cursor: 'pointer' }}>
+                    <span style={{ fontSize: 14 }}>Sipariş iptal bildirimi</span>
+                    <div style={{ width: 44, height: 24, background: colors.primary, borderRadius: 12, position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, background: colors.white, borderRadius: '50%' }} />
+                    </div>
+                  </label>
+                  
+                  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, background: colors.gray50, borderRadius: 8, cursor: 'pointer' }}>
+                    <span style={{ fontSize: 14 }}>Stok senkronizasyonu</span>
+                    <div style={{ width: 44, height: 24, background: colors.gray300, borderRadius: 12, position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: 2, left: 2, width: 20, height: 20, background: colors.white, borderRadius: '50%' }} />
+                    </div>
+                  </label>
+                </div>
+                
+                <div style={{ marginTop: 16, display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 12, color: colors.gray600, marginBottom: 4, display: 'block' }}>Senkronizasyon Aralığı</label>
+                    <select style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14 }}>
+                      <option>Her 1 dakika</option>
+                      <option>Her 5 dakika</option>
+                      <option>Her 15 dakika</option>
+                      <option>Her 30 dakika</option>
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: 12, color: colors.gray600, marginBottom: 4, display: 'block' }}>Webhook URL</label>
+                    <input type="text" readOnly value="https://api.paketciniz.com/webhook/orders" style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, background: colors.gray50 }} />
+                  </div>
+                </div>
               </div>
 
               {/* Chrome Extension Banner */}
