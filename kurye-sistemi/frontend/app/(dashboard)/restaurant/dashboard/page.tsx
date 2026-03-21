@@ -697,123 +697,132 @@ export default function RestaurantDashboard() {
         </div>
       </main>
 
-      {/* NEW ORDER MODAL */}
+      {/* NEW ORDER MODAL - Mobile Responsive */}
       {showNewOrderModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', justifyContent: 'flex-end' }} onClick={() => setShowNewOrderModal(false)}>
-          <div style={{ width: '100%', maxWidth: 900, height: '100%', background: colors.white, display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ width: '100%', maxWidth: '100vw', height: '100%', background: colors.white, display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: `1px solid ${colors.gray200}` }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.gray800, margin: 0 }}>Sipariş Bilgileri</h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: `1px solid ${colors.gray200}`, flexShrink: 0 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, margin: 0 }}>Sipariş Bilgileri</h2>
               <button onClick={() => setShowNewOrderModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.gray400, padding: 4 }}><Icons.close /></button>
             </div>
 
-            {/* Modal Body */}
-            <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-              {/* Customer Info */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto 140px', gap: 16, marginBottom: 16 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Ad Soyad</label>
-                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, outline: 'none' }} />
+            {/* Modal Body - Scrollable */}
+            <div style={{ flex: 1, overflow: 'auto', padding: 12 }}>
+              {/* Customer Info - Stacked on mobile */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Ad Soyad</label>
+                    <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Telefon</label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} style={{ flex: 1, padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, outline: 'none' }} />
+                      <button style={{ padding: '10px 12px', background: colors.primary, border: 'none', borderRadius: 6, color: colors.white, fontSize: 12, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' }}>Ara</button>
+                    </div>
+                  </div>
                 </div>
+                
                 <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Telefon</label>
-                  <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, outline: 'none' }} />
-                </div>
-                <div style={{ paddingTop: 24 }}>
-                  <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: colors.primary, border: 'none', borderRadius: 6, color: colors.white, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>
-                    <span>Ara</span><Icons.search />
-                  </button>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Ödeme Yöntemi</label>
-                  <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Ödeme Yöntemi</label>
+                  <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, boxSizing: 'border-box' }}>
                     <option>Nakit</option>
                     <option>Kredi Kartı</option>
                     <option>Online Ödeme</option>
                   </select>
                 </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Adres</label>
+                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Adres giriniz..." style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, boxSizing: 'border-box' }} />
+                </div>
+                
+                <div>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Adres Detayı</label>
+                  <input type="text" value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, boxSizing: 'border-box' }} />
+                </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Sipariş Notu</label>
+                    <input type="text" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, boxSizing: 'border-box' }} />
+                  </div>
+                  <div style={{ width: 100 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: colors.gray700, marginBottom: 4 }}>Tutar</label>
+                    <input type="text" value={cartTotal.toFixed(2)} readOnly style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, background: colors.gray50, fontWeight: 700, textAlign: 'right', boxSizing: 'border-box' }} />
+                  </div>
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Adres</label>
-                  <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Adres giriniz..." style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14 }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Adres Detayı</label>
-                  <input type="text" value={addressDetail} onChange={(e) => setAddressDetail(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14 }} />
-                </div>
-              </div>
+              <hr style={{ margin: '16px 0', border: 'none', borderTop: `1px solid ${colors.gray200}` }} />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Sipariş Notu</label>
-                  <input type="text" value={orderNote} onChange={(e) => setOrderNote(e.target.value)} style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14 }} />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: colors.gray700, marginBottom: 6 }}>Ödeme Tutarı</label>
-                  <input type="text" value={cartTotal.toFixed(2)} readOnly style={{ width: '100%', padding: '10px 12px', border: `1px solid ${colors.gray300}`, borderRadius: 6, fontSize: 14, background: colors.gray50 }} />
-                </div>
-              </div>
-
-              <hr style={{ margin: '24px 0', border: 'none', borderTop: `1px solid ${colors.gray200}` }} />
-
-              {/* Categories */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {/* Categories - Horizontal scroll on mobile */}
+              <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
                 {categories.map(cat => (
-                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '8px 16px', borderRadius: 20, border: 'none', fontSize: 13, fontWeight: 500, cursor: 'pointer', background: activeCategory === cat ? colors.primary : colors.gray100, color: activeCategory === cat ? colors.white : colors.gray600 }}>{cat}</button>
+                  <button key={cat} onClick={() => setActiveCategory(cat)} style={{ padding: '8px 14px', borderRadius: 16, border: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer', background: activeCategory === cat ? colors.primary : colors.gray100, color: activeCategory === cat ? colors.white : colors.gray600, whiteSpace: 'nowrap' }}>{cat}</button>
                 ))}
               </div>
 
               {/* Search */}
-              <div style={{ position: 'relative', marginBottom: 16 }}>
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Ürün ara..." style={{ width: '100%', padding: '10px 12px 10px 40px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 14 }} />
-                <span style={{ position: 'absolute', left: 12, top: 10, color: colors.gray400 }}><Icons.search /></span>
+              <div style={{ position: 'relative', marginBottom: 12 }}>
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Ürün ara..." style={{ width: '100%', padding: '10px 12px 10px 36px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }} />
+                <span style={{ position: 'absolute', left: 10, top: 10, color: colors.gray400 }}><Icons.search /></span>
               </div>
 
-              {/* Products Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+              {/* Products Grid - 2 columns on mobile */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 16 }}>
                 {filteredProducts.map(product => (
-                  <button key={product.id} onClick={() => addToCart(product)} style={{ padding: 16, border: `1px solid ${colors.gray200}`, borderRadius: 12, textAlign: 'left', background: colors.white, cursor: 'pointer' }}>
-                    <p style={{ fontWeight: 600, color: colors.gray800, margin: 0 }}>{product.name}</p>
-                    <p style={{ fontSize: 12, color: colors.gray500, margin: '4px 0' }}>{product.category}</p>
-                    <p style={{ fontWeight: 700, color: colors.primary, margin: 0 }}>{product.price} TL</p>
+                  <button key={product.id} onClick={() => addToCart(product)} style={{ padding: 12, border: `1px solid ${colors.gray200}`, borderRadius: 10, textAlign: 'left', background: colors.white, cursor: 'pointer' }}>
+                    <p style={{ fontWeight: 600, color: colors.gray800, margin: 0, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.name}</p>
+                    <p style={{ fontSize: 11, color: colors.gray500, margin: '2px 0' }}>{product.category}</p>
+                    <p style={{ fontWeight: 700, color: colors.primary, margin: 0, fontSize: 14 }}>{product.price} TL</p>
                   </button>
                 ))}
               </div>
 
-              {filteredProducts.length === 0 && <div style={{ textAlign: 'center', padding: 40, color: colors.gray400 }}>Ürün bulunamadı</div>}
+              {filteredProducts.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: colors.gray400 }}>Ürün bulunamadı</div>}
             </div>
 
-            {/* Modal Footer */}
-            <div style={{ padding: '16px 24px', borderTop: `1px solid ${colors.gray200}`, background: colors.gray50, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button onClick={() => setPrinterSize('57mm')} style={{ padding: '10px 16px', borderRadius: 6, border: 'none', background: printerSize === '57mm' ? colors.gray600 : colors.white, color: printerSize === '57mm' ? colors.white : colors.gray700, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>57mm</button>
-              <button onClick={() => setPrinterSize('80mm')} style={{ padding: '10px 16px', borderRadius: 6, border: 'none', background: printerSize === '80mm' ? colors.primary : colors.white, color: printerSize === '80mm' ? colors.white : colors.gray700, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>80mm</button>
-              
-              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-                {/* Cart Summary */}
-                <div style={{ padding: 10, background: colors.white, borderRadius: 8, border: `1px solid ${colors.gray200}`, minWidth: 200 }}>
+            {/* Modal Footer - Stacked on mobile */}
+            <div style={{ padding: 12, borderTop: `1px solid ${colors.gray200}`, background: colors.gray50, display: 'flex', flexDirection: 'column', gap: 12, flexShrink: 0 }}>
+              {/* Cart Items */}
+              {cart.length > 0 && (
+                <div style={{ background: colors.white, borderRadius: 8, border: `1px solid ${colors.gray200}`, padding: 10, maxHeight: 120, overflow: 'auto' }}>
                   <p style={{ fontSize: 12, fontWeight: 600, margin: '0 0 8px' }}>Sepet ({cart.length})</p>
-                  {cart.length === 0 ? <p style={{ fontSize: 12, color: colors.gray400, margin: 0 }}>Sepet boş</p> : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {cart.map((item) => (
-                        <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
-                          <span>{item.quantity}x {item.name}</span>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            <button onClick={() => updateCartQuantity(item.id, -1)} style={{ width: 20, height: 20, border: 'none', background: colors.gray200, borderRadius: 4, cursor: 'pointer' }}>-</button>
-                            <button onClick={() => updateCartQuantity(item.id, 1)} style={{ width: 20, height: 20, border: 'none', background: colors.gray200, borderRadius: 4, cursor: 'pointer' }}>+</button>
-                            <button onClick={() => removeFromCart(item.id)} style={{ width: 20, height: 20, border: 'none', background: colors.red, color: colors.white, borderRadius: 4, cursor: 'pointer' }}><Icons.trash /></button>
-                          </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {cart.map((item) => (
+                      <div key={item.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', borderBottom: `1px solid ${colors.gray100}` }}>
+                        <span style={{ flex: 1 }}>{item.quantity}x {item.name}</span>
+                        <span style={{ fontWeight: 600, marginRight: 8 }}>{(item.price * item.quantity).toFixed(2)} TL</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <button onClick={() => updateCartQuantity(item.id, -1)} style={{ width: 24, height: 24, border: 'none', background: colors.gray200, borderRadius: 4, cursor: 'pointer', fontSize: 14 }}>-</button>
+                          <button onClick={() => updateCartQuantity(item.id, 1)} style={{ width: 24, height: 24, border: 'none', background: colors.gray200, borderRadius: 4, cursor: 'pointer', fontSize: 14 }}>+</button>
+                          <button onClick={() => removeFromCart(item.id)} style={{ width: 24, height: 24, border: 'none', background: colors.red, color: colors.white, borderRadius: 4, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Icons.trash /></button>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
 
-                <button onClick={() => setShowNewOrderModal(false)} style={{ padding: '10px 20px', borderRadius: 6, border: 'none', background: colors.gray500, color: colors.white, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>Kapat</button>
-                <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 6, border: 'none', background: colors.gray500, color: colors.white, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}><Icons.print /><span>Yazdır</span></button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 20px', borderRadius: 6, background: colors.primary, color: colors.white, fontSize: 14, fontWeight: 700 }}><span>Toplam:</span><span>{cartTotal.toFixed(2)} ₺</span></div>
-                <button onClick={handleCreateOrder} style={{ padding: '10px 24px', borderRadius: 6, border: 'none', background: cart.length > 0 ? colors.green : colors.gray400, color: colors.white, fontSize: 14, fontWeight: 600, cursor: cart.length > 0 ? 'pointer' : 'not-allowed' }}>Sipariş Oluştur</button>
+              {/* Printer selection + Actions */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setPrinterSize('57mm')} style={{ flex: 1, padding: '10px', borderRadius: 6, border: 'none', background: printerSize === '57mm' ? colors.gray600 : colors.white, color: printerSize === '57mm' ? colors.white : colors.gray700, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>57mm</button>
+                  <button onClick={() => setPrinterSize('80mm')} style={{ flex: 1, padding: '10px', borderRadius: 6, border: 'none', background: printerSize === '80mm' ? colors.primary : colors.white, color: printerSize === '80mm' ? colors.white : colors.gray700, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>80mm</button>
+                </div>
+                
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => setShowNewOrderModal(false)} style={{ flex: 1, padding: '12px', borderRadius: 6, border: 'none', background: colors.gray400, color: colors.white, fontSize: 14, fontWeight: 500, cursor: 'pointer' }}>Kapat</button>
+                  <button style={{ flex: 1, padding: '12px', borderRadius: 6, border: 'none', background: colors.gray500, color: colors.white, fontSize: 14, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><Icons.print /><span>Yazdır</span></button>
+                </div>
+                
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <div style={{ padding: '12px 16px', borderRadius: 6, background: colors.primary, color: colors.white, fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>Toplam: {cartTotal.toFixed(2)} ₺</div>
+                  <button onClick={handleCreateOrder} style={{ flex: 1, padding: '12px', borderRadius: 6, border: 'none', background: cart.length > 0 ? colors.green : colors.gray400, color: colors.white, fontSize: 14, fontWeight: 600, cursor: cart.length > 0 ? 'pointer' : 'not-allowed' }}>Sipariş Oluştur</button>
+                </div>
               </div>
             </div>
           </div>
