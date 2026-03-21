@@ -4,40 +4,44 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  LayoutDashboard, ShoppingBag, Utensils, Settings, LogOut,
-  TrendingUp, Clock, CheckCircle, DollarSign, Bell, User,
-  ChevronRight, Star, Package, ArrowUpRight, Calendar
+  LayoutDashboard, ShoppingBag, History, TrendingUp, 
+  DollarSign, CreditCard, Utensils, Users, LogOut,
+  Plus, Search, Filter, ChevronRight, Phone, MapPin,
+  Clock, CheckCircle, X, Bike, Wallet, BarChart3,
+  Calendar, Bell, User, Settings, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 // Mock Data
-const mockStats = {
-  todayOrders: 24,
-  activeOrders: 3,
-  completedOrders: 21,
-  todayRevenue: 3850,
-  rating: 4.8,
-};
-
 const mockOrders = [
-  { id: 'SIP-001', customer: 'Ahmet Y.', items: '2x Lahmacun, 1x Ayran', total: 185, status: 'preparing', time: '10:30' },
-  { id: 'SIP-002', customer: 'Ayşe K.', items: '1x Adana Dürüm', total: 220, status: 'ready', time: '10:25' },
-  { id: 'SIP-003', customer: 'Mehmet D.', items: '3x Pide', total: 450, status: 'delivering', time: '10:15' },
+  { id: 'SIP-001', customer: 'Ahmet Yılmaz', phone: '0555 123 45 67', address: 'Atatürk Cad. No:15', distance: '2.10 km', time: '13:30', status: 'delivered', payment: 'Online', amount: 185, courier: 'YUSUF GÖK' },
+  { id: 'SIP-002', customer: 'Ayşe Kaya', phone: '0555 234 56 78', address: 'Cumhuriyet Mah. 23', distance: '0.54 km', time: '13:18', status: 'delivered', payment: 'Nakit', amount: 220, courier: 'DENİZ ENMEK' },
+  { id: 'SIP-003', customer: 'Mehmet Demir', phone: '0555 345 67 89', address: 'İstiklal Sok. 8', distance: '2.69 km', time: '12:52', status: 'delivered', payment: 'Online', amount: 450, courier: 'ÖZCAN ÇAKAR' },
+];
+
+const menuItems = [
+  { id: 'current', label: 'Güncel Siparişler', icon: ShoppingBag },
+  { id: 'history', label: 'Geçmiş Siparişler', icon: History },
+  { id: 'performance', label: 'Teslimat Performansı', icon: TrendingUp },
+  { id: 'company', label: 'Firma Hakediş', icon: DollarSign },
+  { id: 'courier', label: 'Kurye Hakediş', icon: Bike },
+  { id: 'pos', label: 'Pos Yönetimi', icon: CreditCard },
+  { id: 'menu', label: 'Menüler & Ürünler', icon: Utensils },
+  { id: 'customers', label: 'Müşteriler', icon: Users },
 ];
 
 export default function RestaurantDashboard() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('current');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem('restaurant_user');
-    if (stored) {
-      setUser(JSON.parse(stored));
-    }
+    if (stored) setUser(JSON.parse(stored));
   }, []);
 
   const handleLogout = () => {
@@ -45,374 +49,438 @@ export default function RestaurantDashboard() {
     router.push('/');
   };
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'orders', label: 'Siparişler', icon: ShoppingBag, badge: 3 },
-    { id: 'menu', label: 'Menü', icon: Utensils },
-    { id: 'settings', label: 'Ayarlar', icon: Settings },
-  ];
-
   const renderContent = () => {
     switch(activeTab) {
-      case 'dashboard': return <DashboardView />;
-      case 'orders': return <OrdersView />;
-      case 'menu': return <MenuView />;
-      case 'settings': return <SettingsView />;
-      default: return <DashboardView />;
+      case 'current': return <CurrentOrdersView />;
+      case 'history': return <HistoryOrdersView />;
+      case 'performance': return <PerformanceView />;
+      case 'company': return <CompanyEarningsView />;
+      default: return <CurrentOrdersView />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Package className="w-5 h-5 text-white" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <aside className={`${isMobileMenuOpen ? 'fixed inset-0 z-50' : 'hidden'} lg:flex lg:static lg:inset-auto flex-col w-72 bg-[#6B4EE6] text-white`}>
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center justify-between lg:justify-start gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-bold text-lg leading-tight">Paketçiniz</h1>
-              <p className="text-xs text-gray-500">Restoran Paneli</p>
+              <h1 className="font-bold text-xl">Paketçiniz</h1>
+              <p className="text-xs text-white/70">Restoran Paneli</p>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              <div className="w-5 h-4 flex flex-col justify-between">
-                <span className={`w-full h-0.5 bg-gray-700 transition-all ${isMobileMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-gray-700 transition-all ${isMobileMenuOpen ? 'opacity-0' : ''}`}></span>
-                <span className={`w-full h-0.5 bg-gray-700 transition-all ${isMobileMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
-              </div>
-            </Button>
+            <button className="lg:hidden" onClick={() => setIsMobileMenuOpen(false)}><X className="w-6 h-6" /></button>
           </div>
         </div>
-        
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border-t border-gray-200 p-4 bg-white"
+
+        <nav className="flex-1 p-4 space-y-1">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                activeTab === item.id 
+                  ? 'bg-[#FFD93D] text-gray-900 shadow-lg' 
+                  : 'text-white/90 hover:bg-white/10'
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                activeTab === item.id ? 'bg-gray-900/10' : 'bg-white/10'
+              }`}>
+                <item.icon className="w-4 h-4" />
+              </div>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-white/10">
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-white/90 hover:bg-white/10 transition-all"
           >
-            <nav className="space-y-1">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                    activeTab === item.id 
-                      ? 'bg-orange-50 text-orange-600 shadow-sm' 
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="w-5 h-5" />
-                    {item.label}
-                  </div>
-                  {item.badge && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{item.badge}</span>
-                  )}
-                </button>
-              ))}
-              <div className="pt-2 border-t border-gray-200 mt-2">
-                <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-all">
-                  <LogOut className="w-5 h-5" />
-                  Çıkış Yap
-                </button>
-              </div>
-            </nav>
-          </motion.div>
-        )}
-      </div>
+            <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center"><LogOut className="w-4 h-4" /></div>
+            Çıkış Yap
+          </button>
+        </div>
+      </aside>
 
-      <div className="flex">
-        {/* Sidebar - Desktop */}
-        <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-gray-200 min-h-screen sticky top-0">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Package className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="font-bold text-xl leading-tight">Paketçiniz</h1>
-                <p className="text-xs text-gray-500">Restoran Paneli</p>
-              </div>
-            </div>
-          </div>
-
-          <nav className="flex-1 p-4 space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                  activeTab === item.id 
-                    ? 'bg-orange-50 text-orange-600 shadow-sm ring-1 ring-orange-200' 
-                    : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
-                </div>
-                {item.badge && (
-                  <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">{item.badge}</span>
-                )}
-              </button>
-            ))}
-          </nav>
-
-          <div className="p-4 border-t border-gray-200">
-            <div className="bg-gray-50 rounded-xl p-4 mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-white font-semibold">
-                  {user?.name?.charAt(0) || 'R'}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate">{user?.name || 'Lezzet Restoran'}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.phone || '0555 123 4567'}</p>
-                </div>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full" size="sm" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Çıkış
-            </Button>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 min-h-screen">
-          {/* Desktop Header */}
-          <div className="hidden lg:flex items-center justify-between bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-40">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {navItems.find(n => n.id === activeTab)?.label}
-              </h2>
-              <p className="text-sm text-gray-500">
-                {new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
-            </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Header */}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+          <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center gap-4">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Calendar className="w-4 h-4" />
-                Bugün
-              </Button>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </Button>
-              <div className="w-10 h-10 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center text-white font-semibold">
-                {user?.name?.charAt(0) || 'R'}
+              <button className="lg:hidden" onClick={() => setIsMobileMenuOpen(true)}>
+                <div className="w-6 h-5 flex flex-col justify-between">
+                  <span className="w-full h-0.5 bg-gray-700"></span>
+                  <span className="w-full h-0.5 bg-gray-700"></span>
+                  <span className="w-4 h-0.5 bg-gray-700"></span>
+                </div>
+              </button>
+              
+              <div className="hidden md:block">
+                <h2 className="text-xl font-bold text-gray-900">Osmaniye Paketçiniz</h2>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg"
+003e
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">TATLI KÖŞE</span>
+                <span className="text-xs text-gray-400">Osmaniye Paketçiniz</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" className="hidden sm:flex items-center gap-2">
+                  <Phone className="w-4 h-4" />
+                  <span>Aramalar</span>
+                  <div className="w-8 h-4 bg-gray-200 rounded-full relative">
+                    <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow"></div>
+                  </div>
+                </Button>
+                
+                <Button size="sm" className="bg-[#6B4EE6] hover:bg-[#5a41d1]">
+                  <Plus className="w-4 h-4 mr-1" /> Yeni Sipariş
+                </Button>
+                
+                <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50"
+003e
+                  <LogOut className="w-4 h-4 mr-1" /> Çıkış
+                </Button>
               </div>
             </div>
           </div>
+        </header>
 
-          <div className="p-4 lg:p-8">
-            {renderContent()}
-          </div>
+        <main className="flex-1 p-6">
+          {renderContent()}
         </main>
       </div>
     </div>
   );
 }
 
-// Dashboard View
-function DashboardView() {
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <CardContent className="p-4 lg:p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-blue-100 text-xs lg:text-sm mb-1">Bugünkü Sipariş</p>
-                <p className="text-2xl lg:text-3xl font-bold">{mockStats.todayOrders}</p>
-              </div>
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-orange-500 to-red-500 text-white">
-          <CardContent className="p-4 lg:p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-orange-100 text-xs lg:text-sm mb-1">Aktif Sipariş</p>
-                <p className="text-2xl lg:text-3xl font-bold">{mockStats.activeOrders}</p>
-              </div>
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-green-500 to-emerald-600 text-white">
-          <CardContent className="p-4 lg:p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-green-100 text-xs lg:text-sm mb-1">Günlük Kazanç</p>
-                <p className="text-2xl lg:text-3xl font-bold">₺{mockStats.todayRevenue.toLocaleString()}</p>
-              </div>
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-5 h-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-yellow-400 to-orange-500 text-white">
-          <CardContent className="p-4 lg:p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-yellow-100 text-xs lg:text-sm mb-1">Değerlendirme</p>
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl lg:text-3xl font-bold">{mockStats.rating}</p>
-                  <Star className="w-5 h-5 fill-white" />
-                </div>
-              </div>
-              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Orders */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold">Son Siparişler</h3>
-          <Button variant="ghost" size="sm" className="text-orange-600">
-            Tümünü Gör <ChevronRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
-
-        <div className="space-y-3">
-          {mockOrders.map((order) => (
-            <Card key={order.id} className="border-0 shadow-sm hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm">{order.id}</span>
-                      <Badge className={`
-                        ${order.status === 'preparing' ? 'bg-amber-100 text-amber-700 hover:bg-amber-100' : ''}
-                        ${order.status === 'ready' ? 'bg-green-100 text-green-700 hover:bg-green-100' : ''}
-                        ${order.status === 'delivering' ? 'bg-blue-100 text-blue-700 hover:bg-blue-100' : ''}
-                      `}>
-                        {order.status === 'preparing' ? 'Hazırlanıyor' : order.status === 'ready' ? 'Hazır' : 'Yolda'}
-                      </Badge>
-                    </div>
-                    <p className="font-medium text-sm truncate">{order.customer}</p>
-                    <p className="text-xs text-gray-500 truncate">{order.items}</p>
-                  </div>
-                  <div className="text-right ml-4">
-                    <p className="font-bold text-lg">₺{order.total}</p>
-                    <p className="text-xs text-gray-500">{order.time}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Orders View
-function OrdersView() {
-  const [filter, setFilter] = useState('all');
+// Current Orders View
+function CurrentOrdersView() {
+  const [activeFilter, setActiveFilter] = useState('pending');
   
   const filters = [
-    { id: 'all', label: 'Tümü' },
-    { id: 'active', label: 'Aktif' },
-    { id: 'completed', label: 'Tamamlanan' },
+    { id: 'pending', label: 'Bekleyen Siparişler', count: 0 },
+    { id: 'onway', label: 'Yoldaki Siparişler', count: 0 },
   ];
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {filters.map((f) => (
-          <Button
-            key={f.id}
-            variant={filter === f.id ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setFilter(f.id)}
-            className={filter === f.id ? 'bg-orange-600 hover:bg-orange-700' : ''}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-2">
+        {filters.map((filter) => (
+          <button
+            key={filter.id}
+            onClick={() => setActiveFilter(filter.id)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeFilter === filter.id
+                ? 'bg-[#6B4EE6] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-[#6B4EE6] hover:text-[#6B4EE6]'
+            }`}
           >
-            {f.label}
-          </Button>
+            {filter.label}
+            <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+              activeFilter === filter.id ? 'bg-white/20' : 'bg-gray-100'
+            }`}>{filter.count}</span>
+          </button>
         ))}
+        
+        <div className="flex-1" />
+        
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon"><Search className="w-4 h-4" /></Button>
+          <Button variant="outline" size="icon"><FileText className="w-4 h-4" /></Button>
+          <Button variant="outline" size="icon"><Settings className="w-4 h-4" /></Button>
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {mockOrders.map((order) => (
-          <Card key={order.id} className="border-0 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">{order.id}</span>
-                    <Badge variant={order.status === 'ready' ? 'default' : 'secondary'}>
-                      {order.status === 'ready' ? 'Hazır' : 'Hazırlanıyor'}
-                    </Badge>
+      {/* Empty State */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-12 text-center">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShoppingBag className="w-8 h-8 text-gray-400" />
+          </div>
+          <p className="text-gray-500">Bu kategoride sipariş bulunmamaktadır</p>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+// History Orders View
+function HistoryOrdersView() {
+  const [dateRange, setDateRange] = useState({ start: '21.03.2026', end: '22.03.2026' });
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      {/* Filters */}
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#6B4EE6] text-white rounded-lg">
+              <CheckCircle className="w-4 h-4" />
+              <span className="font-medium">Tamamlanan</span>
+              <Badge className="bg-white/20 text-white">4</Badge>
+            </div>
+            
+            <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg">
+              <X className="w-4 h-4 text-gray-400" />
+              <span className="text-gray-600">İptal Edilen</span>
+              <Badge className="bg-gray-100">0</Badge>
+            </div>
+
+            <div className="flex-1" />
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-1" /> Filtrele</Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-100">
+            <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>BAŞLANGIÇ (11:00)</option></select>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <input type="text" value="21.03.2026 11:00" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <input type="text" value="22.03.2026 04:00" className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+            </div>
+            <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm"><option>Tüm Durumlar</option></select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr className="text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 py-3">SİPARİŞ</th>
+                <th className="px-4 py-3">MÜŞTERİ</th>
+                <th className="px-4 py-3">ADRES</th>
+                <th className="px-4 py-3">MESAFE</th>
+                <th className="px-4 py-3">SAAT</th>
+                <th className="px-4 py-3">DURUM</th>
+                <th className="px-4 py-3">ÖDEME</th>
+                <th className="px-4 py-3">KURYE</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {mockOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900">{order.id}</td>
+                  <td className="px-4 py-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{order.customer}</p>
+                      <p className="text-xs text-gray-500">{order.phone}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-600 max-w-xs truncate">{order.address}</td>
+                  <td className="px-4 py-4 text-sm text-gray-900">{order.distance}</td>
+                  <td className="px-4 py-4 text-sm text-gray-600">21.03.2026 {order.time}</td>
+                  <td className="px-4 py-4">
+                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100">Teslim Edildi</Badge>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{order.amount}₺</p>
+                      <p className="text-xs text-gray-500">{order.payment}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-sm font-medium text-gray-900">{order.courier}</td>
+                  <td className="px-4 py-4">
+                    <Button variant="ghost" size="icon" className="w-8 h-8 bg-[#FFD93D] hover:bg-[#f5c800]">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </motion.div>
+  );
+}
+
+// Performance View
+function PerformanceView() {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <Calendar className="w-5 h-5 text-gray-400" />
+            <span className="text-sm text-gray-600">Tarih Aralığı Seç</span>
+            <div className="flex-1" />
+            <div className="flex items-center gap-2">
+              <input type="text" value="21.03.2026 04:00" className="px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+              <span className="text-gray-400">-</span>
+              <input type="text" value="22.03.2026 05:00" className="px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+              <Button className="bg-[#6B4EE6] hover:bg-[#5a41d1]"><Filter className="w-4 h-4 mr-1" /> Uygula</Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <Badge className="bg-[#6B4EE6] text-white hover:bg-[#6B4EE6]">Finansal Özet</Badge>
+            <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="w-12 h-12 bg-[#6B4EE6] rounded-xl flex items-center justify-center">
+                <DollarSign className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Toplam Ciro</p>
+                <p className="text-2xl font-bold">₺4.105,00</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center">
+                <ShoppingBag className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Sipariş Adedi</p>
+                <p className="text-2xl font-bold">4</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+              <div className="w-12 h-12 bg-[#FFD93D] rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-gray-900" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Ortalama Tutar</p>
+                <p className="text-2xl font-bold">₺1.026,25</p>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full border-[#6B4EE6] text-[#6B4EE6] hover:bg-[#6B4EE6] hover:text-white">
+              Detaylı Rapor <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <Badge className="bg-[#6B4EE6] text-white hover:bg-[#6B4EE6]">Teslimat Analizi</Badge>
+            <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-6 bg-[#6B4EE6] rounded-xl text-white text-center">
+              <p className="text-sm opacity-80 mb-2"><TrendingUp className="w-4 h-4 inline mr-1" /> Ortalama Hız</p>
+              <p className="text-5xl font-bold">37<span className="text-2xl ml-1">dk</span></p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Dağılım</span>
+                <Badge className="bg-yellow-100 text-yellow-700">% 0 gecikme</Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Hızlı (&lt;15dk)</span>
                   </div>
-                  <p className="font-medium">{order.customer}</p>
-                  <p className="text-sm text-gray-500">{order.items}</p>
+                  <span>0</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-xl font-bold">₺{order.total}</p>
-                  <Button size="sm" variant="outline" className="mt-2">Detay</Button>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span>Normal (15-30dk)</span>
+                  </div>
+                  <span>0</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span>Yavaş (30dk+)</span>
+                  </div>
+                  <span>0</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <CheckCircle className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                <p className="text-2xl font-bold">4</p>
+                <p className="text-xs text-gray-500">Başarılı</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-xl text-center">
+                <Clock className="w-5 h-5 text-red-500 mx-auto mb-1" />
+                <p className="text-2xl font-bold">0</p>
+                <p className="text-xs text-gray-500">Geciken</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </motion.div>
   );
 }
 
-// Menu View
-function MenuView() {
-  const categories = [
-    { name: 'Ana Yemekler', items: 12, icon: '🍖' },
-    { name: 'Pide & Lahmacun', items: 8, icon: '🥙' },
-    { name: 'İçecekler', items: 6, icon: '🥤' },
-    { name: 'Tatlılar', items: 4, icon: '🍰' },
-  ];
-
+// Company Earnings View
+function CompanyEarningsView() {
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-bold">Menü Kategorileri</h3>
-        <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
-          + Yeni Ekle
-        </Button>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      <Card className="border-0 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">Restoran</h3>
+              <p className="text-sm text-gray-500">Tutar: <span className="text-red-600 font-semibold">300.00 ₺</span> (TL) Kurye Firmasına Borçlu</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="text" value="21.03.2026 04:00" className="px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+              <span className="text-gray-400">-</span>
+              <input type="text" value="22.03.2026 04:00" className="px-3 py-2 border border-gray-200 rounded-lg text-sm" readOnly />
+              <Button className="bg-[#6B4EE6] hover:bg-[#5a41d1]"><Filter className="w-4 h-4 mr-1" /> Uygula</Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="border-b border-gray-200">
+        <div className="flex gap-6">
+          <button className="px-4 py-3 text-sm font-medium text-[#6B4EE6] border-b-2 border-[#6B4EE6]">Paket Özeti</button>
+          <button className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">Paket İşlemleri</button>
+          <button className="px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">Ödeme İşlemleri</button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {categories.map((cat) => (
-          <Card key={cat.name} className="border-0 shadow-sm cursor-pointer hover:shadow-md transition-all group">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">{cat.icon}</span>
-                <div>
-                  <h4 className="font-semibold group-hover:text-orange-600 transition-colors">{cat.name}</h4>
-                  <p className="text-sm text-gray-500">{cat.items} ürün</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-orange-600 transition-colors" />
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        {[
+          { label: 'PAKET SAYISI', value: '-' },
+          { label: 'KM - ÜCRET', value: '6.91 km' },
+          { label: 'PAKET TAŞIMA', value: '₺300,00' },
+          { label: 'TOPLAM TAŞIMA', value: '₺300,00' },
+          { label: 'NAKİT', value: '₺0,00', color: 'text-green-600' },
+          { label: 'KREDİ KARTI', value: '₺0,00', color: 'text-green-600' },
+        ].map((item, i) => (
+          <Card key={i} className="border-0 shadow-sm">
+            <CardContent className="p-4 text-center">
+              <p className="text-xs text-gray-400 mb-1">{item.label}</p>
+              <p className={`text-lg font-bold ${item.color || ''}`}>{item.value}</p>
+              {item.label === 'KM - ÜCRET' && <p className="text-sm text-gray-500">₺0,00</p>}
             </CardContent>
           </Card>
         ))}
@@ -421,38 +489,5 @@ function MenuView() {
   );
 }
 
-// Settings View
-function SettingsView() {
-  const settings = [
-    { name: 'İşletme Bilgileri', desc: 'Restoran adı, adres, telefon', icon: User },
-    { name: 'Çalışma Saatleri', desc: 'Açılış-kapanış saatleri', icon: Clock },
-    { name: 'Teslimat Ayarları', desc: 'Minimum sipariş, teslimat süresi', icon: Package },
-    { name: 'Bildirimler', desc: 'SMS, e-posta bildirimleri', icon: Bell },
-    { name: 'Ödeme Ayarları', desc: 'IBAN, komisyon oranları', icon: DollarSign },
-  ];
-
-  return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-      <h3 className="text-lg font-bold">Ayarlar</h3>
-      
-      <div className="space-y-3">
-        {settings.map((setting) => (
-          <Card key={setting.name} className="border-0 shadow-sm cursor-pointer hover:shadow-md transition-all group">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
-                  <setting.icon className="w-5 h-5 text-gray-600 group-hover:text-orange-600 transition-colors" />
-                </div>
-                <div>
-                  <h4 className="font-semibold">{setting.name}</h4>
-                  <p className="text-sm text-gray-500">{setting.desc}</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
+// Import Eye icon
+import { Eye } from 'lucide-react';
