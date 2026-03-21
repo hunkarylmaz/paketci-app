@@ -4,34 +4,30 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { 
-  Package, Phone, Lock, Eye, EyeOff, ArrowRight
+  User, Lock, Eye, EyeOff, ShoppingBag, FileText, BarChart3, 
+  Calendar, DollarSign, LogOut, Plus, Phone, Search, Filter, FileText as FileIcon, Settings, X, Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<'phone' | 'code'>('phone');
-  const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
-  const [showCode, setShowCode] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (phone.length >= 10) setStep('code');
-  };
-
-  const handleCodeSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setTimeout(() => {
       localStorage.setItem('restaurant_user', JSON.stringify({
-        id: 1, 
-        name: 'Tatlı Köşe', 
-        dealerName: 'Osmaniye Paketçiniz',
-        phone: phone, 
+        id: 1,
+        name: 'ASMA DÖNER',
+        dealerName: 'Paketçiniz Bodrum',
+        username: username,
         token: 'mock_token'
       }));
       router.push('/restaurant/dashboard');
@@ -39,123 +35,94 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-        {/* Logo Area */}
-        <div className="text-center mb-8">
-          <motion.div 
-            initial={{ scale: 0.8 }} 
-            animate={{ scale: 1 }} 
-            transition={{ type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl shadow-2xl mb-6 border border-white/30"
-          >
-            <Package className="w-12 h-12 text-white" />
-          </motion.div>
-          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">Paketçiniz</h1>
-          <p className="text-blue-100 text-lg">Restoran Partner Paneli</p>
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center p-4"
+      style={{
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      }}
+    >
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}
+      />
 
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }} 
+        animate={{ opacity: 1, scale: 1 }} 
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md relative z-10"
+      >
         <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
           <CardContent className="p-8">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {step === 'phone' ? 'Giriş Yap' : 'Doğrulama'}
-              </h2>
-              <p className="text-sm text-gray-500 mt-2">
-                {step === 'phone' ? 'Telefon numaranızı girin' : `${phone} numarasına kod gönderildi`}
-              </p>
+              <motion.div
+                initial={{ y: -20 }}
+                animate={{ y: 0 }}
+                className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-2xl shadow-lg mb-4"
+              >
+                <ShoppingBag className="w-8 h-8 text-white" />
+              </motion.div>
+              <h1 className="text-2xl font-bold text-gray-800 mb-1">İşletme paneline hoşgeldin</h1>
+              <p className="text-gray-500">Hesabınıza giriş yapın</p>
             </div>
 
-            {step === 'phone' ? (
-              <form onSubmit={handlePhoneSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Kullanıcı Adı</label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
+                    <User className="w-5 h-5" />
+                  </div>
                   <Input 
-                    type="tel" 
-                    placeholder="5XX XXX XX XX" 
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
-                    className="pl-12 h-14 text-lg text-center tracking-wider border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl" 
-                    maxLength={11} 
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Kullanıcı adınızı giriniz"
+                    className="pl-10 h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                    required
                   />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 transition-all"
-                  disabled={phone.length < 10}
-                >
-                  Kod Gönder <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </form>
-            ) : (
-              <form onSubmit={handleCodeSubmit} className="space-y-5">
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Şifre</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-500" />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500">
+                    <Lock className="w-5 h-5" />
+                  </div>
                   <Input 
-                    type={showCode ? 'text' : 'password'} 
-                    placeholder="• • • • • •" 
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="pl-12 pr-12 h-14 text-lg text-center tracking-[0.5em] border-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl" 
-                    maxLength={6} 
-                    autoFocus 
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Şifrenizi giriniz"
+                    className="pl-10 pr-10 h-12 border-gray-200 focus:border-purple-500 focus:ring-purple-500"
+                    required
                   />
                   <button 
-                    type="button" 
-                    onClick={() => setShowCode(!showCode)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 transition-colors"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
                   >
-                    {showCode ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/30 transition-all"
-                  disabled={code.length < 6 || loading}
-                >
-                  {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-                </Button>
-                <button 
-                  type="button" 
-                  onClick={() => setStep('phone')}
-                  className="w-full text-sm text-blue-600 hover:text-blue-700 py-2 font-medium"
-                >
-                  Numarayı değiştir
-                </button>
-              </form>
-            )}
+              </div>
 
-            <div className="relative py-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-400">veya</span>
-              </div>
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg shadow-lg shadow-purple-500/30"
+                disabled={loading}
+              >
+                {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+              </Button>
+            </form>
+
+            <div className="text-center mt-6">
+              <p className="text-sm text-gray-400">© 2026 Tüm hakları saklıdır.</p>
             </div>
-
-            <Button 
-              variant="outline" 
-              className="w-full h-14 border-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 rounded-xl font-medium"
-              onClick={() => {
-                localStorage.setItem('restaurant_user', JSON.stringify({
-                  id: 1, 
-                  name: 'Tatlı Köşe', 
-                  dealerName: 'Osmaniye Paketçiniz',
-                  phone: '05551234567', 
-                  token: 'demo_token'
-                }));
-                router.push('/restaurant/dashboard');
-              }}
-            >
-              Demo Olarak Devam Et
-            </Button>
           </CardContent>
         </Card>
-
-        <p className="text-center text-white/60 text-sm mt-8">
-          © 2024 Paketçiniz. Tüm hakları saklıdır.
-        </p>
       </motion.div>
     </div>
   );
