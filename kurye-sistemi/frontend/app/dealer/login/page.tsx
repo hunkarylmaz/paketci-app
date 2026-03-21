@@ -30,11 +30,11 @@ export default function DealerLoginPage() {
     
     setTimeout(() => {
       // Demo credentials check
-      if (username === 'asmadoner' && password === 'asma48') {
+      if (username === 'paketciniz' && password === '12345678') {
         localStorage.setItem('dealer_user', JSON.stringify({
           id: 1,
-          name: 'ASMA DÖNER',
-          company: 'Paketçiniz Bodrum',
+          name: 'PAKETCINIZ',
+          company: 'Paketçiniz Bayi',
           username: username,
           role: 'dealer',
           token: 'mock_dealer_token'

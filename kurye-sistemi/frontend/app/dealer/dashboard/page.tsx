@@ -109,7 +109,7 @@ export default function DealerDashboard() {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('restaurants');
-  const [user, setUser] = useState({ name: 'ASMA DÖNER', company: 'Paketçiniz Bodrum' });
+  const [user, setUser] = useState({ name: 'PAKETCINIZ', company: 'Paketçiniz Bayi' });
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
