@@ -5,13 +5,13 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Redirect / to dealer login
-RewriteRule ^$ /dealer/login.html [L,R=301]
+# Handle courier routes
+RewriteRule ^courier/login$ /courier/login.html [L]
+RewriteRule ^courier/dashboard$ /courier/dashboard.html [L]
+RewriteRule ^courier$ /courier/login.html [L,R=301]
 
-# Handle dealer routes
-RewriteRule ^dealer/login$ /dealer/login.html [L]
-RewriteRule ^dealer/dashboard$ /dealer/dashboard.html [L]
-RewriteRule ^dealer$ /dealer/login.html [L,R=301]
+# Redirect root to courier login
+RewriteRule ^$ /courier/login.html [L]
 
-# Handle all other routes by serving index.html
+# Handle all other routes
 RewriteRule ^ index.html [L]
