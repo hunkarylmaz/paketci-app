@@ -3,6 +3,17 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { User } from '../../users/entities/user.entity';
 import { Region } from '../../regions/entities/region.entity';
 
+export enum TerritoryStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
+
+export enum TerritoryPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
+}
+
 @Entity('territories')
 export class Territory {
   @PrimaryGeneratedColumn('uuid')
@@ -33,6 +44,20 @@ export class Territory {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: TerritoryStatus,
+    default: TerritoryStatus.ACTIVE
+  })
+  status: TerritoryStatus;
+
+  @Column({
+    type: 'enum',
+    enum: TerritoryPriority,
+    default: TerritoryPriority.MEDIUM
+  })
+  priority: TerritoryPriority;
 
   @CreateDateColumn()
   createdAt: Date;
