@@ -782,7 +782,7 @@ export default function RestaurantDashboard() {
               </div>
 
               {/* Daily Summary */}
-              <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 24 }}>
+              <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, padding: 24, marginBottom: 24 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, marginBottom: 16 }}>Günlük Özet</h3>
                 <div style={{ display: 'grid', gap: 12 }}>
                   {[
@@ -796,6 +796,127 @@ export default function RestaurantDashboard() {
                       <span style={{ fontWeight: 700, color: item.color || colors.gray800 }}>{item.value}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Detailed Orders Table */}
+              <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, overflow: 'hidden' }}>
+                <div style={{ padding: 20, borderBottom: `1px solid ${colors.gray200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: colors.gray800, margin: 0 }}>📋 Sipariş Detayları</h3>
+                  <span style={{ fontSize: 13, color: colors.gray500 }}>{(() => {
+                    let filtered = orders;
+                    if (reportStartDate && reportEndDate) {
+                      const start = new Date(reportStartDate);
+                      const end = new Date(reportEndDate);
+                      end.setHours(23, 59, 59);
+                      filtered = orders.filter((order: any) => {
+                        const orderDate = new Date(order.createdAt);
+                        return orderDate >= start && orderDate <= end;
+                      });
+                    }
+                    return `${filtered.length} sipariş`;
+                  })()}</span>
+                </div>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
+                    <thead>
+                      <tr style={{ background: colors.gray50 }}>
+                        {['Sipariş', 'Müşteri', 'Oluşturulma', 'Durum', 'Teslim/İptal', 'Süre', 'Neden', 'Tutar'].map((header) => (
+                          <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: colors.gray500, textTransform: 'uppercase', letterSpacing: 0.5, borderBottom: `1px solid ${colors.gray200}` }}>{header}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        let filtered = orders;
+                        if (reportStartDate && reportEndDate) {
+                          const start = new Date(reportStartDate);
+                          const end = new Date(reportEndDate);
+                          end.setHours(23, 59, 59);
+                          filtered = orders.filter((order: any) => {
+                            const orderDate = new Date(order.createdAt);
+                            return orderDate >= start && orderDate <= end;
+                          });
+                        }
+                        
+                        if (filtered.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={8} style={{ padding: '40px 20px', textAlign: 'center', color: colors.gray500 }}>
+                                Bu tarih aralığında sipariş bulunmamaktadır
+                              </td>
+                            </tr>
+                          );
+                        }
+                        
+                        return filtered.map((order: any) => {
+                          const statusColors: any = {
+                            pending: { bg: '#FEF3C7', color: '#D97706', text: 'Bekliyor' },
+                            onway: { bg: '#DBEAFE', color: '#2563EB', text: 'Yolda' },
+                            delivered: { bg: '#D1FAE5', color: '#059669', text: 'Teslim' },
+                            cancelled: { bg: '#FEE2E2', color: '#DC2626', text: 'İptal' },
+                            waiting: { bg: '#E0E7FF', color: '#4F46E5', text: 'Beklemede' }
+                          };
+                          const status = statusColors[order.status] || statusColors.pending;
+                          
+                          // Calculate duration
+                          let duration = '-';
+                          let durationMinutes = 0;
+                          if (order.createdAt) {
+                            const start = new Date(order.createdAt);
+                            const end = order.deliveredAt 
+                              ? new Date(order.deliveredAt) 
+                              : order.cancelledAt 
+                                ? new Date(order.cancelledAt) 
+                                : null;
+                            if (end) {
+                              durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
+                              const hours = Math.floor(durationMinutes / 60);
+                              const mins = durationMinutes % 60;
+                              duration = hours > 0 ? `${hours}s ${mins}dk` : `${mins}dk`;
+                            }
+                          }
+                          
+                          return (
+                            <tr key={order.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
+                              <td style={{ padding: '12px 16px' }}>
+                                <span style={{ fontWeight: 700, color: colors.primary, fontSize: 13 }}>#{order.id}</span>
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <div style={{ fontWeight: 600, color: colors.gray800, fontSize: 13 }}>{order.customerName}</div>
+                              </td>
+                              <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600 }}>
+                                {order.createdAt}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <span style={{ padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 600, background: status.bg, color: status.color }}>
+                                  {status.text}
+                                </span>
+                              </td>
+                              <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600 }}>
+                                {order.deliveredAt || order.cancelledAt || '-'}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <span style={{ 
+                                  fontSize: 12, 
+                                  fontWeight: 600, 
+                                  color: durationMinutes > 60 ? colors.red : durationMinutes > 30 ? colors.orange : colors.green 
+                                }}>
+                                  {duration}
+                                </span>
+                              </td>
+                              <td style={{ padding: '12px 16px', fontSize: 12, color: colors.gray600, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {order.cancellationReason || '-'}
+                              </td>
+                              <td style={{ padding: '12px 16px', fontWeight: 700, color: colors.gray800, fontSize: 13 }}>
+                                {order.total.toFixed(2)} TL
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
