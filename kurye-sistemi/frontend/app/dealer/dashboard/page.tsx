@@ -663,6 +663,8 @@ export default function DealerDashboard() {
                   overflow: 'hidden',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                   height: 450,
+                  position: 'relative',
+                  zIndex: 1,
                 }}>
                   <LiveMap 
                     couriers={couriers} 
@@ -990,7 +992,7 @@ export default function DealerDashboard() {
 
           {/* MAP VIEW */}
           {activeMenu === 'map' && (
-            <div style={{ background: colors.white, borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: 'calc(100vh - 140px)' }}>
+            <div style={{ background: colors.white, borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: 'calc(100vh - 140px)', position: 'relative', zIndex: 1 }}>
               <LiveMap 
                 couriers={couriers} 
                 orders={orders}
@@ -1028,7 +1030,7 @@ export default function DealerDashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 200,
+          zIndex: 1000,
         }}>
           <div style={{
             background: colors.white,
@@ -1139,7 +1141,7 @@ export default function DealerDashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 200,
+          zIndex: 1000,
           overflow: 'auto',
           padding: '20px',
         }}>
@@ -1533,7 +1535,7 @@ export default function DealerDashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 200,
+          zIndex: 1000,
         }}>
           <div style={{
             background: colors.white,
@@ -1685,7 +1687,7 @@ function OrderActionModal({ order, couriers, onClose, onAssign, onChangeCourier,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 200,
+      zIndex: 1000,
     }}>
       <div style={{
         background: colors.white,
