@@ -4,565 +4,1149 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-// Dynamic import for the entire map component (client-side only)
-const LiveMap = dynamic(() => import('./LiveMap'), { 
-  ssr: false,
-  loading: () => <div style={{ height: '100%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6B7280' }}>Harita yükleniyor...</div>
-});
-
-// Bodrum center coordinates
-const BODRUM_CENTER: [number, number] = [37.0344, 27.4305];
+// ==================== ICONS ====================
+const Icons = {
+  menu: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 12h18M3 6h18M3 18h18" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  close: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  dashboard: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="3" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="14" y="3" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="14" y="14" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
+      <rect x="3" y="14" width="7" height="7" rx="1" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  package: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="12" y1="22.08" x2="12" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  store: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="9 22 9 12 15 12 15 22" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  users: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  map: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polygon points="1 6 1 22 8 18 16 22 21 18 21 2 16 6 8 2 1 6" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="8" y1="2" x2="8" y2="18" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="16" y1="6" x2="16" y2="22" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  wallet: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 6v12a2 2 0 0 0 2 2h14v-4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  chart: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="20" x2="18" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="12" y1="20" x2="12" y2="4" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="6" y1="20" x2="6" y2="14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  fileText: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="14 2 14 8 20 8" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="16" y1="13" x2="8" y2="13" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="16" y1="17" x2="8" y2="17" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="10 9 9 9 8 9" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  settings: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  logout: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="16 17 21 12 16 7" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="21" y1="12" x2="9" y2="12" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  search: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  plus: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  location: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  phone: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  bike: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="5.5" cy="17.5" r="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="18.5" cy="17.5" r="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  chevronDown: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  chevronRight: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="9 18 15 12 9 6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+};
 
 // ==================== COLORS ====================
 const colors = {
-  primary: '#6B46C1', primaryDark: '#5c3cbb', primaryLight: '#7C3AED',
-  sidebarBg: '#4c1d95', white: '#FFFFFF', yellow: '#FCD34D',
-  gray50: '#F9FAFB', gray100: '#F3F4F6', gray200: '#E5E7EB',
-  gray300: '#D1D5DB', gray400: '#9CA3AF', gray500: '#6B7280',
-  gray600: '#4B5563', gray700: '#374151', gray800: '#1F2937',
-  green: '#10B981', red: '#EF4444', orange: '#F97316', blue: '#3B82F6'
+  primary: '#2563EB',
+  primaryDark: '#1D4ED8',
+  primaryLight: '#3B82F6',
+  sidebarBg: '#0F172A',
+  sidebarHover: '#1E293B',
+  white: '#FFFFFF',
+  gray50: '#F8FAFC',
+  gray100: '#F1F5F9',
+  gray200: '#E2E8F0',
+  gray300: '#CBD5E1',
+  gray400: '#94A3B8',
+  gray500: '#64748B',
+  gray600: '#475569',
+  gray700: '#334155',
+  gray800: '#1E293B',
+  gray900: '#0F172A',
+  green: '#10B981',
+  greenLight: '#D1FAE5',
+  red: '#EF4444',
+  redLight: '#FEE2E2',
+  yellow: '#F59E0B',
+  yellowLight: '#FEF3C7',
+  orange: '#F97316',
+  purple: '#8B5CF6',
+  border: '#E2E8F0'
 };
 
 // ==================== TYPES ====================
+type OrderStatus = 'waiting' | 'ready' | 'assigned' | 'onway' | 'cancelled' | 'delivered';
+
+interface Order {
+  id: string;
+  customerName: string;
+  customerPhone: string;
+  address: string;
+  restaurantName: string;
+  status: OrderStatus;
+  total: number;
+  createdAt: string;
+  courierId?: string;
+  courierName?: string;
+  lat?: number;
+  lng?: number;
+}
+
 interface Courier {
-  id: number; name: string; phone: string; email: string;
-  status: 'active' | 'onway' | 'passive' | 'offline';
-  deliveries: number; rating: number;
-  location: { lat: number; lng: number } | null;
+  id: string;
+  name: string;
+  phone: string;
+  status: 'available' | 'busy' | 'offline';
   vehicleType: 'motorcycle' | 'bicycle' | 'car';
-  joinDate: string;
+  lat: number;
+  lng: number;
+  totalDeliveries: number;
+  todayDeliveries: number;
 }
 
 interface Restaurant {
-  id: number; name: string; phone: string; address: string;
-  status: 'active' | 'inactive'; orders: number; rating: number;
-  commission: number; location: { lat: number; lng: number };
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  lat: number;
+  lng: number;
+  commission: number;
+  totalOrders: number;
+  isActive: boolean;
 }
 
-// ==================== INITIAL DATA ====================
-const initialCouriers: Courier[] = [
-  { id: 1, name: 'Furkan Nam', phone: '0555 111 2233', email: 'furkan@paketciniz.com', status: 'active', deliveries: 47, rating: 4.8, location: { lat: 37.0344, lng: 27.4305 }, vehicleType: 'motorcycle', joinDate: '2024-01-15' },
-  { id: 2, name: 'Ahmet Yılmaz', phone: '0555 222 3344', email: 'ahmet@paketciniz.com', status: 'passive', deliveries: 32, rating: 4.5, location: null, vehicleType: 'bicycle', joinDate: '2024-02-20' },
-  { id: 3, name: 'Mehmet Kaya', phone: '0555 333 4455', email: 'mehmet@paketciniz.com', status: 'passive', deliveries: 28, rating: 4.2, location: null, vehicleType: 'motorcycle', joinDate: '2024-03-10' },
-  { id: 4, name: 'Ali Demir', phone: '0555 444 5566', email: 'ali@paketciniz.com', status: 'offline', deliveries: 41, rating: 4.9, location: null, vehicleType: 'car', joinDate: '2024-01-05' },
-  { id: 5, name: 'Can Özdemir', phone: '0555 555 6677', email: 'can@paketciniz.com', status: 'passive', deliveries: 19, rating: 4.0, location: null, vehicleType: 'motorcycle', joinDate: '2024-04-01' },
-  { id: 6, name: 'Emre Şahin', phone: '0555 666 7788', email: 'emre@paketciniz.com', status: 'passive', deliveries: 35, rating: 4.6, location: null, vehicleType: 'bicycle', joinDate: '2024-02-15' },
-  { id: 7, name: 'Burak Yıldız', phone: '0555 777 8899', email: 'burak@paketciniz.com', status: 'passive', deliveries: 23, rating: 4.3, location: null, vehicleType: 'motorcycle', joinDate: '2024-03-25' }
+// ==================== MOCK DATA ====================
+const mockOrders: Order[] = [
+  { id: 'P-1001', customerName: 'Ahmet Yılmaz', customerPhone: '0532 111 2233', address: 'Kıbrıs Şehitleri Cd. No:45, Bodrum', restaurantName: 'ASMA DÖNER', status: 'waiting', total: 145, createdAt: '2025-03-22 14:30', lat: 37.0344, lng: 27.4305 },
+  { id: 'P-1002', customerName: 'Mehmet Kaya', customerPhone: '0533 222 3344', address: 'Cumhuriyet Cad. No:12, Bodrum', restaurantName: 'Burger King', status: 'ready', total: 89, createdAt: '2025-03-22 14:25', lat: 37.0360, lng: 27.4320 },
+  { id: 'P-1003', customerName: 'Ayşe Demir', customerPhone: '0534 333 4455', address: 'Turgutreis Mah. No:78, Bodrum', restaurantName: 'ASMA DÖNER', status: 'assigned', total: 210, createdAt: '2025-03-22 14:20', courierId: 'C1', courierName: 'Ali Kurye', lat: 37.0200, lng: 27.4100 },
+  { id: 'P-1004', customerName: 'Fatma Şahin', customerPhone: '0535 444 5566', address: 'Gümbet Mah. No:23, Bodrum', restaurantName: 'Pizza Hut', status: 'onway', total: 175, createdAt: '2025-03-22 14:15', courierId: 'C2', courierName: 'Veli Kurye', lat: 37.0400, lng: 27.4200 },
+  { id: 'P-1005', customerName: 'Can Yıldız', customerPhone: '0536 555 6677', address: 'Bitez Mah. No:56, Bodrum', restaurantName: 'ASMA DÖNER', status: 'onway', total: 95, createdAt: '2025-03-22 14:10', courierId: 'C1', courierName: 'Ali Kurye', lat: 37.0250, lng: 27.4150 },
+  { id: 'P-1006', customerName: 'Zeynep Aydın', customerPhone: '0537 666 7788', address: 'Ortakent Mah. No:34, Bodrum', restaurantName: 'Dominos', status: 'cancelled', total: 120, createdAt: '2025-03-22 14:05', lat: 37.0150, lng: 27.4050 },
+  { id: 'P-1007', customerName: 'Burak Özdemir', customerPhone: '0538 777 8899', address: 'Yalıkavak Mah. No:89, Bodrum', restaurantName: 'ASMA DÖNER', status: 'delivered', total: 165, createdAt: '2025-03-22 13:45', courierId: 'C3', courierName: 'Hasan Kurye', lat: 37.0500, lng: 27.4400 },
+  { id: 'P-1008', customerName: 'Elif Korkmaz', customerPhone: '0539 888 9900', address: 'Torba Mah. No:67, Bodrum', restaurantName: 'McDonalds', status: 'delivered', total: 78, createdAt: '2025-03-22 13:30', courierId: 'C2', courierName: 'Veli Kurye', lat: 37.0550, lng: 27.4500 },
 ];
 
-const initialRestaurants: Restaurant[] = [
-  { id: 1, name: 'ASMA DÖNER', phone: '0252 316 48 48', address: 'Bahçelievler Mah. No:15 Bodrum', status: 'active', orders: 47, rating: 4.7, commission: 15, location: { lat: 37.0344, lng: 27.4305 } },
-  { id: 2, name: 'Bodrum Lokantası', phone: '0252 313 12 34', address: 'Cumhuriyet Cad. No:28 Bodrum', status: 'active', orders: 23, rating: 4.5, commission: 12, location: { lat: 37.0365, lng: 27.4280 } },
-  { id: 3, name: 'Ege Balık Evi', phone: '0252 316 56 78', address: 'Kumbahçe Mah. No:42 Bodrum', status: 'inactive', orders: 0, rating: 4.2, commission: 18, location: { lat: 37.0320, lng: 27.4350 } },
-  { id: 4, name: 'Limon Cafe', phone: '0252 318 90 12', address: 'Yalıkavak Mah. No:8 Bodrum', status: 'active', orders: 31, rating: 4.6, commission: 10, location: { lat: 37.1050, lng: 27.2600 } },
-  { id: 5, name: 'Gümbet Burger', phone: '0252 319 34 56', address: 'Gümbet Mah. No:25 Bodrum', status: 'active', orders: 52, rating: 4.4, commission: 14, location: { lat: 37.0250, lng: 27.4200 } }
+const mockCouriers: Courier[] = [
+  { id: 'C1', name: 'Ali Kurye', phone: '0541 111 2233', status: 'busy', vehicleType: 'motorcycle', lat: 37.0250, lng: 27.4150, totalDeliveries: 1250, todayDeliveries: 12 },
+  { id: 'C2', name: 'Veli Kurye', phone: '0542 222 3344', status: 'busy', vehicleType: 'motorcycle', lat: 37.0400, lng: 27.4200, totalDeliveries: 980, todayDeliveries: 8 },
+  { id: 'C3', name: 'Hasan Kurye', phone: '0543 333 4455', status: 'available', vehicleType: 'bicycle', lat: 37.0450, lng: 27.4350, totalDeliveries: 650, todayDeliveries: 5 },
+  { id: 'C4', name: 'Mehmet Kurye', phone: '0544 444 5566', status: 'available', vehicleType: 'motorcycle', lat: 37.0300, lng: 27.4250, totalDeliveries: 1100, todayDeliveries: 0 },
+  { id: 'C5', name: 'Osman Kurye', phone: '0545 555 6677', status: 'offline', vehicleType: 'car', lat: 37.0350, lng: 27.4400, totalDeliveries: 450, todayDeliveries: 0 },
 ];
+
+const mockRestaurants: Restaurant[] = [
+  { id: 'R1', name: 'ASMA DÖNER', phone: '0252 316 1234', address: 'Kumbahçe Mah. No:15, Bodrum', lat: 37.0344, lng: 27.4305, commission: 15, totalOrders: 1250, isActive: true },
+  { id: 'R2', name: 'Burger King', phone: '0252 316 5678', address: 'Cumhuriyet Cad. No:45, Bodrum', lat: 37.0360, lng: 27.4320, commission: 18, totalOrders: 890, isActive: true },
+  { id: 'R3', name: 'Pizza Hut', phone: '0252 316 9012', address: 'Gümbet Mah. No:78, Bodrum', lat: 37.0400, lng: 27.4200, commission: 20, totalOrders: 650, isActive: true },
+];
+
+// ==================== ORDER STATUS CONFIG ====================
+const orderStatusConfig: Record<OrderStatus, { label: string; color: string; bgColor: string }> = {
+  waiting: { label: 'Bekleyen', color: colors.gray600, bgColor: colors.gray100 },
+  ready: { label: 'Hazır', color: colors.yellow, bgColor: colors.yellowLight },
+  assigned: { label: 'Atama', color: colors.purple, bgColor: '#EDE9FE' },
+  onway: { label: 'Yolda', color: colors.primary, bgColor: '#DBEAFE' },
+  cancelled: { label: 'İptal', color: colors.red, bgColor: colors.redLight },
+  delivered: { label: 'Teslim', color: colors.green, bgColor: colors.greenLight },
+};
+
+// ==================== DYNAMIC MAP IMPORT ====================
+const LiveMap = dynamic(() => import('./LiveMap'), { ssr: false, loading: () => (
+  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: colors.gray100 }}>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ width: 40, height: 40, border: '3px solid #E2E8F0', borderTopColor: colors.primary, borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }}></div>
+      <p style={{ color: colors.gray500, fontSize: 14 }}>Harita yükleniyor...</p>
+    </div>
+  </div>
+)});
 
 // ==================== MAIN COMPONENT ====================
 export default function CourierDashboard() {
   const router = useRouter();
-  const [activeView, setActiveView] = useState('dashboard');
-  const [user, setUser] = useState({ name: 'Hünkar Yılmaz', company: 'Paketçiniz Bodrum' });
-  const [orders, setOrders] = useState<any[]>([]);
-  const [credits, setCredits] = useState(678);
+  const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [couriers, setCouriers] = useState<Courier[]>(mockCouriers);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
+  const [selectedCourier, setSelectedCourier] = useState<string | null>(null);
+  const [showAddCourierModal, setShowAddCourierModal] = useState(false);
+  const [showAddRestaurantModal, setShowAddRestaurantModal] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['orders']);
   
-  // Data states
-  const [couriers, setCouriers] = useState<Courier[]>(initialCouriers);
-  const [restaurants, setRestaurants] = useState<Restaurant[]>(initialRestaurants);
-  
-  // Modal states
-  const [showCourierModal, setShowCourierModal] = useState(false);
-  const [showRestaurantModal, setShowRestaurantModal] = useState(false);
-  const [editingCourier, setEditingCourier] = useState<Courier | null>(null);
-  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
-  
-  // Form states
-  const [courierForm, setCourierForm] = useState<{ name: string; phone: string; email: string; vehicleType: 'motorcycle' | 'bicycle' | 'car' }>({ name: '', phone: '', email: '', vehicleType: 'motorcycle' });
+  // Forms
+  const [courierForm, setCourierForm] = useState({ name: '', phone: '', vehicleType: 'motorcycle' as const });
   const [restaurantForm, setRestaurantForm] = useState({ name: '', phone: '', address: '', commission: '15' });
 
-  useEffect(() => {
-    const stored = localStorage.getItem('courier_user');
-    if (!stored) { window.location.href = '/login.html'; return; }
-    setUser(JSON.parse(stored));
-    const restaurantOrders = localStorage.getItem('restaurant_orders');
-    if (restaurantOrders) setOrders(JSON.parse(restaurantOrders));
-    
-    const savedCouriers = localStorage.getItem('courier_data');
-    const savedRestaurants = localStorage.getItem('restaurant_data');
-    if (savedCouriers) setCouriers(JSON.parse(savedCouriers));
-    if (savedRestaurants) setRestaurants(JSON.parse(savedRestaurants));
-  }, [router]);
-
-  useEffect(() => { localStorage.setItem('courier_data', JSON.stringify(couriers)); }, [couriers]);
-  useEffect(() => { localStorage.setItem('restaurant_data', JSON.stringify(restaurants)); }, [restaurants]);
-
-  const handleLogout = () => { localStorage.removeItem('courier_user'); window.location.href = '/login.html'; };
-  
-  const syncWithRestaurant = () => {
-    const restaurantOrders = localStorage.getItem('restaurant_orders');
-    if (restaurantOrders) { 
-      setOrders(JSON.parse(restaurantOrders)); 
-      alert(`${JSON.parse(restaurantOrders).length} sipariş senkronize edildi!`);
-    }
+  const toggleMenu = (menu: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(menu) ? prev.filter(m => m !== menu) : [...prev, menu]
+    );
   };
 
-  // Courier CRUD
-  const openAddCourier = () => {
-    setEditingCourier(null);
-    setCourierForm({ name: '', phone: '', email: '', vehicleType: 'motorcycle' });
-    setShowCourierModal(true);
+  const filteredOrders = activeTab === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === activeTab);
+
+  const orderCounts = {
+    waiting: orders.filter(o => o.status === 'waiting').length,
+    ready: orders.filter(o => o.status === 'ready').length,
+    assigned: orders.filter(o => o.status === 'assigned').length,
+    onway: orders.filter(o => o.status === 'onway').length,
+    cancelled: orders.filter(o => o.status === 'cancelled').length,
+    delivered: orders.filter(o => o.status === 'delivered').length,
   };
 
-  const openEditCourier = (courier: Courier) => {
-    setEditingCourier(courier);
-    setCourierForm({ name: courier.name, phone: courier.phone, email: courier.email, vehicleType: courier.vehicleType });
-    setShowCourierModal(true);
+  const courierCounts = {
+    available: couriers.filter(c => c.status === 'available').length,
+    busy: couriers.filter(c => c.status === 'busy').length,
+    offline: couriers.filter(c => c.status === 'offline').length,
   };
 
-  const handleSaveCourier = () => {
-    if (!courierForm.name || !courierForm.phone) {
-      alert('Lütfen zorunlu alanları doldurun');
-      return;
-    }
-    if (editingCourier) {
-      setCouriers(couriers.map(c => c.id === editingCourier.id ? { ...c, ...courierForm } : c));
-      alert(`${courierForm.name} güncellendi!`);
-    } else {
-      const newCourier: Courier = {
-        id: Date.now(), name: courierForm.name, phone: courierForm.phone, email: courierForm.email,
-        status: 'passive', deliveries: 0, rating: 5.0, location: null,
-        vehicleType: courierForm.vehicleType, joinDate: new Date().toISOString().split('T')[0]
-      };
-      setCouriers([...couriers, newCourier]);
-      alert(`${newCourier.name} başarıyla eklendi!`);
-    }
-    setShowCourierModal(false);
+  const handleAddCourier = () => {
+    if (!courierForm.name || !courierForm.phone) return;
+    const newCourier: Courier = {
+      id: `C${Date.now()}`,
+      name: courierForm.name,
+      phone: courierForm.phone,
+      status: 'available',
+      vehicleType: courierForm.vehicleType,
+      lat: 37.0344 + (Math.random() - 0.5) * 0.02,
+      lng: 27.4305 + (Math.random() - 0.5) * 0.02,
+      totalDeliveries: 0,
+      todayDeliveries: 0,
+    };
+    setCouriers([...couriers, newCourier]);
+    setCourierForm({ name: '', phone: '', vehicleType: 'motorcycle' });
+    setShowAddCourierModal(false);
   };
 
-  const handleDeleteCourier = (id: number) => {
-    if (confirm('Bu kuryeyi silmek istediğinize emin misiniz?')) {
-      setCouriers(couriers.filter(c => c.id !== id));
-    }
-  };
-
-  // Restaurant CRUD
-  const openAddRestaurant = () => {
-    setEditingRestaurant(null);
+  const handleAddRestaurant = () => {
+    if (!restaurantForm.name || !restaurantForm.phone || !restaurantForm.address) return;
+    const newRestaurant: Restaurant = {
+      id: `R${Date.now()}`,
+      name: restaurantForm.name,
+      phone: restaurantForm.phone,
+      address: restaurantForm.address,
+      lat: 37.0344 + (Math.random() - 0.5) * 0.03,
+      lng: 27.4305 + (Math.random() - 0.5) * 0.03,
+      commission: parseInt(restaurantForm.commission),
+      totalOrders: 0,
+      isActive: true,
+    };
+    setRestaurants([...restaurants, newRestaurant]);
     setRestaurantForm({ name: '', phone: '', address: '', commission: '15' });
-    setShowRestaurantModal(true);
+    setShowAddRestaurantModal(false);
   };
 
-  const openEditRestaurant = (restaurant: Restaurant) => {
-    setEditingRestaurant(restaurant);
-    setRestaurantForm({ name: restaurant.name, phone: restaurant.phone, address: restaurant.address, commission: restaurant.commission.toString() });
-    setShowRestaurantModal(true);
+  const handleLogout = () => {
+    localStorage.removeItem('courier_user');
+    window.location.href = '/login.html';
   };
 
-  const handleSaveRestaurant = () => {
-    if (!restaurantForm.name || !restaurantForm.phone || !restaurantForm.address) {
-      alert('Lütfen zorunlu alanları doldurun');
-      return;
-    }
-    if (editingRestaurant) {
-      setRestaurants(restaurants.map(r => r.id === editingRestaurant.id ? { 
-        ...r, name: restaurantForm.name, phone: restaurantForm.phone, 
-        address: restaurantForm.address, commission: parseInt(restaurantForm.commission) || 15 
-      } : r));
-      alert(`${restaurantForm.name} güncellendi!`);
-    } else {
-      const newRestaurant: Restaurant = {
-        id: Date.now(), name: restaurantForm.name, phone: restaurantForm.phone, address: restaurantForm.address,
-        status: 'active', orders: 0, rating: 5.0, commission: parseInt(restaurantForm.commission) || 15,
-        location: { lat: 37.0344 + (Math.random() - 0.5) * 0.02, lng: 27.4305 + (Math.random() - 0.5) * 0.02 }
-      };
-      setRestaurants([...restaurants, newRestaurant]);
-      alert(`${newRestaurant.name} başarıyla eklendi!`);
-    }
-    setShowRestaurantModal(false);
-  };
-
-  const handleDeleteRestaurant = (id: number) => {
-    if (confirm('Bu restoranı silmek istediğinize emin misiniz?')) {
-      setRestaurants(restaurants.filter(r => r.id !== id));
-    }
-  };
-
-  const stats = { 
-    delivered: orders.filter(o => o.status === 'delivered').length, 
-    processing: orders.filter(o => o.status === 'onway').length, 
-    cancelled: orders.filter(o => o.status === 'cancelled').length, 
-    pending: orders.filter(o => o.status === 'pending').length,
-    totalCouriers: couriers.length, activeCouriers: couriers.filter(c => c.status === 'active').length,
-    totalRestaurants: restaurants.length, activeRestaurants: restaurants.filter(r => r.status === 'active').length
-  };
-
+  // Sidebar Menu Items
   const menuItems = [
-    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-    { id: 'map', icon: '🗺️', label: 'Harita' },
-    { id: 'restaurant', icon: '🏪', label: 'Restoranlar' },
-    { id: 'courier', icon: '🚴', label: 'Kuryeler' },
-    { id: 'report', icon: '📈', label: 'Raporlar' }
+    { id: 'dashboard', label: 'Güncel Durum', icon: <Icons.dashboard /> },
+    { 
+      id: 'orders', 
+      label: 'Siparişler', 
+      icon: <Icons.package />,
+      children: [
+        { id: 'orders-waiting', label: 'Bekleyen', count: orderCounts.waiting },
+        { id: 'orders-ready', label: 'Hazır', count: orderCounts.ready },
+        { id: 'orders-assigned', label: 'Atama', count: orderCounts.assigned },
+        { id: 'orders-onway', label: 'Yolda', count: orderCounts.onway },
+        { id: 'orders-cancelled', label: 'İptal', count: orderCounts.cancelled },
+        { id: 'orders-delivered', label: 'Teslim', count: orderCounts.delivered },
+      ]
+    },
+    { id: 'restaurants', label: 'İşletmeler', icon: <Icons.store />, onClick: () => setActiveMenu('restaurants') },
+    { id: 'couriers', label: 'Kuryeler', icon: <Icons.users />, onClick: () => setActiveMenu('couriers') },
+    { id: 'map', label: 'Harita', icon: <Icons.map />, onClick: () => setActiveMenu('map') },
+    { id: 'wallet', label: 'Cari Hesap', icon: <Icons.wallet /> },
+    { 
+      id: 'reports', 
+      label: 'Raporlar', 
+      icon: <Icons.chart />,
+      children: [
+        { id: 'courier-reports', label: 'Kurye Raporları' },
+        { id: 'restaurant-reports', label: 'Restoran Raporları' },
+      ]
+    },
+    { id: 'settings', label: 'Ayarlar', icon: <Icons.settings /> },
   ];
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: colors.gray50 }}>
-      {/* Sidebar */}
-      <aside style={{ width: 80, background: colors.sidebarBg, color: colors.white, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 0', position: 'fixed', height: '100vh', zIndex: 100 }}>
-        <div style={{ marginBottom: 32, fontSize: 28, fontWeight: 800 }}>P</div>
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {/* SIDEBAR */}
+      <aside style={{
+        width: sidebarOpen ? 260 : 70,
+        background: colors.sidebarBg,
+        color: colors.white,
+        transition: 'width 0.3s ease',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        zIndex: 100,
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Logo */}
+        <div style={{ padding: '20px 16px', borderBottom: `1px solid ${colors.gray700}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', color: colors.white, cursor: 'pointer', padding: 4 }}>
+            <Icons.menu />
+          </button>
+          {sidebarOpen && (
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>PAKETÇİ</div>
+              <div style={{ fontSize: 10, color: colors.gray400, letterSpacing: 1 }}>YÖNETİM PANELİ</div>
+            </div>
+          )}
+        </div>
+
+        {/* Menu */}
+        <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto' }}>
           {menuItems.map((item) => (
-            <button key={item.id} onClick={() => setActiveView(item.id)} title={item.label}
-              style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, border: 'none', background: activeView === item.id ? colors.white : 'transparent', color: activeView === item.id ? colors.primary : colors.white, cursor: 'pointer', fontSize: 24, transition: 'all 0.2s', boxShadow: activeView === item.id ? '0 4px 12px rgba(0,0,0,0.15)' : 'none' }}>
-              {item.icon}
-            </button>
+            <div key={item.id}>
+              <button
+                onClick={() => {
+                  if (item.children) toggleMenu(item.id);
+                  else if (item.onClick) item.onClick();
+                  else setActiveMenu(item.id);
+                }}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: '10px 12px',
+                  marginBottom: 4,
+                  borderRadius: 8,
+                  border: 'none',
+                  background: activeMenu === item.id ? colors.primary : 'transparent',
+                  color: colors.white,
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  textAlign: 'left',
+                }}
+              >
+                <span style={{ opacity: 0.9 }}>{item.icon}</span>
+                {sidebarOpen && (
+                  <>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {item.children && (
+                      <Icons.chevronDown />
+                    )}
+                  </>
+                )}
+              </button>
+              
+              {sidebarOpen && item.children && expandedMenus.includes(item.id) && (
+                <div style={{ marginLeft: 32, marginBottom: 8 }}>
+                  {item.children.map((child: any) => (
+                    <button
+                      key={child.id}
+                      onClick={() => {
+                        setActiveMenu(child.id);
+                        if (child.id.startsWith('orders-')) {
+                          const status = child.id.replace('orders-', '') as OrderStatus;
+                          setActiveTab(status);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: colors.gray300,
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        textAlign: 'left',
+                        borderRadius: 6,
+                      }}
+                    >
+                      <span>{child.label}</span>
+                      {child.count !== undefined && (
+                        <span style={{
+                          background: colors.gray700,
+                          color: colors.white,
+                          padding: '2px 8px',
+                          borderRadius: 10,
+                          fontSize: 11,
+                          fontWeight: 600,
+                        }}>{child.count}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
-        <button onClick={handleLogout} style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, border: 'none', background: 'transparent', color: colors.white, cursor: 'pointer', fontSize: 20, opacity: 0.7 }}>🚪</button>
+
+        {/* Logout */}
+        <div style={{ padding: '16px', borderTop: `1px solid ${colors.gray700}` }}>
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '10px 12px',
+              borderRadius: 8,
+              border: 'none',
+              background: 'transparent',
+              color: colors.gray400,
+              cursor: 'pointer',
+              fontSize: 14,
+            }}
+          >
+            <Icons.logout />
+            {sidebarOpen && <span>Çıkış</span>}
+          </button>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main style={{ flex: 1, marginLeft: 80, minHeight: '100vh' }}>
+      {/* MAIN CONTENT */}
+      <main style={{
+        flex: 1,
+        marginLeft: sidebarOpen ? 260 : 70,
+        transition: 'margin-left 0.3s ease',
+        minHeight: '100vh',
+      }}>
         {/* Header */}
-        <header style={{ background: colors.white, padding: '16px 32px', borderBottom: `1px solid ${colors.gray200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0, zIndex: 50 }}>
+        <header style={{
+          background: colors.white,
+          borderBottom: `1px solid ${colors.gray200}`,
+          padding: '16px 24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: colors.gray800, margin: 0 }}>Paketçiniz</h1>
-            <p style={{ margin: '2px 0 0', fontSize: 13, color: colors.gray500 }}>{user.company}</p>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.gray800, margin: 0 }}>
+              Güncel Durum / Siparişler
+            </h1>
+            <p style={{ fontSize: 13, color: colors.gray500, margin: '4px 0 0' }}>
+              Son güncelleme: {new Date().toLocaleString('tr-TR')}
+            </p>
           </div>
+          
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ display: 'flex', gap: 8, background: colors.gray50, padding: '6px', borderRadius: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px', background: colors.primary, borderRadius: 10, color: colors.white }}>
-                <span>✓</span>
-                <div>
-                  <div style={{ fontSize: 10, opacity: 0.9 }}>TESLİM</div>
-                  <div style={{ fontSize: 16, fontWeight: 800 }}>{stats.delivered}</div>
-                </div>
-              </div>
-              {['Bekleyen', 'Yolda', 'İptal'].map((label, idx) => {
-                const values = [stats.pending, stats.processing, stats.cancelled];
-                return (
-                  <div key={label} style={{ textAlign: 'center', padding: '8px 16px' }}>
-                    <div style={{ fontSize: 10, color: colors.gray400 }}>{label}</div>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: values[idx] > 0 ? colors.gray800 : colors.gray300 }}>{values[idx]}</div>
-                  </div>
-                );
-              })}
+            <div style={{
+              background: colors.primaryLight,
+              color: colors.white,
+              padding: '8px 16px',
+              borderRadius: 20,
+              fontSize: 14,
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}>
+              <span>Kontör</span>
+              <span style={{ fontSize: 16 }}>26,722</span>
             </div>
-            <div onClick={syncWithRestaurant} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 18px', background: colors.primary, borderRadius: 10, color: colors.white, cursor: 'pointer', boxShadow: '0 4px 12px rgba(107, 70, 193, 0.25)' }}>
-              <span>⏱</span>
-              <div>
-                <div style={{ fontSize: 10, opacity: 0.9 }}>Kontör</div>
-                <div style={{ fontSize: 16, fontWeight: 800 }}>{credits}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: colors.gray600 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', background: colors.gray200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icons.users />
               </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingLeft: 16, borderLeft: `1px solid ${colors.gray200}` }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 14, fontWeight: 700 }}>{user.name}</div>
-                <div style={{ fontSize: 12, color: colors.gray500 }}>Yönetici</div>
-              </div>
-              <div style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, borderRadius: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontWeight: 700 }}>{user.name.charAt(0)}</div>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>Admin</span>
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <div style={{ padding: 32 }}>
-          {activeView === 'dashboard' && <DashboardView stats={stats} orders={orders} couriers={couriers} restaurants={restaurants} setActiveView={setActiveView} />}
-          {activeView === 'map' && <MapView couriers={couriers} restaurants={restaurants} />}
-          {activeView === 'courier' && <CouriersView couriers={couriers} onAdd={openAddCourier} onEdit={openEditCourier} onDelete={handleDeleteCourier} />}
-          {activeView === 'restaurant' && <RestaurantsView restaurants={restaurants} onAdd={openAddRestaurant} onEdit={openEditRestaurant} onDelete={handleDeleteRestaurant} />}
-          {activeView === 'report' && <ReportsView stats={stats} couriers={couriers} restaurants={restaurants} orders={orders} />}
+        {/* CONTENT */}
+        <div style={{ padding: 24 }}>
+          
+          {/* DASHBOARD VIEW */}
+          {activeMenu === 'dashboard' && (
+            <>
+              {/* Order Status Tabs */}
+              <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+                {(['waiting', 'ready', 'assigned', 'onway', 'cancelled', 'delivered'] as OrderStatus[]).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setActiveTab(status)}
+                    style={{
+                      padding: '16px 24px',
+                      borderRadius: 12,
+                      border: 'none',
+                      background: activeTab === status ? orderStatusConfig[status].bgColor : colors.white,
+                      boxShadow: activeTab === status ? 'none' : '0 1px 3px rgba(0,0,0,0.1)',
+                      cursor: 'pointer',
+                      minWidth: 100,
+                      textAlign: 'center' as const,
+                    }}
+                  >
+                    <div style={{ fontSize: 12, color: colors.gray500, marginBottom: 4 }}>{orderStatusConfig[status].label}</div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: orderStatusConfig[status].color }}>
+                      {orderCounts[status]}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Map and Couriers Side by Side */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: 20, marginBottom: 24 }}>
+                {/* Map */}
+                <div style={{
+                  background: colors.white,
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  height: 450,
+                }}>
+                  <LiveMap 
+                    couriers={couriers} 
+                    orders={orders.filter(o => o.status === 'onway' || o.status === 'assigned')}
+                    restaurants={restaurants}
+                    selectedCourier={selectedCourier}
+                  />
+                </div>
+
+                {/* Couriers Panel */}
+                <div style={{
+                  background: colors.sidebarBg,
+                  borderRadius: 16,
+                  padding: 20,
+                  color: colors.white,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Kuryeler</h3>
+                    <div style={{ display: 'flex', gap: 4, fontSize: 11 }}>
+                      <span style={{ color: '#10B981' }}>● Açık</span>
+                      <span style={{ color: '#EF4444' }}>● Kapalı</span>
+                    </div>
+                  </div>
+
+                  {/* Courier Tabs */}
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 16, borderBottom: `1px solid ${colors.gray700}`, paddingBottom: 12 }}>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: '#10B981' }}>{courierCounts.available}</div>
+                      <div style={{ fontSize: 11, color: colors.gray400 }}>Boşta</div>
+                    </div>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: colors.yellow }}>{courierCounts.busy}</div>
+                      <div style={{ fontSize: 11, color: colors.gray400 }}>Meşgul</div>
+                    </div>
+                    <div style={{ flex: 1, textAlign: 'center' }}>
+                      <div style={{ fontSize: 20, fontWeight: 700, color: colors.gray400 }}>{courierCounts.offline}</div>
+                      <div style={{ fontSize: 11, color: colors.gray400 }}>Çevrimdışı</div>
+                    </div>
+                  </div>
+
+                  {/* Courier List */}
+                  <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+                    {couriers.map((courier) => (
+                      <div
+                        key={courier.id}
+                        onClick={() => setSelectedCourier(selectedCourier === courier.id ? null : courier.id)}
+                        style={{
+                          padding: '12px',
+                          borderRadius: 8,
+                          background: selectedCourier === courier.id ? colors.gray700 : 'transparent',
+                          cursor: 'pointer',
+                          marginBottom: 8,
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            background: courier.status === 'available' ? '#10B981' : courier.status === 'busy' ? colors.yellow : colors.gray500,
+                          }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 14, fontWeight: 600 }}>{courier.name}</div>
+                            <div style={{ fontSize: 11, color: colors.gray400 }}>
+                              {courier.status === 'available' ? 'Boşta' : courier.status === 'busy' ? 'Meşgul' : 'Çevrimdışı'} • 
+                              {' '}{courier.todayDeliveries} paket
+                            </div>
+                          </div>
+                          <Icons.bike />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setShowAddCourierModal(true)}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      marginTop: 12,
+                      background: colors.primary,
+                      color: colors.white,
+                      border: 'none',
+                      borderRadius: 8,
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <Icons.plus />
+                    Kurye Ekle
+                  </button>
+                </div>
+              </div>
+
+              {/* Orders Table */}
+              <div style={{
+                background: colors.white,
+                borderRadius: 16,
+                overflow: 'hidden',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              }}>
+                <div style={{ padding: '16px 20px', borderBottom: `1px solid ${colors.gray200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: colors.gray800 }}>
+                    {activeTab === 'all' ? 'Tüm Siparişler' : `${orderStatusConfig[activeTab as OrderStatus]?.label} Siparişler`}
+                  </h3>
+                  <button style={{
+                    padding: '8px 16px',
+                    background: colors.gray100,
+                    border: 'none',
+                    borderRadius: 6,
+                    fontSize: 13,
+                    color: colors.gray600,
+                    cursor: 'pointer',
+                  }}>Süz</button>
+                </div>
+                
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: colors.gray50 }}>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Paket</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Müşteri</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Restoran</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Adres</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Durum</th>
+                        <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Tutar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredOrders.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} style={{ padding: '40px', textAlign: 'center', color: colors.gray500 }}>
+                            Sipariş bulunamadı
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredOrders.map((order) => (
+                          <tr key={order.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
+                            <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, color: colors.gray800 }}>
+                              {order.id}
+                            </td>
+                            <td style={{ padding: '14px 16px' }}>
+                              <div style={{ fontSize: 14, fontWeight: 500, color: colors.gray800 }}>{order.customerName}</div>
+                              <div style={{ fontSize: 12, color: colors.gray500 }}>{order.customerPhone}</div>
+                            </td>
+                            <td style={{ padding: '14px 16px', fontSize: 14, color: colors.gray700 }}>
+                              {order.restaurantName}
+                            </td>
+                            <td style={{ padding: '14px 16px', fontSize: 13, color: colors.gray600, maxWidth: 200 }}>
+                              {order.address}
+                            </td>
+                            <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                              <span style={{
+                                padding: '6px 12px',
+                                borderRadius: 20,
+                                fontSize: 12,
+                                fontWeight: 600,
+                                background: orderStatusConfig[order.status].bgColor,
+                                color: orderStatusConfig[order.status].color,
+                              }}>
+                                {orderStatusConfig[order.status].label}
+                              </span>
+                            </td>
+                            <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: 14, fontWeight: 600, color: colors.gray800 }}>
+                              {order.total} TL
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* RESTAURANTS VIEW */}
+          {activeMenu === 'restaurants' && (
+            <div style={{ background: colors.white, borderRadius: 16, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Restoranlar</h2>
+                <button
+                  onClick={() => setShowAddRestaurantModal(true)}
+                  style={{
+                    padding: '10px 20px',
+                    background: colors.primary,
+                    color: colors.white,
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Icons.plus />
+                  Restoran Ekle
+                </button>
+              </div>
+              
+              <div style={{ display: 'grid', gap: 16 }}>
+                {restaurants.map((restaurant) => (
+                  <div key={restaurant.id} style={{
+                    padding: 20,
+                    borderRadius: 12,
+                    border: `1px solid ${colors.gray200}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 16, fontWeight: 600, color: colors.gray800, marginBottom: 4 }}>{restaurant.name}</div>
+                      <div style={{ fontSize: 13, color: colors.gray500 }}>{restaurant.address}</div>
+                      <div style={{ fontSize: 13, color: colors.gray400, marginTop: 4 }}>{restaurant.phone}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>%{restaurant.commission} Komisyon</div>
+                      <div style={{ fontSize: 13, color: colors.gray500 }}>{restaurant.totalOrders} sipariş</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* COURIERS VIEW */}
+          {activeMenu === 'couriers' && (
+            <div style={{ background: colors.white, borderRadius: 16, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700 }}>Kuryeler</h2>
+                <button
+                  onClick={() => setShowAddCourierModal(true)}
+                  style={{
+                    padding: '10px 20px',
+                    background: colors.primary,
+                    color: colors.white,
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Icons.plus />
+                  Kurye Ekle
+                </button>
+              </div>
+              
+              <div style={{ display: 'grid', gap: 16 }}>
+                {couriers.map((courier) => (
+                  <div key={courier.id} style={{
+                    padding: 20,
+                    borderRadius: 12,
+                    border: `1px solid ${colors.gray200}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                      <div style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: '50%',
+                        background: colors.gray100,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 20,
+                      }}>👤</div>
+                      <div>
+                        <div style={{ fontSize: 16, fontWeight: 600, color: colors.gray800 }}>{courier.name}</div>
+                        <div style={{ fontSize: 13, color: colors.gray500 }}>{courier.phone}</div>
+                        <span style={{
+                          display: 'inline-block',
+                          marginTop: 4,
+                          padding: '4px 10px',
+                          borderRadius: 12,
+                          fontSize: 11,
+                          fontWeight: 600,
+                          background: courier.status === 'available' ? colors.greenLight : courier.status === 'busy' ? colors.yellowLight : colors.gray100,
+                          color: courier.status === 'available' ? colors.green : courier.status === 'busy' ? colors.yellow : colors.gray500,
+                        }}>
+                          {courier.status === 'available' ? 'Boşta' : courier.status === 'busy' ? 'Meşgul' : 'Çevrimdışı'}
+                        </span>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.primary }}>{courier.todayDeliveries} paket</div>
+                      <div style={{ fontSize: 13, color: colors.gray500 }}>Bugün</div>
+                      <div style={{ fontSize: 13, color: colors.gray400, marginTop: 4 }}>Toplam: {courier.totalDeliveries}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* MAP VIEW */}
+          {activeMenu === 'map' && (
+            <div style={{ background: colors.white, borderRadius: 16, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', height: 'calc(100vh - 140px)' }}>
+              <LiveMap 
+                couriers={couriers} 
+                orders={orders}
+                restaurants={restaurants}
+                selectedCourier={selectedCourier}
+              />
+            </div>
+          )}
         </div>
       </main>
 
-      {/* Courier Modal */}
-      {showCourierModal && (
-        <Modal title={editingCourier ? 'Kurye Düzenle' : 'Yeni Kurye Ekle'} onClose={() => setShowCourierModal(false)}>
-          <FormInput label="Ad Soyad" value={courierForm.name} onChange={(v: string) => setCourierForm({...courierForm, name: v})} placeholder="örn: Ahmet Yılmaz" required />
-          <FormInput label="Telefon" value={courierForm.phone} onChange={(v: string) => setCourierForm({...courierForm, phone: v})} placeholder="örn: 0555 123 4567" required />
-          <FormInput label="E-posta" value={courierForm.email} onChange={(v: string) => setCourierForm({...courierForm, email: v})} placeholder="örn: ahmet@email.com" />
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.gray700, marginBottom: 6 }}>Araç Tipi</label>
-            <select value={courierForm.vehicleType} onChange={(e) => setCourierForm({...courierForm, vehicleType: e.target.value as any})} style={{ width: '100%', padding: '12px 16px', border: `2px solid ${colors.gray200}`, borderRadius: 10, fontSize: 15 }}>
-              <option value="motorcycle">🏍️ Motorsiklet</option>
-              <option value="bicycle">🚲 Bisiklet</option>
-              <option value="car">🚗 Araba</option>
-            </select>
+      {/* ADD COURIER MODAL */}
+      {showAddCourierModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+        }}>
+          <div style={{
+            background: colors.white,
+            borderRadius: 16,
+            width: '90%',
+            maxWidth: 420,
+            padding: 24,
+          }}>
+            <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>Yeni Kurye Ekle</h3>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Ad Soyad</label>
+              <input
+                type="text"
+                value={courierForm.name}
+                onChange={(e) => setCourierForm({ ...courierForm, name: e.target.value })}
+                placeholder="örn: Ahmet Yılmaz"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Telefon</label>
+              <input
+                type="text"
+                value={courierForm.phone}
+                onChange={(e) => setCourierForm({ ...courierForm, phone: e.target.value })}
+                placeholder="örn: 0532 123 4567"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Araç Tipi</label>
+              <select
+                value={courierForm.vehicleType}
+                onChange={(e) => setCourierForm({ ...courierForm, vehicleType: e.target.value as 'motorcycle' | 'bicycle' | 'car' })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              >
+                <option value="motorcycle">Motosiklet</option>
+                <option value="bicycle">Bisiklet</option>
+                <option value="car">Araba</option>
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setShowAddCourierModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.gray100,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.gray700,
+                  cursor: 'pointer',
+                }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleAddCourier}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.primary,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.white,
+                  cursor: 'pointer',
+                }}
+              >
+                Ekle
+              </button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-            <button onClick={() => setShowCourierModal(false)} style={{ flex: 1, padding: '14px', background: colors.gray100, border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, color: colors.gray700, cursor: 'pointer' }}>İptal</button>
-            <button onClick={handleSaveCourier} style={{ flex: 1, padding: '14px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>{editingCourier ? 'Güncelle' : 'Kurye Ekle'}</button>
-          </div>
-        </Modal>
+        </div>
       )}
 
-      {/* Restaurant Modal */}
-      {showRestaurantModal && (
-        <Modal title={editingRestaurant ? 'Restoran Düzenle' : 'Yeni Restoran Ekle'} onClose={() => setShowRestaurantModal(false)}>
-          <FormInput label="Restoran Adı" value={restaurantForm.name} onChange={(v: string) => setRestaurantForm({...restaurantForm, name: v})} placeholder="örn: Lezzet Döner" required />
-          <FormInput label="Telefon" value={restaurantForm.phone} onChange={(v: string) => setRestaurantForm({...restaurantForm, phone: v})} placeholder="örn: 0252 123 4567" required />
-          <FormInput label="Adres" value={restaurantForm.address} onChange={(v: string) => setRestaurantForm({...restaurantForm, address: v})} placeholder="örn: Bahçelievler Mah. No:15 Bodrum" required />
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.gray700, marginBottom: 6 }}>Komisyon Oranı (%)</label>
-            <input type="number" value={restaurantForm.commission} onChange={(e) => setRestaurantForm({...restaurantForm, commission: e.target.value})} min="5" max="30" style={{ width: '100%', padding: '12px 16px', border: `2px solid ${colors.gray200}`, borderRadius: 10, fontSize: 15 }} />
+      {/* ADD RESTAURANT MODAL */}
+      {showAddRestaurantModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+        }}>
+          <div style={{
+            background: colors.white,
+            borderRadius: 16,
+            width: '90%',
+            maxWidth: 420,
+            padding: 24,
+          }}>
+            <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>Yeni Restoran Ekle</h3>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Restoran Adı</label>
+              <input
+                type="text"
+                value={restaurantForm.name}
+                onChange={(e) => setRestaurantForm({ ...restaurantForm, name: e.target.value })}
+                placeholder="örn: Burger King"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Telefon</label>
+              <input
+                type="text"
+                value={restaurantForm.phone}
+                onChange={(e) => setRestaurantForm({ ...restaurantForm, phone: e.target.value })}
+                placeholder="örn: 0252 316 1234"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Adres</label>
+              <input
+                type="text"
+                value={restaurantForm.address}
+                onChange={(e) => setRestaurantForm({ ...restaurantForm, address: e.target.value })}
+                placeholder="örn: Cumhuriyet Cad. No:45, Bodrum"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Komisyon (%)</label>
+              <input
+                type="number"
+                value={restaurantForm.commission}
+                onChange={(e) => setRestaurantForm({ ...restaurantForm, commission: e.target.value })}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setShowAddRestaurantModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.gray100,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.gray700,
+                  cursor: 'pointer',
+                }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleAddRestaurant}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.primary,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.white,
+                  cursor: 'pointer',
+                }}
+              >
+                Ekle
+              </button>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-            <button onClick={() => setShowRestaurantModal(false)} style={{ flex: 1, padding: '14px', background: colors.gray100, border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, color: colors.gray700, cursor: 'pointer' }}>İptal</button>
-            <button onClick={handleSaveRestaurant} style={{ flex: 1, padding: '14px', background: colors.green, color: colors.white, border: 'none', borderRadius: 10, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>{editingRestaurant ? 'Güncelle' : 'Restoran Ekle'}</button>
-          </div>
-        </Modal>
+        </div>
       )}
-    </div>
-  );
-}
-
-// ==================== SUB VIEWS ====================
-
-function DashboardView({ stats, orders, couriers, restaurants, setActiveView }: any) {
-  return (
-    <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-        {[
-          { icon: '🚴', label: 'Toplam Kurye', value: stats.totalCouriers, sub: `${stats.activeCouriers} aktif`, color: colors.primary },
-          { icon: '🏪', label: 'Restoran', value: stats.totalRestaurants, sub: `${stats.activeRestaurants} aktif`, color: colors.green },
-          { icon: '✓', label: 'Teslim Edilen', value: stats.delivered, sub: 'Bugün', color: colors.orange },
-          { icon: '⏱', label: 'Bekleyen', value: stats.pending, sub: 'Sipariş', color: colors.red }
-        ].map((s, i) => (
-          <div key={i} style={{ background: colors.white, borderRadius: 16, padding: 20, border: `1px solid ${colors.gray200}`, display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 56, height: 56, borderRadius: 14, background: `${s.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>{s.icon}</div>
-            <div>
-              <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 4 }}>{s.label}</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: colors.gray800 }}>{s.value}</div>
-              <div style={{ fontSize: 12, color: s.color, fontWeight: 600 }}>{s.sub}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-        <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', background: colors.primary, color: colors.white, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>Canlı Konumlar</div>
-            <button onClick={() => setActiveView('map')} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 6, color: colors.white, fontSize: 12, cursor: 'pointer' }}>Tümünü Gör →</button>
-          </div>
-          <div style={{ height: 300 }}>
-            <LiveMap couriers={couriers} restaurants={restaurants} />
-          </div>
-        </div>
-        
-        <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, padding: 24 }}>
-          <h3 style={{ margin: '0 0 20px', fontSize: 18, color: colors.gray800 }}>Son Aktiviteler</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[
-              { time: '14:32', text: 'Furkan Nam sipariş #1243 teslim etti' },
-              { time: '14:28', text: 'Yeni sipariş alındı - ASMA DÖNER' },
-              { time: '14:15', text: 'Ahmet Yılmaz aktif duruma geçti' },
-              { time: '14:05', text: 'Sipariş #1239 iptal edildi' }
-            ].map((a, i) => (
-              <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 12, background: colors.gray50, borderRadius: 10 }}>
-                <span style={{ fontSize: 12, color: colors.gray400, minWidth: 45 }}>{a.time}</span>
-                <span style={{ fontSize: 14, color: colors.gray700 }}>{a.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <OrdersTable orders={orders} />
-    </>
-  );
-}
-
-function MapView({ couriers, restaurants }: { couriers: Courier[], restaurants: Restaurant[] }) {
-  return (
-    <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 20, color: colors.gray800 }}>Bodrum Canlı Harita</h2>
-          <p style={{ margin: '4px 0 0', fontSize: 13, color: colors.gray500 }}>OpenStreetMap • Gerçek zamanlı kurye ve restoran takibi</p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <span style={{ padding: '8px 16px', background: `${colors.green}15`, borderRadius: 8, color: colors.green, fontWeight: 600, fontSize: 13 }}>🟢 Aktif: {couriers.filter(c => c.status === 'active').length}</span>
-          <span style={{ padding: '8px 16px', background: `${colors.primary}15`, borderRadius: 8, color: colors.primary, fontWeight: 600, fontSize: 13 }}>🏪 Restoran: {restaurants.length}</span>
-        </div>
-      </div>
-      <div style={{ height: 500, borderRadius: 12, overflow: 'hidden' }}>
-        <LiveMap couriers={couriers} restaurants={restaurants} />
-      </div>
-    </div>
-  );
-}
-
-function CouriersView({ couriers, onAdd, onEdit, onDelete }: { couriers: Courier[], onAdd: () => void, onEdit: (c: Courier) => void, onDelete: (id: number) => void }) {
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 24, color: colors.gray800 }}>Kurye Yönetimi</h2>
-          <p style={{ margin: '4px 0 0', fontSize: 14, color: colors.gray500 }}>{couriers.length} kurye kayıtlı</p>
-        </div>
-        <button onClick={onAdd} style={{ padding: '12px 24px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>+ Yeni Kurye Ekle</button>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-        {couriers.map(c => (
-          <div key={c.id} style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 50, height: 50, background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryLight})`, borderRadius: 25, display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontSize: 18, fontWeight: 700 }}>{c.name.charAt(0)}</div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 16 }}>{c.name}</div>
-                  <div style={{ fontSize: 12, color: colors.gray500 }}>{c.phone}</div>
-                </div>
-              </div>
-              <span style={{ padding: '4px 12px', borderRadius: 12, fontSize: 11, fontWeight: 700, background: c.status === 'active' ? '#D1FAE5' : c.status === 'onway' ? '#DBEAFE' : colors.gray100, color: c.status === 'active' ? '#059669' : c.status === 'onway' ? '#2563EB' : colors.gray600 }}>
-                {c.status === 'active' ? 'Aktif' : c.status === 'onway' ? 'Yolda' : 'Pasif'}
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
-              <div style={{ flex: 1, padding: 10, background: colors.gray50, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: colors.primary }}>{c.deliveries}</div>
-                <div style={{ fontSize: 11, color: colors.gray500 }}>Teslimat</div>
-              </div>
-              <div style={{ flex: 1, padding: 10, background: colors.gray50, borderRadius: 8, textAlign: 'center' }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#D97706' }}>⭐{c.rating}</div>
-                <div style={{ fontSize: 11, color: colors.gray500 }}>Puan</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => onEdit(c)} style={{ flex: 1, padding: '10px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, cursor: 'pointer' }}>Düzenle</button>
-              <button onClick={() => onDelete(c.id)} style={{ padding: '10px', background: colors.gray100, border: 'none', borderRadius: 8, cursor: 'pointer', color: colors.red }}>🗑</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function RestaurantsView({ restaurants, onAdd, onEdit, onDelete }: { restaurants: Restaurant[], onAdd: () => void, onEdit: (r: Restaurant) => void, onDelete: (id: number) => void }) {
-  return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 24, color: colors.gray800 }}>Restoran Yönetimi</h2>
-          <p style={{ margin: '4px 0 0', fontSize: 14, color: colors.gray500 }}>{restaurants.length} restoran kayıtlı</p>
-        </div>
-        <button onClick={onAdd} style={{ padding: '12px 24px', background: colors.green, color: colors.white, border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>+ Yeni Restoran Ekle</button>
-      </div>
-      <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: colors.gray50 }}>
-              {['Restoran', 'Telefon', 'Adres', 'Durum', 'Sipariş', 'Puan', 'Komisyon', 'İşlemler'].map(h => 
-                <th key={h} style={{ padding: '16px 20px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: colors.gray500 }}>{h}</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {restaurants.map(r => (
-              <tr key={r.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
-                <td style={{ padding: '16px 20px', fontWeight: 700 }}>🏪 {r.name}</td>
-                <td style={{ padding: '16px 20px', color: colors.gray600 }}>{r.phone}</td>
-                <td style={{ padding: '16px 20px', color: colors.gray600 }}>{r.address}</td>
-                <td style={{ padding: '16px 20px' }}><span style={{ padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, background: r.status === 'active' ? '#D1FAE5' : colors.gray100, color: r.status === 'active' ? '#059669' : colors.gray600 }}>{r.status === 'active' ? 'Aktif' : 'Pasif'}</span></td>
-                <td style={{ padding: '16px 20px', fontWeight: 700, color: colors.primary }}>{r.orders}</td>
-                <td style={{ padding: '16px 20px', color: '#D97706' }}>⭐ {r.rating}</td>
-                <td style={{ padding: '16px 20px' }}>%{r.commission}</td>
-                <td style={{ padding: '16px 20px' }}>
-                  <button onClick={() => onEdit(r)} style={{ padding: '6px 12px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 6, cursor: 'pointer', marginRight: 8 }}>Düzenle</button>
-                  <button onClick={() => onDelete(r.id)} style={{ padding: '6px 12px', background: colors.gray100, border: 'none', borderRadius: 6, cursor: 'pointer', color: colors.red }}>Sil</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-}
-
-function ReportsView({ stats, couriers, restaurants, orders }: any) {
-  return (
-    <>
-      <h2 style={{ margin: '0 0 24px', fontSize: 24, color: colors.gray800 }}>Detaylı Raporlar</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-        {[
-          { label: 'Günlük Sipariş', value: orders.filter((o: any) => o.status).length || 47, color: colors.primary },
-          { label: 'Aktif Kurye', value: stats.activeCouriers, color: colors.green },
-          { label: 'Toplam Gelir', value: '₺45,320', color: colors.orange },
-          { label: 'Ort. Teslimat', value: '18 dk', color: colors.blue }
-        ].map((s, i) => (
-          <div key={i} style={{ background: colors.white, borderRadius: 16, padding: 24, border: `1px solid ${colors.gray200}` }}>
-            <div style={{ fontSize: 13, color: colors.gray500, marginBottom: 8 }}>{s.label}</div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: s.color }}>{s.value}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, padding: 24 }}>
-        <h3 style={{ margin: '0 0 16px', color: colors.gray800 }}>Performans Özeti</h3>
-        <p style={{ color: colors.gray500 }}>📊 Detaylı grafik ve istatistikler burada gösterilecek...</p>
-      </div>
-    </>
-  );
-}
-
-function OrdersTable({ orders }: { orders: any[] }) {
-  const [filter, setFilter] = useState('pending');
-  const filtered = orders.filter(o => filter === 'all' ? true : o.status === filter);
-  
-  return (
-    <div style={{ background: colors.white, borderRadius: 16, border: `1px solid ${colors.gray200}`, overflow: 'hidden' }}>
-      <div style={{ padding: '20px 24px', borderBottom: `1px solid ${colors.gray200}`, display: 'flex', gap: 10 }}>
-        {[{k:'pending',l:'Bekleyen'},{k:'onway',l:'Yolda'},{k:'delivered',l:'Teslim'},{k:'cancelled',l:'İptal'}].map((f: any) => (
-          <button key={f.k} onClick={() => setFilter(f.k)} style={{ padding: '10px 20px', background: filter === f.k ? colors.primary : colors.gray50, border: 'none', borderRadius: 10, color: filter === f.k ? colors.white : colors.gray600, fontWeight: 600, cursor: 'pointer' }}>{f.l}</button>
-        ))}
-      </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr style={{ background: colors.gray50 }}>
-            {['Sipariş', 'Müşteri', 'Restoran', 'Durum', 'Tutar'].map(h => <th key={h} style={{ padding: '16px 20px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: colors.gray500 }}>{h}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.length === 0 ? (
-            <tr><td colSpan={5} style={{ padding: 60, textAlign: 'center', color: colors.gray400 }}>📭 Bu kategoride sipariş bulunmamaktadır</td></tr>
-          ) : (
-            filtered.map((o: any) => (
-              <tr key={o.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
-                <td style={{ padding: '16px 20px', fontWeight: 700, color: colors.primary }}>#{o.id}</td>
-                <td style={{ padding: '16px 20px' }}>{o.customerName}</td>
-                <td style={{ padding: '16px 20px' }}>ASMA DÖNER</td>
-                <td style={{ padding: '16px 20px' }}><span style={{ padding: '4px 12px', borderRadius: 12, fontSize: 12, fontWeight: 700, background: o.status === 'pending' ? '#FEF3C7' : o.status === 'onway' ? '#DBEAFE' : '#D1FAE5', color: o.status === 'pending' ? '#D97706' : o.status === 'onway' ? '#2563EB' : '#059669' }}>{o.status === 'pending' ? 'Bekliyor' : o.status === 'onway' ? 'Yolda' : 'Teslim'}</span></td>
-                <td style={{ padding: '16px 20px', fontWeight: 700 }}>{o.total?.toFixed(2)} ₺</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// ==================== UI COMPONENTS ====================
-
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: colors.white, borderRadius: 16, width: '100%', maxWidth: 450, maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${colors.gray200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: colors.gray800 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20 }}>✕</button>
-        </div>
-        <div style={{ padding: 24 }}>{children}</div>
-      </div>
-    </div>
-  );
-}
-
-function FormInput({ label, value, onChange, placeholder, required }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; required?: boolean }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: colors.gray700, marginBottom: 6 }}>{label} {required && <span style={{ color: colors.red }}>*</span>}</label>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required} style={{ width: '100%', padding: '12px 16px', border: `2px solid ${colors.gray200}`, borderRadius: 10, fontSize: 15, boxSizing: 'border-box' }} />
     </div>
   );
 }
