@@ -662,7 +662,7 @@ export default function DealerDashboard() {
                   borderRadius: 16,
                   overflow: 'hidden',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  height: 450,
+                  height: 600,
                   position: 'relative',
                   zIndex: 1,
                 }}>
