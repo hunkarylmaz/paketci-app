@@ -199,10 +199,13 @@ export class LocationTrackingService {
       this.REDIS_GEO_KEY,
       `${from.longitude},${from.latitude}`,
       `${to.longitude},${to.latitude}`,
-      unit,
     );
 
-    return parseFloat(distance || '0');
+    let meters = parseFloat(distance || '0');
+    if (unit === 'km') {
+      meters = meters / 1000;
+    }
+    return meters;
   }
 
   // ETA (Tahmini varış süresi) hesapla

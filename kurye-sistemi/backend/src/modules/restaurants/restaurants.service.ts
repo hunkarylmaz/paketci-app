@@ -195,7 +195,8 @@ export class RestaurantsService {
     }
 
     const restaurant = this.restaurantRepository.create(data);
-    return this.restaurantRepository.save(restaurant);
+    const saved = await this.restaurantRepository.save(restaurant);
+    return Array.isArray(saved) ? saved[0] : saved;
   }
 
   // Restoran güncelle

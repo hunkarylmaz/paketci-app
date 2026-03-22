@@ -2,6 +2,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Region } from '../../regions/entities/region.entity';
+import { Restaurant } from '../../restaurants/entities/restaurant.entity';
+import { Lead } from '../../leads/entities/lead.entity';
 
 export enum TerritoryStatus {
   ACTIVE = 'ACTIVE',
@@ -22,6 +24,9 @@ export class Territory {
   @Column()
   name: string;
 
+  @Column({ unique: true })
+  code: string;
+
   @Column({ nullable: true })
   description: string;
 
@@ -32,15 +37,13 @@ export class Territory {
   @JoinColumn({ name: 'regionId' })
   region: Region;
 
-  @OneToMany(() => User, user => user.assignedTerritories)
-  fieldSales: User[];
-
+  // Saha satış temsilcisi
   @Column({ nullable: true })
-  assignedToId: string;
+  fieldSalesId: string;
 
   @ManyToOne(() => User, user => user.assignedTerritories, { nullable: true })
-  @JoinColumn({ name: 'assignedToId' })
-  assignedTo: User;
+  @JoinColumn({ name: 'fieldSalesId' })
+  fieldSales: User;
 
   @Column({ default: true })
   isActive: boolean;
@@ -58,6 +61,13 @@ export class Territory {
     default: TerritoryPriority.MEDIUM
   })
   priority: TerritoryPriority;
+
+  // İlişkiler
+  @OneToMany(() => Restaurant, restaurant => restaurant.territory)
+  restaurants: Restaurant[];
+
+  @OneToMany(() => Lead, lead => lead.territory)
+  leads: Lead[];
 
   @CreateDateColumn()
   createdAt: Date;

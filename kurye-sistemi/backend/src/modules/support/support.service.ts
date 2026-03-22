@@ -37,13 +37,14 @@ export class SupportService {
       isUnreadByCourier: false,
       messageCount: 1,
       lastMessageAt: new Date(),
-    });
+    } as any);
 
     const saved = await this.ticketRepository.save(ticket);
+    const savedTicket = Array.isArray(saved) ? saved[0] : saved;
 
     // İlk mesajı otomatik ekle (açıklama)
     const message = this.messageRepository.create({
-      ticketId: saved.id,
+      ticketId: savedTicket.id,
       senderId: userId,
       senderType: MessageSenderType.COURIER,
       content: dto.description,
@@ -51,7 +52,7 @@ export class SupportService {
 
     await this.messageRepository.save(message);
 
-    return saved;
+    return savedTicket;
   }
 
   // Bayiye ait ticket'ları getir

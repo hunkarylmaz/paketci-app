@@ -213,10 +213,10 @@ export class ReportsService {
 
       data.push([
         platform,
-        total,
+        String(total),
         `${percentage}%`,
-        completed,
-        cancelled,
+        String(completed),
+        String(cancelled),
         total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
       ]);
     }
@@ -335,7 +335,7 @@ export class ReportsService {
         d.platform || 'Doğrudan',
         (d.orderAmount || 0).toFixed(2),
         (d.deliveryFee || 0).toFixed(2),
-        this.calculateDeliveryDuration(d),
+        String(this.calculateDeliveryDuration(d)),
       ]);
     }
 

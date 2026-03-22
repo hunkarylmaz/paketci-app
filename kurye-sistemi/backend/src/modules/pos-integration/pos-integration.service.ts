@@ -4,8 +4,10 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as net from 'net';
-import * as SerialPort from 'serialport';
 import { POSIntegration, CallerIDDevice, Printer } from './entities';
+
+// SerialPort will be loaded dynamically
+let SerialPort: any;
 
 // Standart Sipariş Formatı (POS'tan gelen)
 interface POSOrder {
@@ -43,7 +45,7 @@ interface POSOrder {
 export class POSIntegrationService {
   private readonly logger = new Logger(POSIntegrationService.name);
   private tcpConnections: Map<string, net.Socket> = new Map();
-  private serialConnections: Map<string, SerialPort> = new Map();
+  private serialConnections: Map<string, any> = new Map();
 
   constructor(
     @InjectRepository(POSIntegration)
@@ -171,6 +173,12 @@ export class POSIntegrationService {
 
   private async setupSerialCallerID(device: CallerIDDevice): Promise<void> {
     const { port, baudRate = 9600 } = device.connectionConfig;
+    
+    // Dynamic import for SerialPort
+    if (!SerialPort) {
+      const sp = await import('serialport');
+      SerialPort = sp.default || sp;
+    }
     
     const serialPort = new SerialPort({
       path: port,

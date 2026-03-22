@@ -3,6 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { User } from '../../users/entities/user.entity';
 import { Restaurant } from '../../restaurants/entities/restaurant.entity';
 import { Visit } from '../../visits/entities/visit.entity';
+import { Territory } from '../../territories/entities/territory.entity';
 
 export enum LeadStatus {
   NEW = 'NEW',
@@ -75,6 +76,13 @@ export class Lead {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({ nullable: true })
+  territoryId: string;
+
+  @ManyToOne(() => Territory, territory => territory.leads, { nullable: true })
+  @JoinColumn({ name: 'territoryId' })
+  territory: Territory;
 
   @CreateDateColumn()
   createdAt: Date;

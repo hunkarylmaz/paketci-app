@@ -108,12 +108,12 @@ let ReportsService = class ReportsService {
             const avgTime = this.calculateAvgDeliveryTime(dayDeliveries);
             data.push([
                 date,
-                total,
-                completed,
-                cancelled,
+                String(total),
+                String(completed),
+                String(cancelled),
                 `${((completed / total) * 100).toFixed(1)}%`,
                 revenue.toFixed(2),
-                avgTime,
+                String(avgTime),
             ]);
         }
         return data;
@@ -132,12 +132,12 @@ let ReportsService = class ReportsService {
             data.push([
                 `${courier.firstName} ${courier.lastName}`,
                 courier.phone,
-                total,
-                completed,
-                cancelled,
+                String(total),
+                String(completed),
+                String(cancelled),
                 total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
                 earnings.toFixed(2),
-                avgTime,
+                String(avgTime),
             ]);
         }
         return data;
@@ -155,10 +155,10 @@ let ReportsService = class ReportsService {
             data.push([
                 restaurant.name,
                 restaurant.phone,
-                restaurant.address,
-                total,
-                completed,
-                cancelled,
+                typeof restaurant.address === 'object' ? restaurant.address?.full || '' : String(restaurant.address || ''),
+                String(total),
+                String(completed),
+                String(cancelled),
                 total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
                 revenue.toFixed(2),
             ]);
@@ -176,10 +176,10 @@ let ReportsService = class ReportsService {
             const percentage = deliveries.length > 0 ? ((total / deliveries.length) * 100).toFixed(1) : '0';
             data.push([
                 platform,
-                total,
+                String(total),
                 `${percentage}%`,
-                completed,
-                cancelled,
+                String(completed),
+                String(cancelled),
                 total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
             ]);
         }
@@ -277,7 +277,7 @@ let ReportsService = class ReportsService {
                 d.platform || 'Doğrudan',
                 (d.orderAmount || 0).toFixed(2),
                 (d.deliveryFee || 0).toFixed(2),
-                this.calculateDeliveryDuration(d),
+                String(this.calculateDeliveryDuration(d)),
             ]);
         }
         return data;
