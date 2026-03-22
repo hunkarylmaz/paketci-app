@@ -80,6 +80,26 @@ const Icons = {
       <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round" strokeLinejoin="round"/>
       <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
+  ),
+  wallet: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M4 6v12a2 2 0 0 0 2 2h14v-4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  creditCard: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="1" y1="10" x2="23" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  coins: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="8" cy="8" r="6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 8a6 6 0 0 1-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 16a6 6 0 0 1-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
   )
 };
 
@@ -109,6 +129,21 @@ export default function DealerDashboard() {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState('restaurants');
+  
+  // Bayi kredi/kontör yönetimi
+  const [dealerCredits, setDealerCredits] = useState({
+    balance: 5000,
+    pendingCredits: 0,
+    totalLoaded: 15000,
+    transactions: [
+      { id: 1, type: 'load', amount: 5000, date: '2025-03-20', description: 'Banka Transferi' },
+      { id: 2, type: 'use', amount: -2500, date: '2025-03-18', description: 'Restoran kullanımı' },
+      { id: 3, type: 'load', amount: 10000, date: '2025-03-15', description: 'Kredi Kartı' },
+    ]
+  });
+  const [showCreditModal, setShowCreditModal] = useState(false);
+  const [creditAmount, setCreditAmount] = useState('');
+  const [creditPaymentMethod, setCreditPaymentMethod] = useState('bank');
   const [user, setUser] = useState({ name: 'PAKETCINIZ', company: 'Paketçiniz Bayi' });
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
