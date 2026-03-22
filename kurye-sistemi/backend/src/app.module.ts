@@ -6,6 +6,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from './modules/auth/auth.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { UsersModule } from './modules/users/users.module';
+import { RestaurantsModule } from './modules/restaurants/restaurants.module';
+import { CouriersModule } from './modules/couriers/couriers.module';
 import { CommonModule } from './common/common.module';
 
 // Temporarily disabled for minimum working version
@@ -35,7 +37,7 @@ import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ScheduleModule.forRoot(),
     
     TypeOrmModule.forRootAsync({
@@ -48,16 +50,18 @@ import { CommonModule } from './common/common.module';
         password: config.get('DB_PASS', 'password'),
         database: config.get('DB_NAME', 'kurye_db'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: config.get('NODE_ENV') !== 'production',
-        logging: config.get('NODE_ENV') === 'development',
+        synchronize: true,
+        logging: false,
       }),
       inject: [ConfigService],
     }),
 
-    // Core modules only (minimum working version)
+    // Core modules
     AuthModule,
     UsersModule,
     CompaniesModule,
+    RestaurantsModule,
+    CouriersModule,
     CommonModule,
     
     // Disabled modules - will be enabled incrementally

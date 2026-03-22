@@ -14,6 +14,8 @@ const schedule_1 = require("@nestjs/schedule");
 const auth_module_1 = require("./modules/auth/auth.module");
 const companies_module_1 = require("./modules/companies/companies.module");
 const users_module_1 = require("./modules/users/users.module");
+const restaurants_module_1 = require("./modules/restaurants/restaurants.module");
+const couriers_module_1 = require("./modules/couriers/couriers.module");
 const common_module_1 = require("./common/common.module");
 let AppModule = class AppModule {
 };
@@ -21,7 +23,7 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true }),
+            config_1.ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
             schedule_1.ScheduleModule.forRoot(),
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
@@ -33,14 +35,16 @@ exports.AppModule = AppModule = __decorate([
                     password: config.get('DB_PASS', 'password'),
                     database: config.get('DB_NAME', 'kurye_db'),
                     entities: [__dirname + '/**/*.entity{.ts,.js}'],
-                    synchronize: config.get('NODE_ENV') !== 'production',
-                    logging: config.get('NODE_ENV') === 'development',
+                    synchronize: true,
+                    logging: false,
                 }),
                 inject: [config_1.ConfigService],
             }),
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             companies_module_1.CompaniesModule,
+            restaurants_module_1.RestaurantsModule,
+            couriers_module_1.CouriersModule,
             common_module_1.CommonModule,
         ],
     })

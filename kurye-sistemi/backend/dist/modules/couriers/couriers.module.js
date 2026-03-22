@@ -10,6 +10,7 @@ exports.CouriersModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const couriers_controller_1 = require("./couriers.controller");
+const couriers_service_1 = require("./couriers.service");
 const courier_entity_1 = require("./entities/courier.entity");
 let CouriersModule = class CouriersModule {
 };
@@ -18,6 +19,8 @@ exports.CouriersModule = CouriersModule = __decorate([
     (0, common_1.Module)({
         imports: [typeorm_1.TypeOrmModule.forFeature([courier_entity_1.Courier])],
         controllers: [couriers_controller_1.CouriersController],
+        providers: [couriers_service_1.CouriersService],
+        exports: [couriers_service_1.CouriersService],
     })
 ], CouriersModule);
 //# sourceMappingURL=couriers.module.js.map
