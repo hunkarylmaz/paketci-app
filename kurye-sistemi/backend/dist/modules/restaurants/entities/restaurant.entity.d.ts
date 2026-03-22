@@ -99,7 +99,6 @@ export declare class Restaurant {
             };
         };
     };
-    users: RestaurantUser[];
     latitude: number;
     longitude: number;
     address: {

@@ -150,10 +150,6 @@ __decorate([
     __metadata("design:type", Object)
 ], Restaurant.prototype, "pricingConfig", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => RestaurantUser, user => user.restaurantId),
-    __metadata("design:type", Array)
-], Restaurant.prototype, "users", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'decimal', precision: 10, scale: 8, nullable: true }),
     __metadata("design:type", Number)
 ], Restaurant.prototype, "latitude", void 0);

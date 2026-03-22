@@ -140,7 +140,6 @@ export class RestaurantsService {
     }
 
     return query
-      .leftJoinAndSelect('restaurant.users', 'users')
       .orderBy('restaurant.createdAt', 'DESC')
       .getMany();
   }
@@ -149,7 +148,6 @@ export class RestaurantsService {
   async findById(id: string, user?: any): Promise<Restaurant> {
     const restaurant = await this.restaurantRepository.findOne({
       where: { id },
-      relations: ['users'],
     });
 
     if (!restaurant) {

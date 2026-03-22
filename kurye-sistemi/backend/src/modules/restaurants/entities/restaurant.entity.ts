@@ -149,10 +149,10 @@ export class Restaurant {
   };
 
   // ============================================
-  // KULLANICILAR
+  // KULLANICILAR - Geçici olarak kaldırıldı (döngüsel bağımlılık)
   // ============================================
-  @OneToMany(() => RestaurantUser, user => user.restaurantId)
-  users: RestaurantUser[];
+  // @OneToMany(() => RestaurantUser, user => user.restaurant)
+  // users: RestaurantUser[];
 
   // ============================================
   // KONUM
