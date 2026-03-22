@@ -374,39 +374,34 @@ export default function DealerLogin() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isLoading || !username || !password}
+            disabled={isLoading}
             style={{
               width: '100%',
               padding: '16px',
-              background: (!username || !password) 
-                ? colors.gray300 
-                : `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
+              background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`,
               color: colors.white,
               border: 'none',
               borderRadius: '12px',
               fontSize: '16px',
               fontWeight: 600,
-              cursor: (!username || !password) ? 'not-allowed' : 'pointer',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
               transition: 'all 0.3s ease',
-              boxShadow: (!username || !password)
-                ? 'none'
-                : `0 4px 14px 0 ${colors.primary}40`,
+              boxShadow: `0 4px 14px 0 ${colors.primary}40`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
+              opacity: isLoading ? 0.7 : 1,
             }}
             onMouseEnter={(e) => {
-              if (username && password && !isLoading) {
+              if (!isLoading) {
                 e.currentTarget.style.transform = 'translateY(-2px)';
                 e.currentTarget.style.boxShadow = `0 8px 25px -5px ${colors.primary}60`;
               }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'none';
-              if (username && password) {
-                e.currentTarget.style.boxShadow = `0 4px 14px 0 ${colors.primary}40`;
-              }
+              e.currentTarget.style.boxShadow = `0 4px 14px 0 ${colors.primary}40`;
             }}
           >
             {isLoading ? (
