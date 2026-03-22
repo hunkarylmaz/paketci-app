@@ -13,9 +13,9 @@ export default function CourierLoginPage() {
   useEffect(() => {
     const stored = localStorage.getItem('courier_user');
     if (stored) {
-      router.push('/courier/dashboard');
+      window.location.href = '/dashboard.html';
     }
-  }, [router]);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +32,7 @@ export default function CourierLoginPage() {
           role: 'courier_admin',
           token: 'mock_courier_token'
         }));
-        router.push('/courier/dashboard');
+        window.location.href = '/dashboard.html';
       } else {
         setError('Yanlış kullanıcı adı veya şifre');
         setLoading(false);

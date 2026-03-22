@@ -82,7 +82,7 @@ export default function CourierDashboard() {
 
   useEffect(() => {
     const stored = localStorage.getItem('courier_user');
-    if (!stored) { router.push('/courier/login'); return; }
+    if (!stored) { window.location.href = '/login.html'; return; }
     setUser(JSON.parse(stored));
     const restaurantOrders = localStorage.getItem('restaurant_orders');
     if (restaurantOrders) setOrders(JSON.parse(restaurantOrders));
@@ -96,7 +96,7 @@ export default function CourierDashboard() {
   useEffect(() => { localStorage.setItem('courier_data', JSON.stringify(couriers)); }, [couriers]);
   useEffect(() => { localStorage.setItem('restaurant_data', JSON.stringify(restaurants)); }, [restaurants]);
 
-  const handleLogout = () => { localStorage.removeItem('courier_user'); router.push('/courier/login'); };
+  const handleLogout = () => { localStorage.removeItem('courier_user'); window.location.href = '/login.html'; };
   
   const syncWithRestaurant = () => {
     const restaurantOrders = localStorage.getItem('restaurant_orders');

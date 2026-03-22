@@ -181,7 +181,7 @@ export default function DealerLogin() {
         token: 'fake-jwt-token'
       };
       localStorage.setItem('dealer_user', JSON.stringify(user));
-      router.push('/dashboard');
+      window.location.href = '/dashboard.html';
     } else {
       setError('Kullanıcı adı veya şifre hatalı');
       setIsLoading(false);

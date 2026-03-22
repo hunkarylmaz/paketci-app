@@ -162,7 +162,7 @@ export default function DealerDashboard() {
   useEffect(() => {
     const stored = localStorage.getItem('dealer_user');
     if (!stored) {
-      router.push('/dealer/login');
+      window.location.href = '/login.html';
       return;
     }
     setUser(JSON.parse(stored));
@@ -194,7 +194,7 @@ export default function DealerDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('dealer_user');
-    router.push('/dealer/login');
+    window.location.href = '/login.html';
   };
 
   const handleAddRestaurant = () => {
