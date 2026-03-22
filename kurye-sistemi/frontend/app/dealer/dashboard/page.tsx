@@ -305,6 +305,7 @@ export default function DealerDashboard() {
         <nav style={{ flex: 1, padding: '16px 12px' }}>
           {[
             { id: 'restaurants', label: 'Restoranlar', icon: <Icons.restaurant /> },
+            { id: 'credits', label: 'Kontör Yükle', icon: <Icons.wallet /> },
             { id: 'reports', label: 'Raporlar', icon: <Icons.chart /> },
             { id: 'settings', label: 'Ayarlar', icon: <Icons.settings /> }
           ].map((item) => (
@@ -379,6 +380,7 @@ export default function DealerDashboard() {
             <h1 style={{ fontSize: 18, fontWeight: 700, color: colors.gray800, margin: 0 }}>
               {activeTab === 'restaurants' && 'Restoran Yönetimi'}
               {activeTab === 'reports' && 'Raporlar'}
+              {activeTab === 'credits' && 'Kontör Yönetimi'}
               {activeTab === 'settings' && 'Ayarlar'}
             </h1>
             <p style={{ margin: '4px 0 0', fontSize: 13, color: colors.gray500 }}>{user.company}</p>
@@ -604,6 +606,99 @@ export default function DealerDashboard() {
             </div>
           )}
 
+          {/* CREDITS TAB - Kontör Yükleme */}
+          {activeTab === 'credits' && (
+            <div>
+              {/* Bakiye Kartları */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
+                <div style={{ background: `linear-gradient(135deg, ${colors.primary}, ${colors.primaryDark})`, padding: 24, borderRadius: 12, color: colors.white }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                    <Icons.wallet />
+                    <span style={{ opacity: 0.9, fontSize: 14 }}>Mevcut Bakiye</span>
+                  </div>
+                  <p style={{ fontSize: 36, fontWeight: 700 }}>{dealerCredits.balance.toLocaleString()} TL</p>
+                </div>
+                <div style={{ background: colors.white, padding: 24, borderRadius: 12, border: `1px solid ${colors.gray200}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, color: colors.gray500 }}>
+                    <Icons.coins />
+                    <span style={{ fontSize: 14 }}>Bekleyen Kontör</span>
+                  </div>
+                  <p style={{ fontSize: 32, fontWeight: 700, color: colors.orange }}>{dealerCredits.pendingCredits.toLocaleString()} TL</p>
+                </div>
+                <div style={{ background: colors.white, padding: 24, borderRadius: 12, border: `1px solid ${colors.gray200}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, color: colors.gray500 }}>
+                    <Icons.chart />
+                    <span style={{ fontSize: 14 }}>Toplam Yüklenen</span>
+                  </div>
+                  <p style={{ fontSize: 32, fontWeight: 700, color: colors.green }}>{dealerCredits.totalLoaded.toLocaleString()} TL</p>
+                </div>
+              </div>
+
+              {/* Kontör Yükle Butonu */}
+              <div style={{ marginBottom: 24 }}>
+                <button
+                  onClick={() => setShowCreditModal(true)}
+                  style={{
+                    padding: '14px 28px',
+                    background: colors.primary,
+                    color: colors.white,
+                    border: 'none',
+                    borderRadius: 8,
+                    fontSize: 16,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10
+                  }}
+                >
+                  <Icons.plus />
+                  Kontör Yükle
+                </button>
+              </div>
+
+              {/* İşlem Geçmişi */}
+              <div style={{ background: colors.white, borderRadius: 12, border: `1px solid ${colors.gray200}`, overflow: 'hidden' }}>
+                <div style={{ padding: '16px 20px', borderBottom: `1px solid ${colors.gray200}` }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>İşlem Geçmişi</h3>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: colors.gray50 }}>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Tarih</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Açıklama</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Tutar</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: 12, fontWeight: 600, color: colors.gray500 }}>Durum</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dealerCredits.transactions.map((tx) => (
+                      <tr key={tx.id} style={{ borderTop: `1px solid ${colors.gray100}` }}>
+                        <td style={{ padding: '14px 16px', fontSize: 14, color: colors.gray600 }}>{tx.date}</td>
+                        <td style={{ padding: '14px 16px', fontSize: 14, color: colors.gray800 }}>{tx.description}</td>
+                        <td style={{ padding: '14px 16px', fontSize: 14, fontWeight: 600, textAlign: 'right', color: tx.amount > 0 ? colors.green : colors.red }}>
+                          {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} TL
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                          <span style={{
+                            padding: '4px 12px',
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 600,
+                            background: tx.type === 'load' ? '#D1FAE5' : '#FEE2E2',
+                            color: tx.type === 'load' ? '#065F46' : '#991B1B'
+                          }}>
+                            {tx.type === 'load' ? 'Yükleme' : 'Kullanım'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* REPORTS TAB */}
           {activeTab === 'reports' && (
             <div>
@@ -798,6 +893,96 @@ export default function DealerDashboard() {
                   style={{ flex: 1, padding: '12px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}
                 >
                   Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* KONTÖR YÜKLEME MODAL */}
+      {showCreditModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100
+        }}>
+          <div style={{
+            background: colors.white,
+            borderRadius: 12,
+            width: '90%',
+            maxWidth: 480,
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <div style={{ padding: '20px 24px', borderBottom: `1px solid ${colors.gray200}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Kontör Yükle</h3>
+              <button onClick={() => setShowCreditModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: colors.gray400 }}>
+                <Icons.close />
+              </button>
+            </div>
+            <div style={{ padding: 24 }}>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 13, color: colors.gray600, marginBottom: 8 }}>Yüklenecek Tutar (TL)</label>
+                <input
+                  type="number"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(e.target.value)}
+                  placeholder="örn: 5000"
+                  style={{ width: '100%', padding: '12px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 16 }}
+                />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 13, color: colors.gray600, marginBottom: 8 }}>Ödeme Yöntemi</label>
+                <select
+                  value={creditPaymentMethod}
+                  onChange={(e) => setCreditPaymentMethod(e.target.value)}
+                  style={{ width: '100%', padding: '12px', border: `1px solid ${colors.gray300}`, borderRadius: 8, fontSize: 14 }}
+                >
+                  <option value="bank">Banka Transferi</option>
+                  <option value="credit_card">Kredi Kartı</option>
+                  <option value="eft">EFT/Havale</option>
+                </select>
+              </div>
+              <div style={{ background: colors.gray50, padding: 16, borderRadius: 8, marginBottom: 20 }}>
+                <p style={{ margin: '0 0 8px', fontSize: 13, color: colors.gray600 }}>Mevcut Bakiye</p>
+                <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: colors.primary }}>{dealerCredits.balance.toLocaleString()} TL</p>
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
+                  onClick={() => setShowCreditModal(false)}
+                  style={{ flex: 1, padding: '12px', background: colors.gray100, color: colors.gray700, border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={() => {
+                    const amount = parseInt(creditAmount);
+                    if (amount > 0) {
+                      setDealerCredits(prev => ({
+                        ...prev,
+                        balance: prev.balance + amount,
+                        pendingCredits: prev.pendingCredits + amount,
+                        transactions: [{
+                          id: Date.now(),
+                          type: 'load',
+                          amount: amount,
+                          date: new Date().toISOString().split('T')[0],
+                          description: creditPaymentMethod === 'bank' ? 'Banka Transferi' : creditPaymentMethod === 'credit_card' ? 'Kredi Kartı' : 'EFT/Havale'
+                        }, ...prev.transactions]
+                      }));
+                      setCreditAmount('');
+                      setShowCreditModal(false);
+                      alert('Kontör yükleme talebiniz alındı! Onaylandıktan sonra bakiyenize eklenecektir.');
+                    }
+                  }}
+                  style={{ flex: 1, padding: '12px', background: colors.primary, color: colors.white, border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Yükleme Talebi Gönder
                 </button>
               </div>
             </div>
