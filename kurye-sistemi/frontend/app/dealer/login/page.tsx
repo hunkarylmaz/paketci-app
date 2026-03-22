@@ -1,364 +1,276 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 
-export default function DealerLoginPage() {
+// ==================== ICONS ====================
+const Icons = {
+  user: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  ),
+  lock: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+    </svg>
+  ),
+  eye: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+      <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+  ),
+  eyeOff: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+      <line x1="1" y1="1" x2="23" y2="23"></line>
+    </svg>
+  )
+};
+
+// ==================== STYLES ====================
+const styles = {
+  container: {
+    minHeight: '100vh',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    backgroundImage: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>'), linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
+    backgroundSize: 'cover, cover',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '20px',
+  } as React.CSSProperties,
+  card: {
+    background: '#ffffff',
+    borderRadius: '24px',
+    padding: '48px 40px',
+    width: '100%',
+    maxWidth: '420px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  } as React.CSSProperties,
+  title: {
+    fontSize: '28px',
+    fontWeight: 700,
+    color: '#2563EB',
+    textAlign: 'center' as const,
+    marginBottom: '8px',
+    lineHeight: 1.3,
+  },
+  subtitle: {
+    fontSize: '14px',
+    color: '#6B7280',
+    textAlign: 'center' as const,
+    marginBottom: '32px',
+  },
+  inputGroup: {
+    marginBottom: '20px',
+  },
+  label: {
+    display: 'block',
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#374151',
+    marginBottom: '8px',
+  },
+  inputWrapper: {
+    position: 'relative' as const,
+  },
+  input: {
+    width: '100%',
+    padding: '14px 16px 14px 48px',
+    border: '2px solid #E5E7EB',
+    borderRadius: '12px',
+    fontSize: '15px',
+    color: '#1F2937',
+    backgroundColor: '#F9FAFB',
+    transition: 'all 0.2s ease',
+    outline: 'none',
+  } as React.CSSProperties,
+  inputFocus: {
+    borderColor: '#2563EB',
+    backgroundColor: '#ffffff',
+  },
+  inputIcon: {
+    position: 'absolute' as const,
+    left: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#9CA3AF',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  eyeIcon: {
+    position: 'absolute' as const,
+    right: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#9CA3AF',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    background: 'none',
+    border: 'none',
+    padding: 0,
+  },
+  button: {
+    width: '100%',
+    padding: '16px',
+    background: '#2563EB',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '12px',
+    fontSize: '16px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    marginTop: '8px',
+    boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
+  },
+  buttonHover: {
+    background: '#1D4ED8',
+    transform: 'translateY(-1px)',
+    boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)',
+  },
+  footer: {
+    marginTop: '32px',
+    paddingTop: '24px',
+    borderTop: '1px solid #E5E7EB',
+    textAlign: 'center' as const,
+    fontSize: '13px',
+    color: '#9CA3AF',
+  },
+  error: {
+    background: '#FEE2E2',
+    color: '#DC2626',
+    padding: '12px 16px',
+    borderRadius: '8px',
+    fontSize: '14px',
+    marginBottom: '20px',
+    textAlign: 'center' as const,
+  }
+};
+
+// ==================== MAIN COMPONENT ====================
+export default function DealerLogin() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Check if already logged in
-  useEffect(() => {
-    const stored = localStorage.getItem('dealer_user');
-    if (stored) {
-      router.push('/dealer/dashboard');
-    } else {
-      setChecking(false);
-    }
-  }, [router]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
-    
-    setTimeout(() => {
-      // Demo credentials check
-      if (username === 'paketciniz' && password === '12345678') {
-        localStorage.setItem('dealer_user', JSON.stringify({
-          id: 1,
-          name: 'PAKETCINIZ',
-          company: 'Paketçiniz Bayi',
-          username: username,
-          role: 'dealer',
-          token: 'mock_dealer_token'
-        }));
-        router.push('/dealer/dashboard');
-      } else {
-        setError('Yanlış kullanıcı adı veya şifre');
-        setLoading(false);
-      }
-    }, 1000);
+    setIsLoading(true);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Check credentials
+    if (username === 'paketciniz' && password === '12345678') {
+      const user = {
+        id: '1',
+        username: 'paketciniz',
+        name: 'Paketçiniz Bayi',
+        role: 'dealer',
+        token: 'fake-jwt-token'
+      };
+      localStorage.setItem('dealer_user', JSON.stringify(user));
+      router.push('/dashboard');
+    } else {
+      setError('Kullanıcı adı veya şifre hatalı');
+      setIsLoading(false);
+    }
   };
 
-  if (checking) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        background: '#f3f4f6'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            width: 48,
-            height: 48,
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #2563EB',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px'
-          }} />
-          <p style={{ color: '#6b7280' }}>Yükleniyor...</p>
-        </div>
-        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
-
   return (
-    <div style={{
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '100vh',
-      width: '100%',
-      overflow: 'hidden',
-      background: '#f3f4f6'
-    }}>
-      {/* Background */}
-      <div style={{
-        position: 'absolute',
-        top: -20,
-        left: -20,
-        right: -20,
-        bottom: -20,
-        zIndex: 1,
-        filter: 'blur(20px)',
-        WebkitFilter: 'blur(20px)',
-        background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #1E40AF 100%)'
-      }} />
-      
-      {/* Login Card */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: 'easeOut' }}
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          width: '90%',
-          maxWidth: 460,
-          padding: '48px 44px',
-          background: '#ffffff',
-          borderRadius: 24,
-          boxShadow: '0 20px 60px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.05)'
-        }}
-      >
-        <div style={{ width: '100%' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <h1 style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: '#2563EB',
-              margin: '0 0 8px',
-              letterSpacing: -0.3,
-              lineHeight: 1.3
-            }}>
-              Yönetici paneline hoşgeldin
-            </h1>
-            <p style={{
-              fontSize: 16,
-              color: '#6b7280',
-              margin: 0,
-              fontWeight: 400
-            }}>
-              Hesabınıza giriş yapın
-            </p>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>
+          Yönetici paneline<br />hoşgeldin
+        </h1>
+        <p style={styles.subtitle}>Hesabınıza giriş yapın</p>
+
+        {error && <div style={styles.error}>{error}</div>}
+
+        <form onSubmit={handleLogin}>
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Kullanıcı Adı</label>
+            <div style={styles.inputWrapper}>
+              <span style={styles.inputIcon}><Icons.user /></span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                onFocus={() => setFocusedField('username')}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Kullanıcı adınızı giriniz"
+                style={{
+                  ...styles.input,
+                  ...(focusedField === 'username' ? styles.inputFocus : {}),
+                }}
+              />
+            </div>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div style={{
-              background: '#FEE2E2',
-              border: '1px solid #FECACA',
-              borderRadius: 8,
-              padding: '12px 16px',
-              marginBottom: 20,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: '#DC2626',
-              fontSize: 14
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              {error}
+          <div style={styles.inputGroup}>
+            <label style={styles.label}>Şifre</label>
+            <div style={styles.inputWrapper}>
+              <span style={styles.inputIcon}><Icons.lock /></span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Şifrenizi giriniz"
+                style={{
+                  ...styles.input,
+                  ...(focusedField === 'password' ? styles.inputFocus : {}),
+                  paddingRight: '48px',
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                {showPassword ? <Icons.eyeOff /> : <Icons.eye />}
+              </button>
             </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 24
-          }}>
-            {/* Username */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#374151',
-                letterSpacing: 0.2
-              }}>
-                Kullanıcı Adı
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  left: 16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#9ca3af',
-                  pointerEvents: 'none',
-                  zIndex: 2,
-                  transition: 'color .3s ease'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <input 
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Kullanıcı adınızı giriniz"
-                  style={{
-                    width: '100%',
-                    padding: '14px 48px',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: 12,
-                    fontSize: 15,
-                    background: '#ffffff',
-                    transition: 'all .3s ease',
-                    boxSizing: 'border-box',
-                    fontWeight: 400,
-                    color: '#374151',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#2563EB';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(37,99,235,.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#e5e7eb';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#374151',
-                letterSpacing: 0.2
-              }}>
-                Şifre
-              </label>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute',
-                  left: 16,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#9ca3af',
-                  pointerEvents: 'none',
-                  zIndex: 2,
-                  transition: 'color .3s ease'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="16" r="1" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M7 11V7C7 5.67392 7.52678 4.40215 8.46447 3.46447C9.40215 2.52678 10.6739 2 12 2C13.3261 2 14.5979 2.52678 15.5355 3.46447C16.4732 4.40215 17 5.67392 17 7V11" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <input 
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Şifrenizi giriniz"
-                  style={{
-                    width: '100%',
-                    padding: '14px 48px',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: 12,
-                    fontSize: 15,
-                    background: '#ffffff',
-                    transition: 'all .3s ease',
-                    boxSizing: 'border-box',
-                    fontWeight: 400,
-                    color: '#374151',
-                    outline: 'none'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#2563EB';
-                    e.target.style.boxShadow = '0 0 0 4px rgba(37,99,235,.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#e5e7eb';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                  required
-                />
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  tabIndex={-1}
-                  style={{
-                    position: 'absolute',
-                    right: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: '#9ca3af',
-                    zIndex: 2,
-                    transition: 'color .3s ease',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    padding: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#2563EB'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <button 
-              type="submit" 
-              disabled={loading}
-              style={{
-                background: 'linear-gradient(135deg,#2563EB,#1D4ED8)',
-                color: 'white',
-                border: 'none',
-                padding: '16px 32px',
-                borderRadius: 12,
-                fontSize: 16,
-                fontWeight: 600,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all .3s ease',
-                marginTop: 8,
-                boxShadow: '0 4px 12px rgba(37,99,235,.3)',
-                opacity: loading ? 0.7 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(37,99,235,.4)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,.3)';
-              }}
-            >
-              {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
-            </button>
-          </form>
-
-          {/* Footer */}
-          <div style={{
-            textAlign: 'center',
-            marginTop: 32,
-            paddingTop: 24,
-            borderTop: '1px solid #e5e7eb'
-          }}>
-            <p style={{
-              color: '#9ca3af',
-              fontSize: 13,
-              margin: 0,
-              fontWeight: 400
-            }}>
-              © 2026 Tüm hakları saklıdır.
-            </p>
           </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{
+              ...styles.button,
+              opacity: isLoading ? 0.7 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                Object.assign(e.currentTarget.style, styles.buttonHover);
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = styles.button.background as string;
+              e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.boxShadow = styles.button.boxShadow as string;
+            }}
+          >
+            {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+          </button>
+        </form>
+
+        <div style={styles.footer}>
+          © 2026 Tüm hakları saklıdır.
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
