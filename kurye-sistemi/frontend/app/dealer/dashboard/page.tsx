@@ -296,7 +296,23 @@ export default function DealerDashboard() {
   
   // Forms
   const [courierForm, setCourierForm] = useState({ name: '', phone: '', vehicleType: 'motorcycle' as 'motorcycle' | 'bicycle' | 'car' });
-  const [restaurantForm, setRestaurantForm] = useState({ name: '', phone: '', address: '', commission: '15' });
+  const [restaurantForm, setRestaurantForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    commission: '15',
+    workType: 'full_time',
+    openingTime: '09:00',
+    closingTime: '23:00',
+    paymentMethods: [] as string[],
+    integrations: {} as Record<string, boolean>,
+    yemeksepetiId: '',
+    yemeksepetiKey: '',
+    getirId: '',
+    trendyolId: '',
+    migrosId: '',
+  });
 
   const toggleMenu = (menu: string) => {
     setExpandedMenus(prev => 
@@ -355,7 +371,23 @@ export default function DealerDashboard() {
       isActive: true,
     };
     setRestaurants([...restaurants, newRestaurant]);
-    setRestaurantForm({ name: '', phone: '', address: '', commission: '15' });
+    setRestaurantForm({
+      name: '',
+      phone: '',
+      email: '',
+      address: '',
+      commission: '15',
+      workType: 'full_time',
+      openingTime: '09:00',
+      closingTime: '23:00',
+      paymentMethods: [],
+      integrations: {},
+      yemeksepetiId: '',
+      yemeksepetiKey: '',
+      getirId: '',
+      trendyolId: '',
+      migrosId: '',
+    });
     setShowAddRestaurantModal(false);
   };
 
@@ -1108,81 +1140,350 @@ export default function DealerDashboard() {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 200,
+          overflow: 'auto',
+          padding: '20px',
         }}>
           <div style={{
             background: colors.white,
             borderRadius: 16,
-            width: '90%',
-            maxWidth: 420,
+            width: '100%',
+            maxWidth: 600,
+            maxHeight: '90vh',
+            overflow: 'auto',
             padding: 24,
           }}>
             <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>Yeni Restoran Ekle</h3>
             
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Restoran Adı</label>
-              <input
-                type="text"
-                value={restaurantForm.name}
-                onChange={(e) => setRestaurantForm({ ...restaurantForm, name: e.target.value })}
-                placeholder="örn: Burger King"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: `1px solid ${colors.gray300}`,
-                  borderRadius: 8,
-                  fontSize: 14,
-                }}
-              />
+            {/* Temel Bilgiler */}
+            <div style={{ marginBottom: 20, padding: 16, background: colors.gray50, borderRadius: 12 }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: colors.gray700 }}>📋 Temel Bilgiler</h4>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Restoran Adı *</label>
+                  <input
+                    type="text"
+                    value={restaurantForm.name || ''}
+                    onChange={(e) => setRestaurantForm({ ...restaurantForm, name: e.target.value })}
+                    placeholder="örn: Burger King"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14,
+                    }}
+                  />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Telefon *</label>
+                    <input
+                      type="text"
+                      value={restaurantForm.phone || ''}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, phone: e.target.value })}
+                      placeholder="örn: 0252 316 1234"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>E-posta</label>
+                    <input
+                      type="email"
+                      value={restaurantForm.email || ''}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, email: e.target.value })}
+                      placeholder="örn: info@restoran.com"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Adres *</label>
+                  <textarea
+                    value={restaurantForm.address || ''}
+                    onChange={(e) => setRestaurantForm({ ...restaurantForm, address: e.target.value })}
+                    placeholder="örn: Cumhuriyet Cad. No:45, Bodrum"
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: `1px solid ${colors.gray300}`,
+                      borderRadius: 8,
+                      fontSize: 14,
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Telefon</label>
-              <input
-                type="text"
-                value={restaurantForm.phone}
-                onChange={(e) => setRestaurantForm({ ...restaurantForm, phone: e.target.value })}
-                placeholder="örn: 0252 316 1234"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: `1px solid ${colors.gray300}`,
-                  borderRadius: 8,
-                  fontSize: 14,
-                }}
-              />
+
+            {/* Çalışma Bilgileri */}
+            <div style={{ marginBottom: 20, padding: 16, background: colors.gray50, borderRadius: 12 }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: colors.gray700 }}>⏰ Çalışma Bilgileri</h4>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Çalışma Tipi</label>
+                    <select
+                      value={restaurantForm.workType || 'full_time'}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, workType: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    >
+                      <option value="full_time">Tam Zamanlı</option>
+                      <option value="part_time">Yarı Zamanlı</option>
+                      <option value="seasonal">Sezonluk</option>
+                      <option value="temporary">Geçici</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Komisyon (%)</label>
+                    <input
+                      type="number"
+                      value={restaurantForm.commission || 15}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, commission: e.target.value })}
+                      min="0"
+                      max="50"
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Açılış Saati</label>
+                    <input
+                      type="time"
+                      value={restaurantForm.openingTime || '09:00'}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, openingTime: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Kapanış Saati</label>
+                    <input
+                      type="time"
+                      value={restaurantForm.closingTime || '23:00'}
+                      onChange={(e) => setRestaurantForm({ ...restaurantForm, closingTime: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        border: `1px solid ${colors.gray300}`,
+                        borderRadius: 8,
+                        fontSize: 14,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Adres</label>
-              <input
-                type="text"
-                value={restaurantForm.address}
-                onChange={(e) => setRestaurantForm({ ...restaurantForm, address: e.target.value })}
-                placeholder="örn: Cumhuriyet Cad. No:45, Bodrum"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: `1px solid ${colors.gray300}`,
-                  borderRadius: 8,
-                  fontSize: 14,
-                }}
-              />
+
+            {/* Ödeme Şekilleri */}
+            <div style={{ marginBottom: 20, padding: 16, background: colors.gray50, borderRadius: 12 }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: colors.gray700 }}>💳 Ödeme Şekilleri</h4>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {['Nakit', 'Kredi Kartı', 'Debit Kart', 'Online Ödeme', 'Sodexo', 'Multinet', 'Edenred'].map((method) => (
+                  <label
+                    key={method}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '8px 12px',
+                      background: (restaurantForm.paymentMethods || []).includes(method) ? colors.primaryLight : colors.white,
+                      border: `1px solid ${(restaurantForm.paymentMethods || []).includes(method) ? colors.primary : colors.gray300}`,
+                      borderRadius: 8,
+                      cursor: 'pointer',
+                      fontSize: 13,
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(restaurantForm.paymentMethods || []).includes(method)}
+                      onChange={(e) => {
+                        const current = restaurantForm.paymentMethods || [];
+                        if (e.target.checked) {
+                          setRestaurantForm({ ...restaurantForm, paymentMethods: [...current, method] });
+                        } else {
+                          setRestaurantForm({ ...restaurantForm, paymentMethods: current.filter(m => m !== method) });
+                        }
+                      }}
+                      style={{ margin: 0 }}
+                    />
+                    {method}
+                  </label>
+                ))}
+              </div>
             </div>
-            
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Komisyon (%)</label>
-              <input
-                type="number"
-                value={restaurantForm.commission}
-                onChange={(e) => setRestaurantForm({ ...restaurantForm, commission: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: `1px solid ${colors.gray300}`,
-                  borderRadius: 8,
-                  fontSize: 14,
-                }}
-              />
+
+            {/* Entegrasyon Bilgileri */}
+            <div style={{ marginBottom: 20, padding: 16, background: colors.gray50, borderRadius: 12 }}>
+              <h4 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: colors.gray700 }}>🔗 Entegrasyon Bilgileri</h4>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, marginBottom: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={restaurantForm.integrations?.yemeksepeti || false}
+                      onChange={(e) => setRestaurantForm({
+                        ...restaurantForm,
+                        integrations: { ...restaurantForm.integrations, yemeksepeti: e.target.checked }
+                      })}
+                    />
+                    🍔 Yemeksepeti Entegrasyonu
+                  </label>
+                  {restaurantForm.integrations?.yemeksepeti && (
+                    <div style={{ marginTop: 8, marginLeft: 24, display: 'grid', gap: 8 }}>
+                      <input
+                        type="text"
+                        placeholder="Restaurant ID"
+                        value={restaurantForm.yemeksepetiId || ''}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, yemeksepetiId: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: `1px solid ${colors.gray300}`,
+                          borderRadius: 6,
+                          fontSize: 13,
+                        }}
+                      />
+                      <input
+                        type="text"
+                        placeholder="API Key"
+                        value={restaurantForm.yemeksepetiKey || ''}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, yemeksepetiKey: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: `1px solid ${colors.gray300}`,
+                          borderRadius: 6,
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, marginBottom: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={restaurantForm.integrations?.getir || false}
+                      onChange={(e) => setRestaurantForm({
+                        ...restaurantForm,
+                        integrations: { ...restaurantForm.integrations, getir: e.target.checked }
+                      })}
+                    />
+                    🚀 Getir Entegrasyonu
+                  </label>
+                  {restaurantForm.integrations?.getir && (
+                    <div style={{ marginTop: 8, marginLeft: 24 }}>
+                      <input
+                        type="text"
+                        placeholder="Getir Merchant ID"
+                        value={restaurantForm.getirId || ''}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, getirId: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: `1px solid ${colors.gray300}`,
+                          borderRadius: 6,
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, marginBottom: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={restaurantForm.integrations?.trendyol || false}
+                      onChange={(e) => setRestaurantForm({
+                        ...restaurantForm,
+                        integrations: { ...restaurantForm.integrations, trendyol: e.target.checked }
+                      })}
+                    />
+                    🟠 Trendyol Yemek Entegrasyonu
+                  </label>
+                  {restaurantForm.integrations?.trendyol && (
+                    <div style={{ marginTop: 8, marginLeft: 24 }}>
+                      <input
+                        type="text"
+                        placeholder="Trendyol Restaurant ID"
+                        value={restaurantForm.trendyolId || ''}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, trendyolId: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: `1px solid ${colors.gray300}`,
+                          borderRadius: 6,
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 500, marginBottom: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={restaurantForm.integrations?.migros || false}
+                      onChange={(e) => setRestaurantForm({
+                        ...restaurantForm,
+                        integrations: { ...restaurantForm.integrations, migros: e.target.checked }
+                      })}
+                    />
+                    🟡 Migros Yemek Entegrasyonu
+                  </label>
+                  {restaurantForm.integrations?.migros && (
+                    <div style={{ marginTop: 8, marginLeft: 24 }}>
+                      <input
+                        type="text"
+                        placeholder="Migros Store ID"
+                        value={restaurantForm.migrosId || ''}
+                        onChange={(e) => setRestaurantForm({ ...restaurantForm, migrosId: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: `1px solid ${colors.gray300}`,
+                          borderRadius: 6,
+                          fontSize: 13,
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             
             <div style={{ display: 'flex', gap: 12 }}>
