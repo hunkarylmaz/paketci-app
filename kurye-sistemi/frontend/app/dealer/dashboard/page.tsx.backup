@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 // ==================== ICONS ====================
@@ -9,11 +8,6 @@ const Icons = {
   menu: () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 12h18M3 6h18M3 18h18" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  close: () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   dashboard: () => (
@@ -99,15 +93,27 @@ const Icons = {
       <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
+  sync: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="23 4 23 10 17 10" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="1 20 1 14 7 14" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  phone: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
   location: () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" strokeLinecap="round" strokeLinejoin="round"/>
       <circle cx="12" cy="10" r="3" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
-  phone: () => (
+  chevronDown: () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" strokeLinecap="round" strokeLinejoin="round"/>
+      <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
   bike: () => (
@@ -117,14 +123,10 @@ const Icons = {
       <path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
-  chevronDown: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="6 9 12 15 18 9" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ),
-  chevronRight: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="9 18 15 12 9 6" strokeLinecap="round" strokeLinejoin="round"/>
+  coins: () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="8" cy="8" r="6" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M18 8a6 6 0 0 1-6 6" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 };
@@ -247,8 +249,7 @@ const LiveMap = dynamic(() => import('./LiveMap'), { ssr: false, loading: () => 
 )});
 
 // ==================== MAIN COMPONENT ====================
-export default function CourierDashboard() {
-  const router = useRouter();
+export default function DealerDashboard() {
   const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -258,7 +259,13 @@ export default function CourierDashboard() {
   const [selectedCourier, setSelectedCourier] = useState<string | null>(null);
   const [showAddCourierModal, setShowAddCourierModal] = useState(false);
   const [showAddRestaurantModal, setShowAddRestaurantModal] = useState(false);
+  const [showCreditModal, setShowCreditModal] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['orders']);
+  
+  // Credit state
+  const [dealerCredits, setDealerCredits] = useState({ current: 26722, pending: 0, total: 125000 });
+  const [creditAmount, setCreditAmount] = useState('');
+  const [creditPaymentMethod, setCreditPaymentMethod] = useState('bank');
   
   // Forms
   const [courierForm, setCourierForm] = useState({ name: '', phone: '', vehicleType: 'motorcycle' as 'motorcycle' | 'bicycle' | 'car' });
@@ -325,8 +332,21 @@ export default function CourierDashboard() {
     setShowAddRestaurantModal(false);
   };
 
+  const handleCreditLoad = () => {
+    const amount = parseInt(creditAmount);
+    if (!amount || amount <= 0) return;
+    
+    setDealerCredits(prev => ({
+      ...prev,
+      current: prev.current + amount,
+      total: prev.total + amount
+    }));
+    setCreditAmount('');
+    setShowCreditModal(false);
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem('courier_user');
+    localStorage.removeItem('dealer_user');
     window.location.href = '/login.html';
   };
 
@@ -346,19 +366,11 @@ export default function CourierDashboard() {
         { id: 'orders-delivered', label: 'Teslim', count: orderCounts.delivered },
       ]
     },
-    { id: 'restaurants', label: 'İşletmeler', icon: <Icons.store />, onClick: () => setActiveMenu('restaurants') },
+    { id: 'restaurants', label: 'Restoranlar', icon: <Icons.store />, onClick: () => setActiveMenu('restaurants') },
     { id: 'couriers', label: 'Kuryeler', icon: <Icons.users />, onClick: () => setActiveMenu('couriers') },
     { id: 'map', label: 'Harita', icon: <Icons.map />, onClick: () => setActiveMenu('map') },
-    { id: 'wallet', label: 'Cari Hesap', icon: <Icons.wallet /> },
-    { 
-      id: 'reports', 
-      label: 'Raporlar', 
-      icon: <Icons.chart />,
-      children: [
-        { id: 'courier-reports', label: 'Kurye Raporları' },
-        { id: 'restaurant-reports', label: 'Restoran Raporları' },
-      ]
-    },
+    { id: 'wallet', label: 'Kontör Yükle', icon: <Icons.wallet />, onClick: () => setShowCreditModal(true) },
+    { id: 'reports', label: 'Raporlar', icon: <Icons.chart /> },
     { id: 'settings', label: 'Ayarlar', icon: <Icons.settings /> },
   ];
 
@@ -386,7 +398,7 @@ export default function CourierDashboard() {
           {sidebarOpen && (
             <div>
               <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -0.5 }}>PAKETÇİ</div>
-              <div style={{ fontSize: 10, color: colors.gray400, letterSpacing: 1 }}>YÖNETİM PANELİ</div>
+              <div style={{ fontSize: 10, color: colors.gray400, letterSpacing: 1 }}>BAYİ PANELİ</div>
             </div>
           )}
         </div>
@@ -539,14 +551,15 @@ export default function CourierDashboard() {
               alignItems: 'center',
               gap: 8,
             }}>
+              <Icons.coins />
               <span>Kontör</span>
-              <span style={{ fontSize: 16 }}>26,722</span>
+              <span style={{ fontSize: 16 }}>{dealerCredits.current.toLocaleString('tr-TR')}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: colors.gray600 }}>
               <div style={{ width: 32, height: 32, borderRadius: '50%', background: colors.gray200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icons.users />
               </div>
-              <span style={{ fontSize: 14, fontWeight: 500 }}>Admin</span>
+              <span style={{ fontSize: 14, fontWeight: 500 }}>Bayi</span>
             </div>
           </div>
         </header>
@@ -1142,6 +1155,100 @@ export default function CourierDashboard() {
                 }}
               >
                 Ekle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CREDIT LOAD MODAL */}
+      {showCreditModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+        }}>
+          <div style={{
+            background: colors.white,
+            borderRadius: 16,
+            width: '90%',
+            maxWidth: 420,
+            padding: 24,
+          }}>
+            <h3 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 700 }}>Kontör Yükle</h3>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Yüklenecek Tutar</label>
+              <input
+                type="number"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+                placeholder="örn: 5000"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              />
+            </div>
+            
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Ödeme Yöntemi</label>
+              <select
+                value={creditPaymentMethod}
+                onChange={(e) => setCreditPaymentMethod(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: `1px solid ${colors.gray300}`,
+                  borderRadius: 8,
+                  fontSize: 14,
+                }}
+              >
+                <option value="bank">Banka Havalesi</option>
+                <option value="creditCard">Kredi Kartı</option>
+                <option value="eft">EFT</option>
+              </select>
+            </div>
+            
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button
+                onClick={() => setShowCreditModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.gray100,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.gray700,
+                  cursor: 'pointer',
+                }}
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleCreditLoad}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: colors.primary,
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: colors.white,
+                  cursor: 'pointer',
+                }}
+              >
+                Yükle
               </button>
             </div>
           </div>

@@ -58,7 +58,8 @@ const createCourierIcon = (status: string) => {
         color: white;
         font-weight: bold;
         font-size: 14px;
-      ">🛵</div>
+      "
+      >🛵</div>
     `,
     iconSize: [36, 36],
     iconAnchor: [18, 18],
@@ -81,7 +82,8 @@ const createRestaurantIcon = () => {
         justify-content: center;
         color: white;
         font-size: 12px;
-      ">🏪</div>
+      "
+      >🏪</div>
     `,
     iconSize: [32, 32],
     iconAnchor: [16, 16],
@@ -105,7 +107,8 @@ const createOrderIcon = (status: string) => {
         justify-content: center;
         color: white;
         font-size: 10px;
-      ">📦</div>
+      "
+      >📦</div>
     `,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
