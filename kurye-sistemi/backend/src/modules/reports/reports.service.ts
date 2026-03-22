@@ -133,12 +133,12 @@ export class ReportsService {
 
       data.push([
         date,
-        total,
-        completed,
-        cancelled,
+        String(total),
+        String(completed),
+        String(cancelled),
         `${((completed / total) * 100).toFixed(1)}%`,
         revenue.toFixed(2),
-        avgTime,
+        String(avgTime),
       ]);
     }
 
@@ -161,12 +161,12 @@ export class ReportsService {
       data.push([
         `${courier.firstName} ${courier.lastName}`,
         courier.phone,
-        total,
-        completed,
-        cancelled,
+        String(total),
+        String(completed),
+        String(cancelled),
         total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
         earnings.toFixed(2),
-        avgTime,
+        String(avgTime),
       ]);
     }
 
@@ -188,10 +188,10 @@ export class ReportsService {
       data.push([
         restaurant.name,
         restaurant.phone,
-        restaurant.address,
-        total,
-        completed,
-        cancelled,
+        typeof restaurant.address === 'object' ? restaurant.address?.full || '' : String(restaurant.address || ''),
+        String(total),
+        String(completed),
+        String(cancelled),
         total > 0 ? `${((completed / total) * 100).toFixed(1)}%` : '0%',
         revenue.toFixed(2),
       ]);

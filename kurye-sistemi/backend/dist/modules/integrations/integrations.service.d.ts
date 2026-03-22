@@ -1,43 +1,37 @@
-import { HttpService } from '@nestjs/axios';
 import { Repository } from 'typeorm';
-import { RestaurantPlatformConfig } from './entities/restaurant-platform-config.entity';
-import { PlatformOrder } from './adapters/yemeksepeti.adapter';
-interface IntegrationConfig {
-    platform: string;
-    apiKey: string;
-    apiSecret: string;
-    merchantId: string;
-    branchId?: string;
-    autoAccept: boolean;
-    isOpen: boolean;
-}
-interface IntegrationStatus {
-    platform: string;
-    connected: boolean;
-    lastSyncAt?: Date;
-    error?: string;
-    pendingOrders: number;
-    todayOrders: number;
-}
+import { Integration, IntegrationPlatform } from './entities/integration.entity';
+import { WebhookEvent } from './entities/webhook-event.entity';
+import { CreateIntegrationDto, UpdateIntegrationDto, TestIntegrationDto, PlatformOrderDto } from './dto/integration.dto';
+import { YemeksepetiAdapter } from './adapters/yemeksepeti.adapter';
+import { MigrosYemekAdapter } from './adapters/migrosyemek.adapter';
+import { TrendyolYemekAdapter } from './adapters/trendyolyemek.adapter';
+import { GetirYemekAdapter } from './adapters/getiryemek.adapter';
+import { PlatformAdapter } from './adapters/platform-adapter.interface';
 export declare class IntegrationsService {
-    private configRepo;
-    private httpService;
+    private integrationRepository;
+    private webhookEventRepository;
+    private yemeksepetiAdapter;
+    private migrosAdapter;
+    private trendyolAdapter;
+    private getirAdapter;
     private readonly logger;
     private adapters;
-    constructor(configRepo: Repository<RestaurantPlatformConfig>, httpService: HttpService);
-    saveIntegration(restaurantId: string, config: IntegrationConfig): Promise<RestaurantPlatformConfig>;
-    getRestaurantIntegrations(restaurantId: string): Promise<IntegrationStatus[]>;
-    testConnection(restaurantId: string, platform: string): Promise<{
+    constructor(integrationRepository: Repository<Integration>, webhookEventRepository: Repository<WebhookEvent>, yemeksepetiAdapter: YemeksepetiAdapter, migrosAdapter: MigrosYemekAdapter, trendyolAdapter: TrendyolYemekAdapter, getirAdapter: GetirYemekAdapter);
+    findAll(restaurantId?: string): Promise<Integration[]>;
+    findOne(id: string): Promise<Integration>;
+    findByPlatform(restaurantId: string, platform: IntegrationPlatform): Promise<Integration | null>;
+    create(dto: CreateIntegrationDto): Promise<Integration>;
+    update(id: string, dto: UpdateIntegrationDto): Promise<Integration>;
+    remove(id: string): Promise<void>;
+    testConnection(dto: TestIntegrationDto): Promise<{
         success: boolean;
         message: string;
+        data?: any;
     }>;
-    fetchOrders(restaurantId: string, platform: string): Promise<PlatformOrder[]>;
-    toggleRestaurantStatus(restaurantId: string, platform: string, isOpen: boolean): Promise<boolean>;
-    acceptOrder(restaurantId: string, platform: string, orderId: string): Promise<boolean>;
-    rejectOrder(restaurantId: string, platform: string, orderId: string, reason: string): Promise<boolean>;
-    private checkConnection;
-    private encrypt;
-    private decrypt;
-    getWebhookUrl(platform: string, restaurantId: string): string;
+    syncOrders(integrationId: string, filters?: any): Promise<any[]>;
+    handleWebhook(platform: IntegrationPlatform, payload: any, signature?: string): Promise<void>;
+    processWebhookEvent(event: WebhookEvent): Promise<void>;
+    createOrderFromExtension(restaurantId: string, orderData: PlatformOrderDto): Promise<any>;
+    private detectEventType;
+    getPlatformAdapter(platform: IntegrationPlatform): PlatformAdapter | undefined;
 }
-export {};

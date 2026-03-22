@@ -10,14 +10,19 @@ exports.DeliveriesModule = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const deliveries_controller_1 = require("./deliveries.controller");
+const deliveries_service_1 = require("./deliveries.service");
 const delivery_entity_1 = require("./entities/delivery.entity");
+const company_entity_1 = require("../companies/entities/company.entity");
+const credit_entity_1 = require("../credits/entities/credit.entity");
 let DeliveriesModule = class DeliveriesModule {
 };
 exports.DeliveriesModule = DeliveriesModule;
 exports.DeliveriesModule = DeliveriesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([delivery_entity_1.Delivery])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([delivery_entity_1.Delivery, company_entity_1.Company, credit_entity_1.Credit])],
         controllers: [deliveries_controller_1.DeliveriesController],
+        providers: [deliveries_service_1.DeliveriesService],
+        exports: [deliveries_service_1.DeliveriesService],
     })
 ], DeliveriesModule);
 //# sourceMappingURL=deliveries.module.js.map

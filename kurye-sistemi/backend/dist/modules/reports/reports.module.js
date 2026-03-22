@@ -12,6 +12,10 @@ const typeorm_1 = require("@nestjs/typeorm");
 const reports_controller_1 = require("./reports.controller");
 const reports_service_1 = require("./reports.service");
 const delivery_entity_1 = require("../deliveries/entities/delivery.entity");
+const courier_entity_1 = require("../couriers/entities/courier.entity");
+const restaurant_entity_1 = require("../restaurants/entities/restaurant.entity");
+const user_entity_1 = require("../users/entities/user.entity");
+const company_entity_1 = require("../companies/entities/company.entity");
 const common_module_1 = require("../../common/common.module");
 let ReportsModule = class ReportsModule {
 };
@@ -19,7 +23,7 @@ exports.ReportsModule = ReportsModule;
 exports.ReportsModule = ReportsModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([delivery_entity_1.Delivery]),
+            typeorm_1.TypeOrmModule.forFeature([delivery_entity_1.Delivery, courier_entity_1.Courier, restaurant_entity_1.Restaurant, user_entity_1.User, company_entity_1.Company]),
             common_module_1.CommonModule,
         ],
         controllers: [reports_controller_1.ReportsController],

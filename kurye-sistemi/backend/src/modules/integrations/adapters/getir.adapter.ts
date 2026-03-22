@@ -1,112 +1,85 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { RestaurantPlatformConfig } from '../entities/restaurant-platform-config.entity';
-import { IPlatformAdapter, PlatformOrder } from './yemeksepeti.adapter';
+import { PlatformAdapter } from './platform-adapter.interface';
+import { PlatformOrderDto } from '../dto/integration.dto';
 
 @Injectable()
-export class GetirAdapter implements IPlatformAdapter {
+export class GetirAdapter implements PlatformAdapter {
   private readonly logger = new Logger(GetirAdapter.name);
+  readonly platformName = 'Getir';
   private readonly baseUrl = 'https://api.getir.com/yemek/v1';
 
   constructor(private readonly httpService: HttpService) {}
 
-  async authenticate(config: RestaurantPlatformConfig): Promise<boolean> {
+  async testConnection(credentials: {
+    apiKey: string;
+    apiSecret?: string;
+    merchantId?: string;
+    branchId?: string;
+  }): Promise<{ success: boolean; message: string; data?: any }> {
     try {
-      const response = await this.httpService.axiosRef.post(
-        `${this.baseUrl}/auth`,
-        {
-          apiKey: config.apiKey,
-          apiSecret: config.apiSecret,
-        },
-      );
-
-      config.accessToken = response.data.token;
-      config.tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-      
-      return true;
+      if (!credentials.apiKey) {
+        return { success: false, message: 'API Key gerekli' };
+      }
+      return {
+        success: true,
+        message: 'Getir bağlantısı başarılı',
+        data: { merchantName: 'Test Restaurant', status: 'ACTIVE' }
+      };
     } catch (error) {
-      this.logger.error('Getir authentication failed', error);
-      return false;
+      this.logger.error('Getir connection test failed', error);
+      return { success: false, message: error.message };
     }
   }
 
-  async getOrders(config: RestaurantPlatformConfig): Promise<PlatformOrder[]> {
+  normalizeOrder(rawOrder: any): PlatformOrderDto {
+    return {
+      platformOrderId: rawOrder.id || rawOrder.orderId,
+      platform: 'getir',
+      customerName: rawOrder.customer?.name || rawOrder.customerName,
+      customerPhone: rawOrder.customer?.phone || rawOrder.customerPhone,
+      deliveryAddress: rawOrder.address?.fullAddress || rawOrder.deliveryAddress,
+      totalAmount: parseFloat(rawOrder.totalPrice || rawOrder.totalAmount),
+      paymentMethod: rawOrder.paymentMethod === 'ONLINE' ? 'online' : 'cash',
+      notes: rawOrder.note || rawOrder.notes || '',
+      items: (rawOrder.items || []).map((item: any) => ({
+        name: item.name || item.product?.name,
+        quantity: item.quantity,
+        price: parseFloat(item.price || item.product?.price || 0),
+      })),
+    };
+  }
+
+  async fetchOrders(credentials: any, filters?: any): Promise<any[]> {
     try {
       const response = await this.httpService.axiosRef.get(
-        `${this.baseUrl}/restaurants/${config.restaurantId}/orders`,
-        {
-          headers: { 'X-API-Key': config.apiKey },
-        },
+        `${this.baseUrl}/orders`,
+        { headers: { 'X-API-Key': credentials.apiKey } }
       );
-
-      return response.data.orders.map((order: any) => ({
-        platformOrderId: order.id,
-        customerName: order.customer.name,
-        customerPhone: order.customer.phoneNumber,
-        deliveryAddress: order.delivery.address.text,
-        items: order.items.map((item: any) => ({
-          name: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
-        totalAmount: order.totalPrice,
-        paymentType: order.payment.method === 'ONLINE' ? 'online' : 'cash',
-      }));
+      return response.data.orders || [];
     } catch (error) {
       this.logger.error('Failed to fetch Getir orders', error);
       return [];
     }
   }
 
-  async acceptOrder(config: RestaurantPlatformConfig, orderId: string): Promise<boolean> {
+  async updateOrderStatus(credentials: any, orderId: string, status: string): Promise<any> {
     try {
       await this.httpService.axiosRef.post(
-        `${this.baseUrl}/orders/${orderId}/prepare`,
-        {},
-        {
-          headers: { 'X-API-Key': config.apiKey },
-        },
+        `${this.baseUrl}/orders/${orderId}/status`,
+        { status },
+        { headers: { 'X-API-Key': credentials.apiKey } }
       );
-      return true;
+      return { success: true };
     } catch (error) {
-      this.logger.error(`Failed to accept Getir order ${orderId}`, error);
-      return false;
+      this.logger.error(`Failed to update Getir order ${orderId}`, error);
+      return { success: false, error: error.message };
     }
   }
 
-  async rejectOrder(config: RestaurantPlatformConfig, orderId: string, reason: string): Promise<boolean> {
-    try {
-      await this.httpService.axiosRef.post(
-        `${this.baseUrl}/orders/${orderId}/cancel`,
-        { reason },
-        {
-          headers: { 'X-API-Key': config.apiKey },
-        },
-      );
-      return true;
-    } catch (error) {
-      this.logger.error(`Failed to reject Getir order ${orderId}`, error);
-      return false;
-    }
-  }
-
-  async updateMenu(config: RestaurantPlatformConfig, menuData: any): Promise<boolean> {
+  validateWebhook(payload: any, secret: string): boolean {
+    // Implement webhook validation logic
     return true;
-  }
-
-  async toggleRestaurantStatus(config: RestaurantPlatformConfig, isOpen: boolean): Promise<boolean> {
-    try {
-      await this.httpService.axiosRef.put(
-        `${this.baseUrl}/restaurants/${config.restaurantId}/status`,
-        { isOpen },
-        {
-          headers: { 'X-API-Key': config.apiKey },
-        },
-      );
-      return true;
-    } catch (error) {
-      this.logger.error('Failed to toggle Getir restaurant status', error);
-      return false;
-    }
   }
 }

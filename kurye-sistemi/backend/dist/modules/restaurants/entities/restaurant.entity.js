@@ -20,6 +20,7 @@ const invoice_entity_1 = require("../../invoices/entities/invoice.entity");
 const territory_entity_1 = require("../../territories/entities/territory.entity");
 const visit_entity_1 = require("../../visits/entities/visit.entity");
 const lead_entity_1 = require("../../leads/entities/lead.entity");
+const integration_entity_1 = require("../../integrations/entities/integration.entity");
 var PricingType;
 (function (PricingType) {
     PricingType["PER_PACKAGE"] = "PER_PACKAGE";
@@ -292,6 +293,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => lead_entity_1.Lead, lead => lead.restaurant),
     __metadata("design:type", Array)
 ], Restaurant.prototype, "leads", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => integration_entity_1.Integration, integration => integration.restaurant),
+    __metadata("design:type", Array)
+], Restaurant.prototype, "integrations", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

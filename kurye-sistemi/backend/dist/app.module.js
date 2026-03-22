@@ -13,31 +13,8 @@ const typeorm_1 = require("@nestjs/typeorm");
 const schedule_1 = require("@nestjs/schedule");
 const auth_module_1 = require("./modules/auth/auth.module");
 const companies_module_1 = require("./modules/companies/companies.module");
-const restaurants_module_1 = require("./modules/restaurants/restaurants.module");
-const couriers_module_1 = require("./modules/couriers/couriers.module");
-const deliveries_module_1 = require("./modules/deliveries/deliveries.module");
-const credits_module_1 = require("./modules/credits/credits.module");
 const users_module_1 = require("./modules/users/users.module");
-const maps_module_1 = require("./modules/maps/maps.module");
-const notifications_module_1 = require("./modules/notifications/notifications.module");
-const reports_module_1 = require("./modules/reports/reports.module");
-const shifts_module_1 = require("./modules/shifts/shifts.module");
 const common_module_1 = require("./common/common.module");
-const receipts_module_1 = require("./modules/receipts/receipts.module");
-const extension_module_1 = require("./modules/extension/extension.module");
-const webhooks_module_1 = require("./modules/webhooks/webhooks.module");
-const integrations_module_1 = require("./modules/integrations/integrations.module");
-const tracking_module_1 = require("./modules/tracking/tracking.module");
-const regions_module_1 = require("./modules/regions/regions.module");
-const dealers_module_1 = require("./modules/dealers/dealers.module");
-const territories_module_1 = require("./modules/territories/territories.module");
-const invoices_module_1 = require("./modules/invoices/invoices.module");
-const payments_module_1 = require("./modules/payments/payments.module");
-const leads_module_1 = require("./modules/leads/leads.module");
-const visits_module_1 = require("./modules/visits/visits.module");
-const contracts_module_1 = require("./modules/contracts/contracts.module");
-const support_module_1 = require("./modules/support/support.module");
-const pos_integration_module_1 = require("./modules/pos-integration/pos-integration.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -64,29 +41,6 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             companies_module_1.CompaniesModule,
-            restaurants_module_1.RestaurantsModule,
-            couriers_module_1.CouriersModule,
-            deliveries_module_1.DeliveriesModule,
-            credits_module_1.CreditsModule,
-            maps_module_1.MapsModule,
-            notifications_module_1.NotificationsModule,
-            reports_module_1.ReportsModule,
-            shifts_module_1.ShiftsModule,
-            receipts_module_1.ReceiptsModule,
-            extension_module_1.ExtensionModule,
-            webhooks_module_1.WebhooksModule,
-            integrations_module_1.IntegrationsModule,
-            tracking_module_1.TrackingModule,
-            regions_module_1.RegionsModule,
-            dealers_module_1.DealersModule,
-            territories_module_1.TerritoriesModule,
-            invoices_module_1.InvoicesModule,
-            payments_module_1.PaymentsModule,
-            leads_module_1.LeadsModule,
-            visits_module_1.VisitsModule,
-            contracts_module_1.ContractsModule,
-            support_module_1.SupportModule,
-            pos_integration_module_1.PosIntegrationModule,
             common_module_1.CommonModule,
         ],
     })

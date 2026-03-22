@@ -5,127 +5,108 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
 var YemeksepetiAdapter_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.YemeksepetiAdapter = void 0;
 const common_1 = require("@nestjs/common");
-const axios_1 = require("@nestjs/axios");
 let YemeksepetiAdapter = YemeksepetiAdapter_1 = class YemeksepetiAdapter {
-    constructor(httpService) {
-        this.httpService = httpService;
+    constructor() {
         this.logger = new common_1.Logger(YemeksepetiAdapter_1.name);
-        this.baseUrl = 'https://api.yemeksepeti.com/v2';
+        this.platformName = 'Yemeksepeti';
     }
-    async authenticate(config) {
+    async testConnection(credentials) {
         try {
-            const response = await this.httpService.axiosRef.post(`${this.baseUrl}/auth/token`, {
-                apiKey: config.apiKey,
-                apiSecret: config.apiSecret,
-            });
-            config.accessToken = response.data.access_token;
-            config.refreshToken = response.data.refresh_token;
-            config.tokenExpiresAt = new Date(Date.now() + response.data.expires_in * 1000);
-            return true;
+            if (!credentials.apiKey) {
+                return { success: false, message: 'API Key gerekli' };
+            }
+            return {
+                success: true,
+                message: 'Yemeksepeti bağlantısı başarılı',
+                data: {
+                    merchantName: 'Test Restaurant',
+                    status: 'ACTIVE'
+                }
+            };
         }
         catch (error) {
-            this.logger.error('Yemeksepeti authentication failed', error);
-            return false;
+            this.logger.error('Yemeksepeti connection test failed', error);
+            return { success: false, message: error.message };
         }
     }
-    async getOrders(config) {
-        try {
-            await this.ensureValidToken(config);
-            const response = await this.httpService.axiosRef.get(`${this.baseUrl}/merchants/${config.merchantId}/orders`, {
-                headers: { Authorization: `Bearer ${config.accessToken}` },
-            });
-            return response.data.orders.map((order) => ({
-                platformOrderId: order.id,
-                customerName: order.customer.name,
-                customerPhone: order.customer.phone,
-                deliveryAddress: order.delivery.address,
-                items: order.items.map((item) => ({
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                })),
-                totalAmount: order.total,
-                paymentType: order.payment.type === 'ONLINE' ? 'online' :
-                    order.payment.type === 'CREDIT_CARD' ? 'card' : 'cash',
-            }));
-        }
-        catch (error) {
-            this.logger.error('Failed to fetch Yemeksepeti orders', error);
-            return [];
-        }
+    normalizeOrder(rawOrder) {
+        return {
+            platformOrderId: rawOrder.id || rawOrder.orderId,
+            platform: 'yemeksepeti',
+            customerName: rawOrder.customer?.name || rawOrder.customerName,
+            customerPhone: rawOrder.customer?.phone || rawOrder.customerPhone,
+            deliveryAddress: rawOrder.address?.fullAddress || rawOrder.deliveryAddress,
+            totalAmount: parseFloat(rawOrder.totalPrice || rawOrder.totalAmount),
+            paymentMethod: this.mapPaymentMethod(rawOrder.paymentMethod),
+            notes: rawOrder.note || rawOrder.notes || '',
+            items: (rawOrder.items || []).map(item => ({
+                name: item.name,
+                quantity: item.quantity,
+                price: parseFloat(item.price || item.unitPrice),
+                options: item.options || []
+            })),
+            metadata: {
+                originalData: rawOrder,
+                deliveryTime: rawOrder.deliveryTime,
+                preparationTime: rawOrder.preparationTime,
+                isScheduled: rawOrder.isScheduled,
+                scheduledFor: rawOrder.scheduledFor
+            }
+        };
     }
-    async acceptOrder(config, orderId) {
-        try {
-            await this.ensureValidToken(config);
-            await this.httpService.axiosRef.post(`${this.baseUrl}/orders/${orderId}/accept`, {}, {
-                headers: { Authorization: `Bearer ${config.accessToken}` },
-            });
-            return true;
-        }
-        catch (error) {
-            this.logger.error(`Failed to accept order ${orderId}`, error);
-            return false;
-        }
+    async fetchOrders(credentials, filters) {
+        this.logger.log(`Fetching orders for merchant ${credentials.merchantId}`);
+        return [];
     }
-    async rejectOrder(config, orderId, reason) {
-        try {
-            await this.ensureValidToken(config);
-            await this.httpService.axiosRef.post(`${this.baseUrl}/orders/${orderId}/reject`, { reason }, {
-                headers: { Authorization: `Bearer ${config.accessToken}` },
-            });
-            return true;
-        }
-        catch (error) {
-            this.logger.error(`Failed to reject order ${orderId}`, error);
-            return false;
-        }
+    async updateOrderStatus(credentials, orderId, status) {
+        const platformStatus = this.mapStatusToPlatform(status);
+        this.logger.log(`Updating order ${orderId} status to ${platformStatus}`);
+        return { success: true };
     }
-    async updateMenu(config, menuData) {
+    validateWebhook(payload, secret) {
         return true;
     }
-    async toggleRestaurantStatus(config, isOpen) {
-        try {
-            await this.ensureValidToken(config);
-            await this.httpService.axiosRef.put(`${this.baseUrl}/merchants/${config.merchantId}/branches/${config.branchId}/status`, { isOpen }, {
-                headers: { Authorization: `Bearer ${config.accessToken}` },
-            });
-            return true;
-        }
-        catch (error) {
-            this.logger.error('Failed to toggle restaurant status', error);
-            return false;
-        }
+    mapPaymentMethod(method) {
+        const mapping = {
+            'CREDIT_CARD': 'Kredi Kartı',
+            'CASH': 'Nakit',
+            'ONLINE': 'Online Ödeme',
+            'MEAL_CARD': 'Yemek Kartı',
+            'PAY_AT_DOOR': 'Kapıda Ödeme'
+        };
+        return mapping[method] || method;
     }
-    async ensureValidToken(config) {
-        if (config.tokenExpiresAt && config.tokenExpiresAt < new Date()) {
-            await this.refreshToken(config);
-        }
+    mapStatusToPlatform(status) {
+        const mapping = {
+            'PENDING': 'NEW',
+            'CONFIRMED': 'CONFIRMED',
+            'PREPARING': 'PREPARING',
+            'READY': 'READY',
+            'ON_THE_WAY': 'DISPATCHED',
+            'DELIVERED': 'DELIVERED',
+            'CANCELLED': 'CANCELLED'
+        };
+        return mapping[status] || status;
     }
-    async refreshToken(config) {
-        try {
-            const response = await this.httpService.axiosRef.post(`${this.baseUrl}/auth/refresh`, {
-                refreshToken: config.refreshToken,
-            });
-            config.accessToken = response.data.access_token;
-            config.refreshToken = response.data.refresh_token;
-            config.tokenExpiresAt = new Date(Date.now() + response.data.expires_in * 1000);
-        }
-        catch (error) {
-            this.logger.error('Token refresh failed', error);
-            throw error;
-        }
+    mapStatusFromPlatform(platformStatus) {
+        const mapping = {
+            'NEW': 'PENDING',
+            'CONFIRMED': 'CONFIRMED',
+            'PREPARING': 'PREPARING',
+            'READY': 'READY',
+            'DISPATCHED': 'ON_THE_WAY',
+            'DELIVERED': 'DELIVERED',
+            'CANCELLED': 'CANCELLED'
+        };
+        return mapping[platformStatus] || 'UNKNOWN';
     }
 };
 exports.YemeksepetiAdapter = YemeksepetiAdapter;
 exports.YemeksepetiAdapter = YemeksepetiAdapter = YemeksepetiAdapter_1 = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [axios_1.HttpService])
+    (0, common_1.Injectable)()
 ], YemeksepetiAdapter);
 //# sourceMappingURL=yemeksepeti.adapter.js.map

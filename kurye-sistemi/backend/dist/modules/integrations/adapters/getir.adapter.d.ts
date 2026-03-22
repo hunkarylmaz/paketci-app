@@ -1,15 +1,24 @@
 import { HttpService } from '@nestjs/axios';
-import { RestaurantPlatformConfig } from '../entities/restaurant-platform-config.entity';
-import { IPlatformAdapter, PlatformOrder } from './yemeksepeti.adapter';
-export declare class GetirAdapter implements IPlatformAdapter {
+import { PlatformAdapter } from './platform-adapter.interface';
+import { PlatformOrderDto } from '../dto/integration.dto';
+export declare class GetirAdapter implements PlatformAdapter {
     private readonly httpService;
     private readonly logger;
+    readonly platformName = "Getir";
     private readonly baseUrl;
     constructor(httpService: HttpService);
-    authenticate(config: RestaurantPlatformConfig): Promise<boolean>;
-    getOrders(config: RestaurantPlatformConfig): Promise<PlatformOrder[]>;
-    acceptOrder(config: RestaurantPlatformConfig, orderId: string): Promise<boolean>;
-    rejectOrder(config: RestaurantPlatformConfig, orderId: string, reason: string): Promise<boolean>;
-    updateMenu(config: RestaurantPlatformConfig, menuData: any): Promise<boolean>;
-    toggleRestaurantStatus(config: RestaurantPlatformConfig, isOpen: boolean): Promise<boolean>;
+    testConnection(credentials: {
+        apiKey: string;
+        apiSecret?: string;
+        merchantId?: string;
+        branchId?: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+        data?: any;
+    }>;
+    normalizeOrder(rawOrder: any): PlatformOrderDto;
+    fetchOrders(credentials: any, filters?: any): Promise<any[]>;
+    updateOrderStatus(credentials: any, orderId: string, status: string): Promise<any>;
+    validateWebhook(payload: any, secret: string): boolean;
 }

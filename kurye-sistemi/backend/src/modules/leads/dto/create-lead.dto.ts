@@ -43,7 +43,7 @@ export class CreateLeadDto {
   @ApiPropertyOptional({ description: 'Atanan kullanıcı ID', example: '550e8400-e29b-41d4-a716-446655440001' })
   @IsUUID()
   @IsOptional()
-  assignedTo?: string;
+  assignedToId?: string;
 
   @ApiPropertyOptional({ description: 'Durum', enum: LeadStatus, default: LeadStatus.NEW })
   @IsEnum(LeadStatus)

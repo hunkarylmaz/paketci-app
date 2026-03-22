@@ -1,42 +1,29 @@
 import { IntegrationsService } from './integrations.service';
-interface SaveIntegrationDto {
-    platform: string;
-    apiKey: string;
-    apiSecret: string;
-    merchantId: string;
-    branchId?: string;
-    autoAccept: boolean;
-    isOpen: boolean;
-}
+import { CreateIntegrationDto, UpdateIntegrationDto, TestIntegrationDto, PlatformOrderDto } from './dto/integration.dto';
+import { IntegrationPlatform } from './entities/integration.entity';
 export declare class IntegrationsController {
     private readonly integrationsService;
     constructor(integrationsService: IntegrationsService);
-    getRestaurantIntegrations(restaurantId: string, req: any): Promise<any>;
-    saveIntegration(restaurantId: string, config: SaveIntegrationDto, req: any): Promise<import("./entities/restaurant-platform-config.entity").RestaurantPlatformConfig>;
-    testConnection(restaurantId: string, platform: string, req: any): Promise<{
+    findAll(restaurantId?: string): Promise<import("./entities/integration.entity").Integration[]>;
+    findOne(id: string): Promise<import("./entities/integration.entity").Integration>;
+    create(dto: CreateIntegrationDto): Promise<import("./entities/integration.entity").Integration>;
+    update(id: string, dto: UpdateIntegrationDto): Promise<import("./entities/integration.entity").Integration>;
+    remove(id: string): Promise<void>;
+    testConnection(dto: TestIntegrationDto): Promise<{
         success: boolean;
         message: string;
+        data?: any;
     }>;
-    syncOrders(restaurantId: string, platform: string, req: any): Promise<{
-        success: boolean;
-        count: number;
-        orders: import("./adapters/yemeksepeti.adapter").PlatformOrder[];
-    }>;
-    toggleStatus(restaurantId: string, platform: string, isOpen: boolean, req: any): Promise<{
-        success: boolean;
-    }>;
-    deleteIntegration(restaurantId: string, platform: string, req: any): Promise<{
-        success: boolean;
-    }>;
-    getWebhookUrl(restaurantId: string, platform: string): {
-        url: string;
-    };
+    syncOrders(id: string, startDate?: string, endDate?: string): Promise<any[]>;
+    createOrderFromExtension(orderData: PlatformOrderDto, restaurantId: string): Promise<any>;
     getPlatforms(): {
-        id: string;
+        id: IntegrationPlatform;
         name: string;
         icon: string;
-        requires: string[];
-        webhookEnabled: boolean;
+        color: string;
+        description: string;
+        commission: string;
+        features: string[];
+        authType: string;
     }[];
 }
-export {};

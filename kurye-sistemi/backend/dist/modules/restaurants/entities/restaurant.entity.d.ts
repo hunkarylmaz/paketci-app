@@ -7,6 +7,7 @@ import { Invoice } from '../../invoices/entities/invoice.entity';
 import { Territory } from '../../territories/entities/territory.entity';
 import { Visit } from '../../visits/entities/visit.entity';
 import { Lead } from '../../leads/entities/lead.entity';
+import { Integration } from '../../integrations/entities/integration.entity';
 export declare enum PricingType {
     PER_PACKAGE = "PER_PACKAGE",
     PER_KM = "PER_KM",
@@ -141,6 +142,7 @@ export declare class Restaurant {
     invoices: Invoice[];
     visits: Visit[];
     leads: Lead[];
+    integrations: Integration[];
     createdAt: Date;
     updatedAt: Date;
 }

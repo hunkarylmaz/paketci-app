@@ -13,7 +13,7 @@ import { PlatformAdapter } from './adapters/platform-adapter.interface';
 @Injectable()
 export class IntegrationsService {
   private readonly logger = new Logger(IntegrationsService.name);
-  private readonly adapters: Map<IntegrationPlatform, PlatformAdapter>;
+  private adapters = new Map<IntegrationPlatform, any>();
 
   constructor(
     @InjectRepository(Integration)
@@ -25,12 +25,10 @@ export class IntegrationsService {
     private trendyolAdapter: TrendyolYemekAdapter,
     private getirAdapter: GetirYemekAdapter,
   ) {
-    this.adapters = new Map([
-      [IntegrationPlatform.YEMEK_SEPETI, yemeksepetiAdapter],
-      [IntegrationPlatform.MIGROS_YEMEK, migrosAdapter],
-      [IntegrationPlatform.TRENDYOL_YEMEK, trendyolAdapter],
-      [IntegrationPlatform.GETIR_YEMEK, getirAdapter],
-    ]);
+    this.adapters.set(IntegrationPlatform.YEMEK_SEPETI, yemeksepetiAdapter);
+    this.adapters.set(IntegrationPlatform.MIGROS_YEMEK, migrosAdapter);
+    this.adapters.set(IntegrationPlatform.TRENDYOL_YEMEK, trendyolAdapter);
+    this.adapters.set(IntegrationPlatform.GETIR_YEMEK, getirAdapter);
   }
 
   async findAll(restaurantId?: string): Promise<Integration[]> {

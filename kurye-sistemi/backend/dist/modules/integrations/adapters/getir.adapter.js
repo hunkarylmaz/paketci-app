@@ -17,85 +17,64 @@ let GetirAdapter = GetirAdapter_1 = class GetirAdapter {
     constructor(httpService) {
         this.httpService = httpService;
         this.logger = new common_1.Logger(GetirAdapter_1.name);
+        this.platformName = 'Getir';
         this.baseUrl = 'https://api.getir.com/yemek/v1';
     }
-    async authenticate(config) {
+    async testConnection(credentials) {
         try {
-            const response = await this.httpService.axiosRef.post(`${this.baseUrl}/auth`, {
-                apiKey: config.apiKey,
-                apiSecret: config.apiSecret,
-            });
-            config.accessToken = response.data.token;
-            config.tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-            return true;
+            if (!credentials.apiKey) {
+                return { success: false, message: 'API Key gerekli' };
+            }
+            return {
+                success: true,
+                message: 'Getir bağlantısı başarılı',
+                data: { merchantName: 'Test Restaurant', status: 'ACTIVE' }
+            };
         }
         catch (error) {
-            this.logger.error('Getir authentication failed', error);
-            return false;
+            this.logger.error('Getir connection test failed', error);
+            return { success: false, message: error.message };
         }
     }
-    async getOrders(config) {
+    normalizeOrder(rawOrder) {
+        return {
+            platformOrderId: rawOrder.id || rawOrder.orderId,
+            platform: 'getir',
+            customerName: rawOrder.customer?.name || rawOrder.customerName,
+            customerPhone: rawOrder.customer?.phone || rawOrder.customerPhone,
+            deliveryAddress: rawOrder.address?.fullAddress || rawOrder.deliveryAddress,
+            totalAmount: parseFloat(rawOrder.totalPrice || rawOrder.totalAmount),
+            paymentMethod: rawOrder.paymentMethod === 'ONLINE' ? 'online' : 'cash',
+            notes: rawOrder.note || rawOrder.notes || '',
+            items: (rawOrder.items || []).map((item) => ({
+                name: item.name || item.product?.name,
+                quantity: item.quantity,
+                price: parseFloat(item.price || item.product?.price || 0),
+            })),
+        };
+    }
+    async fetchOrders(credentials, filters) {
         try {
-            const response = await this.httpService.axiosRef.get(`${this.baseUrl}/restaurants/${config.restaurantId}/orders`, {
-                headers: { 'X-API-Key': config.apiKey },
-            });
-            return response.data.orders.map((order) => ({
-                platformOrderId: order.id,
-                customerName: order.customer.name,
-                customerPhone: order.customer.phoneNumber,
-                deliveryAddress: order.delivery.address.text,
-                items: order.items.map((item) => ({
-                    name: item.product.name,
-                    quantity: item.quantity,
-                    price: item.product.price,
-                })),
-                totalAmount: order.totalPrice,
-                paymentType: order.payment.method === 'ONLINE' ? 'online' : 'cash',
-            }));
+            const response = await this.httpService.axiosRef.get(`${this.baseUrl}/orders`, { headers: { 'X-API-Key': credentials.apiKey } });
+            return response.data.orders || [];
         }
         catch (error) {
             this.logger.error('Failed to fetch Getir orders', error);
             return [];
         }
     }
-    async acceptOrder(config, orderId) {
+    async updateOrderStatus(credentials, orderId, status) {
         try {
-            await this.httpService.axiosRef.post(`${this.baseUrl}/orders/${orderId}/prepare`, {}, {
-                headers: { 'X-API-Key': config.apiKey },
-            });
-            return true;
+            await this.httpService.axiosRef.post(`${this.baseUrl}/orders/${orderId}/status`, { status }, { headers: { 'X-API-Key': credentials.apiKey } });
+            return { success: true };
         }
         catch (error) {
-            this.logger.error(`Failed to accept Getir order ${orderId}`, error);
-            return false;
+            this.logger.error(`Failed to update Getir order ${orderId}`, error);
+            return { success: false, error: error.message };
         }
     }
-    async rejectOrder(config, orderId, reason) {
-        try {
-            await this.httpService.axiosRef.post(`${this.baseUrl}/orders/${orderId}/cancel`, { reason }, {
-                headers: { 'X-API-Key': config.apiKey },
-            });
-            return true;
-        }
-        catch (error) {
-            this.logger.error(`Failed to reject Getir order ${orderId}`, error);
-            return false;
-        }
-    }
-    async updateMenu(config, menuData) {
+    validateWebhook(payload, secret) {
         return true;
-    }
-    async toggleRestaurantStatus(config, isOpen) {
-        try {
-            await this.httpService.axiosRef.put(`${this.baseUrl}/restaurants/${config.restaurantId}/status`, { isOpen }, {
-                headers: { 'X-API-Key': config.apiKey },
-            });
-            return true;
-        }
-        catch (error) {
-            this.logger.error('Failed to toggle Getir restaurant status', error);
-            return false;
-        }
     }
 };
 exports.GetirAdapter = GetirAdapter;

@@ -149,7 +149,7 @@ export class LeadsService {
       throw new BadRequestException('Atanacak kullanıcı ID gereklidir');
     }
 
-    lead.assignedTo = assignDto.assignedTo;
+    lead.assignedToId = assignDto.assignedTo;
     return this.leadRepository.save(lead);
   }
 
@@ -169,7 +169,7 @@ export class LeadsService {
 
     // Durum CONVERTED oluyorsa
     if (statusDto.status === LeadStatus.CONVERTED && lead.status !== LeadStatus.CONVERTED) {
-      lead.convertedAt = new Date();
+      // convertedAt alanı entity'de yok, gerekirse eklenebilir
     }
 
     return this.leadRepository.save(lead);
@@ -191,7 +191,7 @@ export class LeadsService {
    */
   async getByAssignedUser(userId: string): Promise<Lead[]> {
     return this.leadRepository.find({
-      where: { assignedTo: userId },
+      where: { assignedToId: userId },
       relations: ['territory'],
       order: { createdAt: 'DESC' },
     });

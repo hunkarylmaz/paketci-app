@@ -12,6 +12,7 @@ import { Invoice } from '../../invoices/entities/invoice.entity';
 import { Territory } from '../../territories/entities/territory.entity';
 import { Visit } from '../../visits/entities/visit.entity';
 import { Lead } from '../../leads/entities/lead.entity';
+import { Integration } from '../../integrations/entities/integration.entity';
 
 // 📊 9 ÇALIŞMA ŞEKLİ
 export enum PricingType {
@@ -293,6 +294,9 @@ export class Restaurant {
 
   @OneToMany(() => Lead, lead => lead.restaurant)
   leads: Lead[];
+
+  @OneToMany(() => Integration, integration => integration.restaurant)
+  integrations: Integration[];
 
   @CreateDateColumn()
   createdAt: Date;
